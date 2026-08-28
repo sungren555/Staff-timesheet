@@ -245,26 +245,34 @@
             margin-bottom: 10px;
         }
 
+        .summary-grid.three {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
         .summary-card {
             background: var(--th-bg);
             border-radius: 10px;
-            padding: 12px 10px;
+            padding: 12px 8px;
             text-align: center;
         }
 
         .summary-card .num {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: bold;
             color: #1a73e8;
             display: block;
         }
 
         .summary-card.off .num {
-            color: #e8641a;
+            color: #d32f2f;
+        }
+
+        .summary-card.holiday .num {
+            color: #b58b00;
         }
 
         .summary-card .lbl {
-            font-size: 11.5px;
+            font-size: 11px;
             color: var(--label-color);
             margin-top: 3px;
             display: block;
@@ -389,14 +397,18 @@
         <h3 class="summary-title">✅ សង្ខេបទិន្នន័យដែលបានបញ្ជូនចុងក្រោយ</h3>
         <div class="summary-sub" id="summaryStaffLine"></div>
 
-        <div class="summary-grid">
-            <div class="summary-card">
+        <div class="summary-grid three">
+            <div class="summary-card worked">
                 <span class="num" id="sumWorkedDays">0</span>
-                <span class="lbl">ថ្ងៃធ្វើការ<br>(Days Worked)</span>
+                <span class="lbl">ថ្ងៃធ្វើការ<br>(Worked)</span>
             </div>
             <div class="summary-card off">
-                <span class="num" id="sumOffDays">0</span>
-                <span class="lbl">ថ្ងៃឈប់សម្រាក<br>(Days Off)</span>
+                <span class="num" id="sumLeaveDays">0</span>
+                <span class="lbl">ថ្ងៃឈប់សម្រាក<br>(Leave)</span>
+            </div>
+            <div class="summary-card holiday">
+                <span class="num" id="sumHolidayDays">0</span>
+                <span class="lbl">ថ្ងៃឈប់បុណ្យ<br>(Public Holiday)</span>
             </div>
         </div>
 
@@ -404,6 +416,10 @@
             <div class="summary-row">
                 <span>ចំនួនថ្ងៃសរុបក្នុងខែ (Total Days)</span>
                 <span id="sumTotalDays">-</span>
+            </div>
+            <div class="summary-row" id="sumUnfilledRow" style="display:none;">
+                <span>ថ្ងៃមិនទាន់បំពេញ (Not Yet Filled)</span>
+                <span id="sumUnfilledDays">-</span>
             </div>
             <div class="summary-row">
                 <span>ប្រាក់ខែគោល (Gross Salary)</span>
@@ -605,8 +621,31 @@
         };
 
         // --- Build the summary stats BEFORE the form gets reset ---
-        const workedDays = Object.keys(dailyData).length;
-        const offDays = Math.max(totalDays - workedDays, 0);
+        // Classify each day exactly like the Apps Script colors it:
+        //   Red (Leave)   -> activity contains LEAVE / AL / PL / ML / CL / SL / NOT WORKING / ច្បាប់
+        //   Yellow (Holiday) -> activity contains PUBLIC HOLIDAY / HOLIDAY
+        //   Blue (Worked) -> anything else (including a day with only an amount, or blank activity)
+        // A day with nothing entered at all is not counted in any category.
+        function classifyDay(activity) {
+            const upper = (activity || '').trim().toUpperCase();
+            if (!upper) return 'worked'; // blank activity -> blue, matches Apps Script's else-branch
+            const leaveKeywords = ['LEAVE', 'AL', 'PL', 'ML', 'CL', 'SL', 'NOT WORKING', 'ច្បាប់'];
+            const holidayKeywords = ['PUBLIC HOLIDAY', 'HOLIDAY'];
+            if (holidayKeywords.some(k => upper.includes(k))) return 'holiday';
+            if (leaveKeywords.some(k => upper.includes(k))) return 'leave';
+            return 'worked';
+        }
+
+        let workedDays = 0, leaveDays = 0, holidayDays = 0;
+        Object.values(dailyData).forEach(d => {
+            const cat = classifyDay(d.activity);
+            if (cat === 'leave') leaveDays++;
+            else if (cat === 'holiday') holidayDays++;
+            else workedDays++;
+        });
+        const recordedDays = workedDays + leaveDays + holidayDays;
+        const unfilledDays = Math.max(totalDays - recordedDays, 0);
+
         const totalAllowance = Object.values(dailyData).reduce((sum, d) => {
             const v = parseFloat(d.amount);
             return sum + (isNaN(v) ? 0 : v);
@@ -641,7 +680,9 @@
                 monthLabel,
                 totalDays,
                 workedDays,
-                offDays,
+                leaveDays,
+                holidayDays,
+                unfilledDays,
                 grossSalaryVal,
                 totalAllowance,
                 avgPerDay,
@@ -662,8 +703,18 @@
     function showSummary(s, persist = true) {
         document.getElementById('summaryStaffLine').textContent = `${s.staff} — ${s.monthLabel}`;
         document.getElementById('sumWorkedDays').textContent = s.workedDays;
-        document.getElementById('sumOffDays').textContent = s.offDays;
+        document.getElementById('sumLeaveDays').textContent = s.leaveDays;
+        document.getElementById('sumHolidayDays').textContent = s.holidayDays;
         document.getElementById('sumTotalDays').textContent = `${s.totalDays} ថ្ងៃ`;
+
+        const unfilledRow = document.getElementById('sumUnfilledRow');
+        if (s.unfilledDays > 0) {
+            document.getElementById('sumUnfilledDays').textContent = `${s.unfilledDays} ថ្ងៃ`;
+            unfilledRow.style.display = 'flex';
+        } else {
+            unfilledRow.style.display = 'none';
+        }
+
         document.getElementById('sumGrossSalary').textContent = s.grossSalaryVal > 0 ? `$${s.grossSalaryVal.toFixed(2)}` : '-';
         document.getElementById('sumFieldAllowance').textContent = `$${s.totalAllowance.toFixed(2)}`;
         document.getElementById('sumGrandTotal').textContent = `$${(s.grossSalaryVal + s.totalAllowance).toFixed(2)}`;
