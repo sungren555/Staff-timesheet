@@ -309,6 +309,24 @@
         .summary-close-btn:hover {
             background-color: #1557b0;
         }
+
+        .summary-clear-btn {
+            margin-top: 10px;
+            background: transparent;
+            color: #b3441f;
+            border: 1px solid #b3441f;
+            padding: 9px;
+            font-size: 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        .summary-clear-btn:hover {
+            background-color: #b3441f;
+            color: white;
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -408,6 +426,8 @@
                 <span id="sumHighestDay">-</span>
             </div>
         </div>
+
+        <button type="button" class="summary-clear-btn" onclick="clearSummaryHistory()">🗑️ លុបប្រវត្តិសង្ខេប (Clear History)</button>
     </div>
 </div>
 
@@ -530,8 +550,28 @@
         generateDays();
         // New month selected: the previous month's summary no longer applies
         document.getElementById('summaryModal').classList.remove('show');
+        localStorage.removeItem('timesheetLastSummary');
     });
-    window.onload = fetchMasterData;
+    window.onload = function() {
+        fetchMasterData();
+        restoreSummary();
+    };
+
+    function restoreSummary() {
+        const saved = localStorage.getItem('timesheetLastSummary');
+        if (!saved) return;
+        try {
+            const s = JSON.parse(saved);
+            showSummary(s, false); // false = don't re-save, it's already saved
+        } catch (e) {
+            localStorage.removeItem('timesheetLastSummary');
+        }
+    }
+
+    function clearSummaryHistory() {
+        localStorage.removeItem('timesheetLastSummary');
+        document.getElementById('summaryModal').classList.remove('show');
+    }
 
     function saveData() {
         const staff = document.getElementById('staffName').value;
@@ -619,7 +659,7 @@
         });
     }
 
-    function showSummary(s) {
+    function showSummary(s, persist = true) {
         document.getElementById('summaryStaffLine').textContent = `${s.staff} — ${s.monthLabel}`;
         document.getElementById('sumWorkedDays').textContent = s.workedDays;
         document.getElementById('sumOffDays').textContent = s.offDays;
@@ -633,6 +673,10 @@
             : '-';
 
         document.getElementById('summaryModal').classList.add('show');
+
+        if (persist) {
+            localStorage.setItem('timesheetLastSummary', JSON.stringify(s));
+        }
     }
 </script>
 
