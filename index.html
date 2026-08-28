@@ -197,6 +197,118 @@
             font-weight: bold;
             font-size: 14px;
         }
+
+        /* Summary card shown after a successful submit - stays inline on the page */
+        #summaryModal {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #summaryModal.show {
+            display: block;
+            animation: summaryFadeIn 0.35s ease;
+        }
+
+        @keyframes summaryFadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .summary-box {
+            background: var(--th-bg);
+            color: var(--text-color);
+            border-radius: 14px;
+            border: 1px solid var(--td-border);
+            padding: 20px;
+        }
+
+        .summary-box h3.summary-title {
+            margin: 0 0 4px 0;
+            border-bottom: none;
+            padding-bottom: 0;
+            color: #1a73e8;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .summary-sub {
+            text-align: center;
+            font-size: 13px;
+            color: var(--label-color);
+            margin-bottom: 18px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .summary-card {
+            background: var(--th-bg);
+            border-radius: 10px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .summary-card .num {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a73e8;
+            display: block;
+        }
+
+        .summary-card.off .num {
+            color: #e8641a;
+        }
+
+        .summary-card .lbl {
+            font-size: 11.5px;
+            color: var(--label-color);
+            margin-top: 3px;
+            display: block;
+            line-height: 1.4;
+        }
+
+        .summary-list {
+            margin-top: 14px;
+            border-top: 1px solid var(--td-border);
+            padding-top: 12px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13.5px;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--td-border);
+        }
+
+        .summary-row span:first-child {
+            color: var(--label-color);
+        }
+
+        .summary-row span:last-child {
+            font-weight: bold;
+        }
+
+        .summary-close-btn {
+            margin-top: 18px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 11px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        .summary-close-btn:hover {
+            background-color: #1557b0;
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -251,6 +363,52 @@
         <button type="button" class="btn-submit" onclick="saveData()">រក្សាទុក និងបញ្ជូនទិន្នន័យ (Submit Data)</button>
         <div id="loading">កំពុងបញ្ជូនទិន្នន័យទៅកាន់ Google Sheets... សូមរង់ចាំបន្តិច!</div>
     </form>
+</div>
+
+<!-- Summary shown after a successful submit; stays visible until a new month is chosen -->
+<div class="container" id="summaryModal">
+    <div class="summary-box">
+        <h3 class="summary-title">✅ សង្ខេបទិន្នន័យដែលបានបញ្ជូនចុងក្រោយ</h3>
+        <div class="summary-sub" id="summaryStaffLine"></div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <span class="num" id="sumWorkedDays">0</span>
+                <span class="lbl">ថ្ងៃធ្វើការ<br>(Days Worked)</span>
+            </div>
+            <div class="summary-card off">
+                <span class="num" id="sumOffDays">0</span>
+                <span class="lbl">ថ្ងៃឈប់សម្រាក<br>(Days Off)</span>
+            </div>
+        </div>
+
+        <div class="summary-list">
+            <div class="summary-row">
+                <span>ចំនួនថ្ងៃសរុបក្នុងខែ (Total Days)</span>
+                <span id="sumTotalDays">-</span>
+            </div>
+            <div class="summary-row">
+                <span>ប្រាក់ខែគោល (Gross Salary)</span>
+                <span id="sumGrossSalary">-</span>
+            </div>
+            <div class="summary-row">
+                <span>ប្រាក់ឧបត្ថម្ភទីវាលសរុប (Total Field Allowance)</span>
+                <span id="sumFieldAllowance">-</span>
+            </div>
+            <div class="summary-row">
+                <span>ចំណូលសរុប (Salary + Allowance)</span>
+                <span id="sumGrandTotal">-</span>
+            </div>
+            <div class="summary-row">
+                <span>មធ្យមភាគប្រាក់/ថ្ងៃធ្វើការ (Avg / Worked Day)</span>
+                <span id="sumAvgPerDay">-</span>
+            </div>
+            <div class="summary-row">
+                <span>ថ្ងៃដែលទទួលបានប្រាក់ខ្ពស់បំផុត (Highest Day)</span>
+                <span id="sumHighestDay">-</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -368,7 +526,11 @@
         document.getElementById('fieldAllowance').value = total > 0 ? total : '';
     }
 
-    document.getElementById('monthYear').addEventListener('change', generateDays);
+    document.getElementById('monthYear').addEventListener('change', () => {
+        generateDays();
+        // New month selected: the previous month's summary no longer applies
+        document.getElementById('summaryModal').classList.remove('show');
+    });
     window.onload = fetchMasterData;
 
     function saveData() {
@@ -402,6 +564,27 @@
             dailyActivities: dailyData
         };
 
+        // --- Build the summary stats BEFORE the form gets reset ---
+        const workedDays = Object.keys(dailyData).length;
+        const offDays = Math.max(totalDays - workedDays, 0);
+        const totalAllowance = Object.values(dailyData).reduce((sum, d) => {
+            const v = parseFloat(d.amount);
+            return sum + (isNaN(v) ? 0 : v);
+        }, 0);
+        const grossSalaryVal = parseFloat(formData.grossSalary) || 0;
+        const avgPerDay = workedDays > 0 ? (totalAllowance / workedDays) : 0;
+
+        let highestDayNum = null, highestDayAmt = -Infinity;
+        Object.entries(dailyData).forEach(([key, d]) => {
+            const v = parseFloat(d.amount);
+            if (!isNaN(v) && v > highestDayAmt) {
+                highestDayAmt = v;
+                highestDayNum = key.replace('day_', '');
+            }
+        });
+
+        const monthLabel = new Date(y, m - 1, 1).toLocaleString('en-US', { month: 'long' }) + ' ' + y;
+
         document.getElementById('loading').style.display = 'block';
 
         fetch(scriptURL, {
@@ -412,7 +595,20 @@
         })
         .then(response => {
             document.getElementById('loading').style.display = 'none';
-            alert('ទិន្នន័យត្រូវបានបញ្ជូនចូល Google Sheets ដោយជោគជ័យ!');
+
+            showSummary({
+                staff,
+                monthLabel,
+                totalDays,
+                workedDays,
+                offDays,
+                grossSalaryVal,
+                totalAllowance,
+                avgPerDay,
+                highestDayNum,
+                highestDayAmt
+            });
+
             document.getElementById('timesheetForm').reset();
             document.getElementById('monthYear').value = `${y}-${m}`;
             generateDays();
@@ -421,6 +617,22 @@
             document.getElementById('loading').style.display = 'none';
             alert('មានបញ្ហាពេលបញ្ជូនទិន្នន័យ៖ ' + error);
         });
+    }
+
+    function showSummary(s) {
+        document.getElementById('summaryStaffLine').textContent = `${s.staff} — ${s.monthLabel}`;
+        document.getElementById('sumWorkedDays').textContent = s.workedDays;
+        document.getElementById('sumOffDays').textContent = s.offDays;
+        document.getElementById('sumTotalDays').textContent = `${s.totalDays} ថ្ងៃ`;
+        document.getElementById('sumGrossSalary').textContent = s.grossSalaryVal > 0 ? `$${s.grossSalaryVal.toFixed(2)}` : '-';
+        document.getElementById('sumFieldAllowance').textContent = `$${s.totalAllowance.toFixed(2)}`;
+        document.getElementById('sumGrandTotal').textContent = `$${(s.grossSalaryVal + s.totalAllowance).toFixed(2)}`;
+        document.getElementById('sumAvgPerDay').textContent = s.workedDays > 0 ? `$${s.avgPerDay.toFixed(2)}` : '-';
+        document.getElementById('sumHighestDay').textContent = s.highestDayNum
+            ? `ថ្ងៃទី ${s.highestDayNum} ($${s.highestDayAmt.toFixed(2)})`
+            : '-';
+
+        document.getElementById('summaryModal').classList.add('show');
     }
 </script>
 
