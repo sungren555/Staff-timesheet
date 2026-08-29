@@ -7,7 +7,7 @@
 
     <!-- PWA / Add-to-Home-Screen setup -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a73e8">
+    <meta name="theme-color" content="#2F5233">
 
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -18,39 +18,81 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Timesheet">
+
+    <!-- Display faces: Moul (formal Khmer letterhead face) + Fraunces (Latin display serif) + Hanuman (body, KM/EN) + JetBrains Mono (figures) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Moul&family=Hanuman:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --bg-color: #f4f6f9;
-            --container-bg: #ffffff;
-            --text-color: #333333;
-            --label-color: #444444;
+            /* Rice-paddy ledger palette */
+            --ink: #24301F;
+            --paddy: #2F5233;
+            --paddy-light: #4C7A4E;
+            --paddy-dark: #203A24;
+            --paper: #F7F2E4;
+            --paper-card: #FFFEFA;
+            --gold: #C99A3E;
+            --stamp-red: #A6402F;
+            --stamp-ochre: #C68A1F;
+            --line: #DCD2B4;
+
+            --bg-color: var(--paper);
+            --container-bg: var(--paper-card);
+            --text-color: var(--ink);
+            --label-color: #6B6350;
             --input-bg: #ffffff;
-            --input-border: #ccc;
+            --input-border: var(--line);
             --input-text: #000000;
-            --th-bg: #f2f2f2;
-            --th-color: #333333;
-            --td-border: #ddd;
+            --th-bg: #EFE8D3;
+            --th-color: var(--ink);
+            --td-border: var(--line);
+            --weekend-bg: #EAD9AE;
+
+            --tint-worked-bg: #E9F2E7;
+            --tint-worked-border: var(--paddy-light);
+            --tint-leave-bg: #FBEAE6;
+            --tint-leave-border: var(--stamp-red);
+            --tint-holiday-bg: #FBF1D9;
+            --tint-holiday-border: var(--stamp-ochre);
+
+            --font-display-km: 'Moul', 'Khmer OS Muol', serif;
+            --font-display-en: 'Fraunces', Georgia, serif;
+            --font-body: 'Hanuman', 'Khmer OS Battambang', 'Siemreap', Arial, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
         }
 
         [data-theme="dark"] {
-            --bg-color: #121212;
-            --container-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --label-color: #b0b0b0;
-            --input-bg: #2d2d2d;
-            --input-border: #444;
-            --input-text: #ffffff;
-            --th-bg: #2c2c2c;
-            --th-color: #ffffff;
-            --td-border: #333;
+            --ink: #ECE7D6;
+            --bg-color: #14180F;
+            --container-bg: #1C2117;
+            --text-color: #ECE7D6;
+            --label-color: #A9A28C;
+            --input-bg: #232A1D;
+            --input-border: #3B4432;
+            --input-text: #F3F0E4;
+            --th-bg: #232A1D;
+            --th-color: #ECE7D6;
+            --td-border: #3B4432;
+            --weekend-bg: #33301A;
+
+            --tint-worked-bg: #202B1E;
+            --tint-worked-border: #6FA96E;
+            --tint-leave-bg: #33201C;
+            --tint-leave-border: #D9695A;
+            --tint-holiday-bg: #332C15;
+            --tint-holiday-border: #E0B45A;
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Siemreap', 'Khmer OS Battambang', Arial, sans-serif;
+            font-family: var(--font-body);
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 10px;
+            padding: 14px;
             transition: background 0.3s, color 0.3s;
         }
 
@@ -58,35 +100,89 @@
             max-width: 1050px;
             margin: auto;
             background: var(--container-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 0;
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(36, 48, 31, 0.14);
             position: relative;
+            overflow: hidden;
+        }
+
+        /* ---------- Header band (letterhead) ---------- */
+        .header-band {
+            background: linear-gradient(135deg, var(--paddy) 0%, var(--paddy-dark) 100%);
+            padding: 22px 20px 20px;
+            position: relative;
+            color: #F6F1E1;
+        }
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-right: 74px;
+        }
+
+        .brand-mark {
+            flex-shrink: 0;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,214,140,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-family: var(--font-display-en);
+            font-weight: 700;
+            font-size: 19px;
+            letter-spacing: 0.05em;
+            color: #FBEFD2;
+        }
+
+        .brand-subtitle {
+            margin: 3px 0 0;
+            font-family: var(--font-body);
+            font-size: 12.5px;
+            color: rgba(246,241,225,0.78);
+        }
+
+        .gold-rule {
+            height: 1px;
+            margin-top: 16px;
+            background: linear-gradient(90deg, rgba(201,154,62,0) 0%, rgba(201,154,62,0.9) 50%, rgba(201,154,62,0) 100%);
         }
 
         .theme-toggle {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--input-border);
-            border: none;
-            padding: 8px 12px;
+            top: 18px;
+            right: 18px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,214,140,0.35);
+            padding: 7px 11px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            color: var(--text-color);
+            font-family: var(--font-body);
+            color: #F6F1E1;
             display: flex;
             align-items: center;
             gap: 5px;
         }
 
-        h2 {
-            text-align: center;
-            color: #1a73e8;
-            font-size: 20px;
-            margin-bottom: 20px;
-            padding-right: 40px;
+        .theme-toggle .icon-sun { display: none; }
+        [data-theme="dark"] .theme-toggle .icon-sun { display: inline-flex; }
+        [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+        .theme-toggle .icon { display: inline-flex; }
+
+        /* ---------- Content ---------- */
+        .content-pad {
+            padding: 20px;
         }
 
         .form-row {
@@ -105,34 +201,80 @@
 
         label {
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12.5px;
             margin-bottom: 6px;
             color: var(--label-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        label .icon {
+            color: var(--paddy-light);
+            flex-shrink: 0;
+        }
+
+        [data-theme="dark"] label .icon {
+            color: var(--tint-worked-border);
         }
 
         select, input {
-            padding: 10px;
+            padding: 10px 11px;
             border: 1px solid var(--input-border);
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
+            font-family: var(--font-body);
             background-color: var(--input-bg);
             color: var(--input-text);
             width: 100%;
             box-sizing: border-box;
         }
 
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--paddy-light);
+            box-shadow: 0 0 0 3px rgba(76, 122, 78, 0.18);
+        }
+
+        #grossSalary, #fieldAllowance {
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
+
         h3 {
-            font-size: 16px;
-            margin-top: 25px;
-            border-bottom: 2px solid #1a73e8;
-            padding-bottom: 5px;
+            font-family: var(--font-display-km);
+            font-size: 17px;
+            font-weight: 400;
+            margin-top: 26px;
+            margin-bottom: 4px;
+            color: var(--paddy);
+        }
+
+        [data-theme="dark"] h3 {
+            color: var(--tint-worked-border);
+        }
+
+        h3::after {
+            content: "";
+            display: block;
+            width: 46px;
+            height: 2px;
+            background: var(--gold);
+            margin-top: 6px;
+            border-radius: 2px;
+        }
+
+        .table-hint {
+            font-size: 11.5px;
+            color: var(--label-color);
+            margin: 6px 0 0;
         }
 
         .table-responsive {
             overflow-x: auto;
-            margin-top: 15px;
-            max-height: 400px;
-            border-radius: 6px;
+            margin-top: 12px;
+            max-height: 430px;
+            border-radius: 10px;
             border: 1px solid var(--td-border);
         }
 
@@ -152,16 +294,45 @@
         th {
             background-color: var(--th-bg);
             color: var(--th-color);
+            font-family: var(--font-mono);
+            font-weight: 700;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
+        th.weekend {
+            background-color: var(--weekend-bg);
+            color: var(--stamp-red);
+        }
+
+        td { background: var(--container-bg); }
+
         .day-input-container {
             display: flex;
             flex-direction: column;
             gap: 4px;
-            width: 75px;
+            width: 78px;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .day-input-container.cell-worked {
+            background: var(--tint-worked-bg);
+            border-color: var(--tint-worked-border);
+        }
+
+        .day-input-container.cell-leave {
+            background: var(--tint-leave-bg);
+            border-color: var(--tint-leave-border);
+        }
+
+        .day-input-container.cell-holiday {
+            background: var(--tint-holiday-bg);
+            border-color: var(--tint-holiday-border);
         }
 
         .activity-input, .amount-input {
@@ -169,36 +340,75 @@
             text-align: center;
             padding: 4px;
             font-size: 11px;
+            border-radius: 5px;
         }
 
+        .amount-input {
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: var(--label-color);
+        }
+
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .legend .dot.worked { background: var(--tint-worked-border); }
+        .legend .dot.leave { background: var(--tint-leave-border); }
+        .legend .dot.holiday { background: var(--tint-holiday-border); }
+
         .btn-submit {
-            background-color: #1a73e8;
-            color: white;
+            background-color: var(--paddy);
+            color: #FBEFD2;
             border: none;
-            padding: 12px;
+            padding: 13px;
             font-size: 15px;
-            border-radius: 6px;
+            font-family: var(--font-body);
+            font-weight: bold;
+            border-radius: 9px;
             cursor: pointer;
             width: 100%;
-            font-weight: bold;
-            margin-top: 20px;
+            margin-top: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             transition: background 0.2s;
         }
 
         .btn-submit:hover {
-            background-color: #1557b0;
+            background-color: var(--paddy-dark);
         }
 
         #loading {
             display: none;
             text-align: center;
-            color: #1a73e8;
-            margin-top: 15px;
+            color: var(--paddy);
+            margin-top: 12px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13.5px;
         }
 
-        /* Summary card shown after a successful submit - stays inline on the page */
+        [data-theme="dark"] #loading { color: var(--tint-worked-border); }
+
+        /* ---------- Summary card ---------- */
         #summaryModal {
             display: none;
             margin-top: 20px;
@@ -224,16 +434,23 @@
 
         .summary-box h3.summary-title {
             margin: 0 0 4px 0;
-            border-bottom: none;
-            padding-bottom: 0;
-            color: #1a73e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: var(--font-display-km);
             font-size: 18px;
-            text-align: center;
+            color: var(--paddy);
         }
+
+        .summary-box h3.summary-title::after { display: none; }
+
+        [data-theme="dark"] .summary-box h3.summary-title { color: var(--tint-worked-border); }
 
         .summary-sub {
             text-align: center;
             font-size: 13px;
+            font-family: var(--font-mono);
             color: var(--label-color);
             margin-bottom: 18px;
         }
@@ -250,26 +467,25 @@
         }
 
         .summary-card {
-            background: var(--th-bg);
+            background: var(--container-bg);
             border-radius: 10px;
             padding: 12px 8px;
             text-align: center;
+            border: 1px solid var(--td-border);
         }
 
         .summary-card .num {
+            font-family: var(--font-mono);
             font-size: 19px;
             font-weight: bold;
-            color: #1a73e8;
+            color: var(--paddy);
             display: block;
         }
 
-        .summary-card.off .num {
-            color: #d32f2f;
-        }
+        [data-theme="dark"] .summary-card.worked .num { color: var(--tint-worked-border); }
 
-        .summary-card.holiday .num {
-            color: #b58b00;
-        }
+        .summary-card.off .num { color: var(--stamp-red); }
+        .summary-card.holiday .num { color: var(--stamp-ochre); }
 
         .summary-card .lbl {
             font-size: 11px;
@@ -299,173 +515,246 @@
 
         .summary-row span:last-child {
             font-weight: bold;
-        }
-
-        .summary-close-btn {
-            margin-top: 18px;
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            padding: 11px;
-            font-size: 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-        }
-
-        .summary-close-btn:hover {
-            background-color: #1557b0;
+            font-family: var(--font-mono);
         }
 
         .summary-clear-btn {
-            margin-top: 10px;
+            margin-top: 14px;
             background: transparent;
-            color: #b3441f;
-            border: 1px solid #b3441f;
+            color: var(--stamp-red);
+            border: 1px solid var(--stamp-red);
             padding: 9px;
             font-size: 13px;
-            border-radius: 6px;
+            font-family: var(--font-body);
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         .summary-clear-btn:hover {
-            background-color: #b3441f;
+            background-color: var(--stamp-red);
             color: white;
+        }
+
+        @media (max-width: 480px) {
+            .brand-title { font-size: 16px; }
+            .brand-subtitle { font-size: 11.5px; }
         }
     </style>
 </head>
 <body data-theme="light">
 
 <div class="container">
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <span id="themeIcon">🌙</span> <span id="themeText">Dark</span>
-    </button>
+    <div class="header-band">
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <span class="icon icon-moon"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg></span>
+            <span class="icon icon-sun"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg></span>
+            <span id="themeText">Dark</span>
+        </button>
 
-    <h2>RISING PHOENIX CO., LTD<br><span style="font-size: 14px; color: #777;">Staff Timesheet Submission Form</span></h2>
-    
-    <form id="timesheetForm">
-        <div class="form-row">
-            <div class="form-group">
-                <label for="staffName">ឈ្មោះបុគ្គលិក (Staff Name):</label>
-                <select id="staffName" required>
-                    <option value="">-- កំពុងទាញយកឈ្មោះបុគ្គលិក... --</option>
-                </select>
+        <div class="brand-row">
+            <div class="brand-mark">
+                <svg viewBox="0 0 48 48" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M24 44V16"/>
+                    <path d="M24 16c0-6 4-10 10-12-2 6-3 10-10 12z"/>
+                    <path d="M24 22c0-5-4-9-9-11 1 5 3 9 9 11z"/>
+                    <ellipse cx="20" cy="10" rx="2.1" ry="3.2" transform="rotate(-30 20 10)"/>
+                    <ellipse cx="28" cy="7" rx="2.1" ry="3.2" transform="rotate(25 28 7)"/>
+                </svg>
             </div>
-            
-            <div class="form-group">
-                <label for="monthYear">ខែ និងឆ្នាំ (Month & Year):</label>
-                <input type="month" id="monthYear" value="2026-09" required>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label for="grossSalary">ប្រាក់ខែគោល (Gross Salary):</label>
-                <input type="number" id="grossSalary" placeholder="ឧ. 500">
-            </div>
-            <div class="form-group">
-                <label for="fieldAllowance">ប្រាក់ឧបត្ថម្ភទីវាល (Field Allowance):</label>
-                <input type="number" id="fieldAllowance" placeholder="គណនាស្វ័យប្រវត្តិ" readonly style="background-color: var(--th-bg); font-weight: bold; color: #1a73e8;">
+            <div class="brand-text">
+                <h1 class="brand-title">RISING PHOENIX CO., LTD</h1>
+                <p class="brand-subtitle">Staff Timesheet Submission Form</p>
             </div>
         </div>
+        <div class="gold-rule"></div>
+    </div>
 
-        <h3>តារាងសកម្មភាពប្រចាំថ្ងៃ (Daily Activities)</h3>
-        <div class="table-responsive">
-            <table id="daysTable">
-                <thead>
-                    <tr id="tableDays"></tr>
-                </thead>
-                <tbody>
-                    <tr id="tableInputs"></tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="content-pad">
+        <form id="timesheetForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="staffName">
+                        <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg></span>
+                        ឈ្មោះបុគ្គលិក (Staff Name):
+                    </label>
+                    <select id="staffName" required>
+                        <option value="">-- កំពុងទាញយកឈ្មោះបុគ្គលិក... --</option>
+                    </select>
+                </div>
 
-        <datalist id="activityListOptions"></datalist>
+                <div class="form-group">
+                    <label for="monthYear">
+                        <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v3.5M16 3.5v3.5"/></svg></span>
+                        ខែ និងឆ្នាំ (Month & Year):
+                    </label>
+                    <input type="month" id="monthYear" value="2026-09" required>
+                </div>
+            </div>
 
-        <button type="button" class="btn-submit" onclick="saveData()">រក្សាទុក និងបញ្ជូនទិន្នន័យ (Submit Data)</button>
-        <div id="loading">កំពុងបញ្ជូនទិន្នន័យទៅកាន់ Google Sheets... សូមរង់ចាំបន្តិច!</div>
-    </form>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="grossSalary">
+                        <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.3 9.3c0-1 1-1.8 2.7-1.8s2.7.9 2.7 2c0 2.6-5.4 1.4-5.4 4 0 1.1 1.2 2 2.7 2s2.7-.8 2.7-1.8"/></svg></span>
+                        ប្រាក់ខែគោល (Gross Salary):
+                    </label>
+                    <input type="number" id="grossSalary" placeholder="ឧ. 500">
+                </div>
+                <div class="form-group">
+                    <label for="fieldAllowance">
+                        <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-7 2-12 6-16-6 1-9 6-9 12"/><path d="M12 21c0-6-2-10-5-13"/></svg></span>
+                        ប្រាក់ឧបត្ថម្ភទីវាល (Field Allowance):
+                    </label>
+                    <input type="number" id="fieldAllowance" placeholder="គណនាស្វ័យប្រវត្តិ" readonly style="background-color: var(--th-bg); font-weight: bold; color: var(--paddy);">
+                </div>
+            </div>
+
+            <h3>តារាងសកម្មភាពប្រចាំថ្ងៃ (Daily Activities)</h3>
+            <p class="table-hint">អូសទៅឆ្វេង/ស្តាំដើម្បីមើលថ្ងៃផ្សេងទៀត — Scroll to see more days</p>
+            <div class="table-responsive">
+                <table id="daysTable">
+                    <thead>
+                        <tr id="tableDays"></tr>
+                    </thead>
+                    <tbody>
+                        <tr id="tableInputs"></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="legend">
+                <span><span class="dot worked"></span>ធ្វើការ (Worked)</span>
+                <span><span class="dot leave"></span>ឈប់សម្រាក (Leave)</span>
+                <span><span class="dot holiday"></span>ថ្ងៃបុណ្យ (Holiday)</span>
+            </div>
+
+            <datalist id="activityListOptions"></datalist>
+
+            <button type="button" class="btn-submit" onclick="saveData()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+                រក្សាទុក និងបញ្ជូនទិន្នន័យ (Submit Data)
+            </button>
+            <div id="loading">កំពុងបញ្ជូនទិន្នន័យទៅកាន់ Google Sheets... សូមរង់ចាំបន្តិច!</div>
+        </form>
+    </div>
 </div>
 
 <!-- Summary shown after a successful submit; stays visible until a new month is chosen -->
 <div class="container" id="summaryModal">
-    <div class="summary-box">
-        <h3 class="summary-title">✅ សង្ខេបទិន្នន័យដែលបានបញ្ជូនចុងក្រោយ</h3>
-        <div class="summary-sub" id="summaryStaffLine"></div>
+    <div class="content-pad">
+        <div class="summary-box">
+            <h3 class="summary-title">
+                <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M8 12.3l2.6 2.6L16.5 9"/></svg>
+                សង្ខេបទិន្នន័យដែលបានបញ្ជូនចុងក្រោយ
+            </h3>
+            <div class="summary-sub" id="summaryStaffLine"></div>
 
-        <div class="summary-grid three">
-            <div class="summary-card worked">
-                <span class="num" id="sumWorkedDays">0</span>
-                <span class="lbl">ថ្ងៃធ្វើការ<br>(Worked)</span>
+            <div class="summary-grid three">
+                <div class="summary-card worked">
+                    <span class="num" id="sumWorkedDays">0</span>
+                    <span class="lbl">ថ្ងៃធ្វើការ<br>(Worked)</span>
+                </div>
+                <div class="summary-card off">
+                    <span class="num" id="sumLeaveDays">0</span>
+                    <span class="lbl">ថ្ងៃឈប់សម្រាក<br>(Leave)</span>
+                </div>
+                <div class="summary-card holiday">
+                    <span class="num" id="sumHolidayDays">0</span>
+                    <span class="lbl">ថ្ងៃឈប់បុណ្យ<br>(Public Holiday)</span>
+                </div>
             </div>
-            <div class="summary-card off">
-                <span class="num" id="sumLeaveDays">0</span>
-                <span class="lbl">ថ្ងៃឈប់សម្រាក<br>(Leave)</span>
+
+            <div class="summary-list">
+                <div class="summary-row">
+                    <span>ចំនួនថ្ងៃសរុបក្នុងខែ (Total Days)</span>
+                    <span id="sumTotalDays">-</span>
+                </div>
+                <div class="summary-row" id="sumUnfilledRow" style="display:none;">
+                    <span>ថ្ងៃមិនទាន់បំពេញ (Not Yet Filled)</span>
+                    <span id="sumUnfilledDays">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>ប្រាក់ខែគោល (Gross Salary)</span>
+                    <span id="sumGrossSalary">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>ប្រាក់ឧបត្ថម្ភទីវាលសរុប (Total Field Allowance)</span>
+                    <span id="sumFieldAllowance">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>ចំណូលសរុប (Salary + Allowance)</span>
+                    <span id="sumGrandTotal">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>មធ្យមភាគប្រាក់/ថ្ងៃធ្វើការ (Avg / Worked Day)</span>
+                    <span id="sumAvgPerDay">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>ថ្ងៃដែលទទួលបានប្រាក់ខ្ពស់បំផុត (Highest Day)</span>
+                    <span id="sumHighestDay">-</span>
+                </div>
             </div>
-            <div class="summary-card holiday">
-                <span class="num" id="sumHolidayDays">0</span>
-                <span class="lbl">ថ្ងៃឈប់បុណ្យ<br>(Public Holiday)</span>
-            </div>
+
+            <button type="button" class="summary-clear-btn" onclick="clearSummaryHistory()">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg>
+                លុបប្រវត្តិសង្ខេប (Clear History)
+            </button>
         </div>
-
-        <div class="summary-list">
-            <div class="summary-row">
-                <span>ចំនួនថ្ងៃសរុបក្នុងខែ (Total Days)</span>
-                <span id="sumTotalDays">-</span>
-            </div>
-            <div class="summary-row" id="sumUnfilledRow" style="display:none;">
-                <span>ថ្ងៃមិនទាន់បំពេញ (Not Yet Filled)</span>
-                <span id="sumUnfilledDays">-</span>
-            </div>
-            <div class="summary-row">
-                <span>ប្រាក់ខែគោល (Gross Salary)</span>
-                <span id="sumGrossSalary">-</span>
-            </div>
-            <div class="summary-row">
-                <span>ប្រាក់ឧបត្ថម្ភទីវាលសរុប (Total Field Allowance)</span>
-                <span id="sumFieldAllowance">-</span>
-            </div>
-            <div class="summary-row">
-                <span>ចំណូលសរុប (Salary + Allowance)</span>
-                <span id="sumGrandTotal">-</span>
-            </div>
-            <div class="summary-row">
-                <span>មធ្យមភាគប្រាក់/ថ្ងៃធ្វើការ (Avg / Worked Day)</span>
-                <span id="sumAvgPerDay">-</span>
-            </div>
-            <div class="summary-row">
-                <span>ថ្ងៃដែលទទួលបានប្រាក់ខ្ពស់បំផុត (Highest Day)</span>
-                <span id="sumHighestDay">-</span>
-            </div>
-        </div>
-
-        <button type="button" class="summary-clear-btn" onclick="clearSummaryHistory()">🗑️ លុបប្រវត្តិសង្ខេប (Clear History)</button>
     </div>
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzUoVPtNVo5WrZk4jkd8dCplJFs6l1ZWXYK2UXylyQi0j17YwAbPuEO7HHvJI8Zy9g_1Q/exec'; // <-- ជំនួស URL របស់អ្នកនៅទីនេះ
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyNefEeNFtacVPHDg7gy3-tE8RomIOAZnkak0YybkmVlWY5TXQVsKUbtprEg4omHjUJEQ/exec'; // <-- ជំនួស URL របស់អ្នកនៅទីនេះ
 
     let globalActivities = [];
 
     function toggleTheme() {
         const body = document.body;
-        const themeIcon = document.getElementById('themeIcon');
         const themeText = document.getElementById('themeText');
-        
+
         if (body.getAttribute('data-theme') === 'light') {
             body.setAttribute('data-theme', 'dark');
-            themeIcon.textContent = '☀️';
             themeText.textContent = 'Light';
         } else {
             body.setAttribute('data-theme', 'light');
-            themeIcon.textContent = '🌙';
             themeText.textContent = 'Dark';
         }
+    }
+
+    // Classify a day exactly like the Apps Script colors it in the master sheet:
+    //   Leave (red)   -> activity contains LEAVE / NOT WORKING / ច្បាប់, or the WHOLE WORD AL / PL / ML / CL / SL
+    //   Holiday (gold)-> activity contains PUBLIC HOLIDAY / HOLIDAY
+    //   Worked (green)-> anything else (including a day with only an amount, or blank activity)
+    // Note: short codes (AL, PL, ML, CL, SL) must match a whole word, not just appear inside
+    // a longer word — otherwise "EXTERNAL AUDITING" would wrongly match "AL" inside "EXTERNAL".
+    function classifyDay(activity) {
+        const raw = (activity || '').trim();
+        if (!raw) return 'worked'; // blank activity -> matches Apps Script's else-branch
+        const upper = raw.toUpperCase();
+
+        const holidayPhrases = ['PUBLIC HOLIDAY', 'HOLIDAY'];
+        if (holidayPhrases.some(k => upper.includes(k))) return 'holiday';
+
+        const leavePhrases = ['LEAVE', 'NOT WORKING', 'ច្បាប់'];
+        if (leavePhrases.some(k => upper.includes(k))) return 'leave';
+
+        const leaveCodes = ['AL', 'PL', 'ML', 'CL', 'SL'];
+        const tokens = upper.split(/[^A-Z]+/).filter(Boolean); // split into whole words only
+        if (tokens.some(t => leaveCodes.includes(t))) return 'leave';
+
+        return 'worked';
+    }
+
+    // Live-tints a day's mini-card the moment the staff types, so they get instant
+    // visual confirmation (matching the master sheet's colors) before submitting.
+    function updateCellStatus(container, actInput, amtInput) {
+        container.classList.remove('cell-worked', 'cell-leave', 'cell-holiday');
+        if (actInput.value === '' && amtInput.value === '') return; // untouched, stays neutral
+        container.classList.add('cell-' + classifyDay(actInput.value));
     }
 
     function fetchMasterData() {
@@ -495,11 +784,15 @@
                     datalist.appendChild(opt);
                 });
 
+                applyDraftMonthIfAny();
                 generateDays();
+                restoreDraftValues();
             })
             .catch(error => {
                 console.error('Error fetching master data:', error);
+                applyDraftMonthIfAny();
                 generateDays();
+                restoreDraftValues();
             });
     }
 
@@ -507,23 +800,25 @@
         const monthYearInput = document.getElementById('monthYear').value;
         const [year, month] = monthYearInput.split('-');
         const daysInMonth = new Date(year, month, 0).getDate();
-        
+
         const daysRow = document.getElementById('tableDays');
         const inputsRow = document.getElementById('tableInputs');
-        
+
         daysRow.innerHTML = '';
         inputsRow.innerHTML = '';
-        
+
         const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
         for (let i = 1; i <= daysInMonth; i++) {
             const dateObj = new Date(year, month - 1, i);
-            const dayName = weekdays[dateObj.getDay()];
-            
+            const dayOfWeek = dateObj.getDay();
+            const dayName = weekdays[dayOfWeek];
+
             const th = document.createElement('th');
             th.innerHTML = `${dayName}<br>${i}`;
+            if (dayOfWeek === 0 || dayOfWeek === 6) th.classList.add('weekend');
             daysRow.appendChild(th);
-            
+
             const td = document.createElement('td');
             const container = document.createElement('div');
             container.className = 'day-input-container';
@@ -540,7 +835,16 @@
             amtInput.className = 'amount-input';
             amtInput.name = `amount_${i}`;
             amtInput.placeholder = 'ទឹកប្រាក់';
-            amtInput.oninput = calculateTotalAllowance; // គណនាទឹកប្រាក់សរុបអូតូ
+
+            actInput.addEventListener('input', () => {
+                saveDraft();
+                updateCellStatus(container, actInput, amtInput);
+            });
+            amtInput.addEventListener('input', () => {
+                calculateTotalAllowance();
+                saveDraft();
+                updateCellStatus(container, actInput, amtInput);
+            });
 
             container.appendChild(actInput);
             container.appendChild(amtInput);
@@ -562,16 +866,106 @@
         document.getElementById('fieldAllowance').value = total > 0 ? total : '';
     }
 
+    document.getElementById('staffName').addEventListener('change', saveDraft);
+    document.getElementById('grossSalary').addEventListener('input', saveDraft);
+
     document.getElementById('monthYear').addEventListener('change', () => {
         generateDays();
         // New month selected: the previous month's summary no longer applies
         document.getElementById('summaryModal').classList.remove('show');
         localStorage.removeItem('timesheetLastSummary');
+        saveDraft();
     });
     window.onload = function() {
         fetchMasterData();
         restoreSummary();
     };
+
+    // --- Draft auto-save: keeps in-progress entries safe across refresh / closing the app ---
+    function saveDraft() {
+        const staff = document.getElementById('staffName').value;
+        const monthYear = document.getElementById('monthYear').value;
+        const grossSalary = document.getElementById('grossSalary').value;
+        const [y, m] = monthYear.split('-');
+        const totalDays = new Date(y, m, 0).getDate();
+
+        const dailyActivities = {};
+        for (let i = 1; i <= totalDays; i++) {
+            const actInput = document.querySelector(`[name="activity_${i}"]`);
+            const amtInput = document.querySelector(`[name="amount_${i}"]`);
+            if (!actInput || !amtInput) continue;
+            const actVal = actInput.value;
+            const amtVal = amtInput.value;
+            if (actVal !== "" || amtVal !== "") {
+                dailyActivities[`day_${i}`] = { activity: actVal, amount: amtVal };
+            }
+        }
+
+        // Nothing meaningful entered yet -> don't keep a stale/empty draft around
+        if (!staff && !grossSalary && Object.keys(dailyActivities).length === 0) {
+            localStorage.removeItem('timesheetDraft');
+            return;
+        }
+
+        localStorage.setItem('timesheetDraft', JSON.stringify({
+            staffName: staff,
+            monthYear: monthYear,
+            grossSalary: grossSalary,
+            dailyActivities: dailyActivities
+        }));
+    }
+
+    function applyDraftMonthIfAny() {
+        const raw = localStorage.getItem('timesheetDraft');
+        if (!raw) return;
+        try {
+            const draft = JSON.parse(raw);
+            if (draft.monthYear) {
+                document.getElementById('monthYear').value = draft.monthYear;
+            }
+        } catch (e) {
+            localStorage.removeItem('timesheetDraft');
+        }
+    }
+
+    function restoreDraftValues() {
+        const raw = localStorage.getItem('timesheetDraft');
+        if (!raw) return;
+        let draft;
+        try {
+            draft = JSON.parse(raw);
+        } catch (e) {
+            localStorage.removeItem('timesheetDraft');
+            return;
+        }
+
+        if (draft.staffName) {
+            const sel = document.getElementById('staffName');
+            const optionExists = Array.from(sel.options).some(o => o.value === draft.staffName);
+            if (optionExists) sel.value = draft.staffName;
+        }
+        if (draft.grossSalary) {
+            document.getElementById('grossSalary').value = draft.grossSalary;
+        }
+        if (draft.dailyActivities) {
+            Object.entries(draft.dailyActivities).forEach(([key, d]) => {
+                const dayNum = key.replace('day_', '');
+                const actInput = document.querySelector(`[name="activity_${dayNum}"]`);
+                const amtInput = document.querySelector(`[name="amount_${dayNum}"]`);
+                if (actInput) actInput.value = d.activity || '';
+                if (amtInput) amtInput.value = d.amount || '';
+            });
+        }
+
+        // Re-apply the live worked/leave/holiday tint to every restored day cell
+        document.querySelectorAll('.day-input-container').forEach(container => {
+            const actInput = container.querySelector('.activity-input');
+            const amtInput = container.querySelector('.amount-input');
+            if (actInput && amtInput) updateCellStatus(container, actInput, amtInput);
+        });
+
+        calculateTotalAllowance();
+    }
 
     function restoreSummary() {
         const saved = localStorage.getItem('timesheetLastSummary');
@@ -604,7 +998,7 @@
         for (let i = 1; i <= totalDays; i++) {
             const actVal = document.querySelector(`[name="activity_${i}"]`).value;
             const amtVal = document.querySelector(`[name="amount_${i}"]`).value;
-            
+
             if (actVal !== "" || amtVal !== "") {
                 dailyData[`day_${i}`] = {
                     activity: actVal,
@@ -621,21 +1015,6 @@
         };
 
         // --- Build the summary stats BEFORE the form gets reset ---
-        // Classify each day exactly like the Apps Script colors it:
-        //   Red (Leave)   -> activity contains LEAVE / AL / PL / ML / CL / SL / NOT WORKING / ច្បាប់
-        //   Yellow (Holiday) -> activity contains PUBLIC HOLIDAY / HOLIDAY
-        //   Blue (Worked) -> anything else (including a day with only an amount, or blank activity)
-        // A day with nothing entered at all is not counted in any category.
-        function classifyDay(activity) {
-            const upper = (activity || '').trim().toUpperCase();
-            if (!upper) return 'worked'; // blank activity -> blue, matches Apps Script's else-branch
-            const leaveKeywords = ['LEAVE', 'AL', 'PL', 'ML', 'CL', 'SL', 'NOT WORKING', 'ច្បាប់'];
-            const holidayKeywords = ['PUBLIC HOLIDAY', 'HOLIDAY'];
-            if (holidayKeywords.some(k => upper.includes(k))) return 'holiday';
-            if (leaveKeywords.some(k => upper.includes(k))) return 'leave';
-            return 'worked';
-        }
-
         let workedDays = 0, leaveDays = 0, holidayDays = 0;
         Object.values(dailyData).forEach(d => {
             const cat = classifyDay(d.activity);
@@ -689,6 +1068,9 @@
                 highestDayNum,
                 highestDayAmt
             });
+
+            // Submission succeeded — the in-progress draft for this month is no longer needed
+            localStorage.removeItem('timesheetDraft');
 
             document.getElementById('timesheetForm').reset();
             document.getElementById('monthYear').value = `${y}-${m}`;
