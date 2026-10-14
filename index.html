@@ -270,83 +270,116 @@
             margin: 6px 0 0;
         }
 
-        .table-responsive {
-            overflow-x: auto;
-            margin-top: 12px;
-            max-height: 430px;
-            border-radius: 10px;
-            border: 1px solid var(--td-border);
+        /* ---------- Mode buttons ---------- */
+        .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .mode-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 50px; padding: 8px 10px; border-radius: 12px;
+            border: 2px solid var(--input-border); background: var(--input-bg);
+            font-family: var(--font-body); font-weight: 700; font-size: 14px;
+            cursor: pointer; line-height: 1.25; text-align: center;
+        }
+        .mode-btn.work { color: var(--paddy); }
+        .mode-btn.off { color: var(--stamp-red); }
+        [data-theme="dark"] .mode-btn.work { color: var(--tint-worked-border); }
+        [data-theme="dark"] .mode-btn.off { color: var(--tint-leave-border); }
+        .mode-btn.work[aria-pressed="true"] { background: var(--paddy); border-color: var(--paddy); color: #FBEFD2; }
+        .mode-btn.off[aria-pressed="true"] { background: var(--stamp-red); border-color: var(--stamp-red); color: #fff; }
+        .mode-hint { margin: 8px 2px 0; font-size: 12.5px; color: var(--label-color); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 20px; }
+        .mode-hint input { width: 170px; padding: 6px 9px; font-size: 13px; }
+        .chip {
+            border: 1.5px dashed var(--label-color); background: transparent; color: var(--text-color);
+            border-radius: 999px; padding: 5px 12px; font-size: 12px; font-family: var(--font-body); cursor: pointer;
+        }
+        .tool-row { display: flex; gap: 10px; margin: 10px 0 14px; }
+        .btn-holiday {
+            flex: 1; min-height: 46px; border-radius: 12px; border: 2px solid var(--tint-holiday-border);
+            background: var(--tint-holiday-bg); color: var(--text-color); font-family: var(--font-body);
+            font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 8px; line-height: 1.25; padding: 6px 10px;
+        }
+        .btn-ghost {
+            min-height: 46px; border-radius: 12px; border: 1px solid var(--input-border); background: transparent;
+            color: var(--label-color); padding: 0 14px; cursor: pointer; font-family: var(--font-body); font-size: 13px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        /* ---------- Calendar ---------- */
+        .month-bar { display: flex; align-items: center; justify-content: space-between; margin: 4px 2px 8px; font-weight: 700; font-size: 14.5px; }
+        .nav-btn {
+            width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--input-border);
+            background: var(--input-bg); color: var(--text-color); cursor: pointer; font-size: 18px; line-height: 1;
+        }
+        .cal {
+            display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+            border: 1px solid var(--td-border); border-radius: 12px; overflow: hidden; background: var(--container-bg);
+        }
+        .dow { background: var(--th-bg); color: var(--th-color); text-align: center; padding: 6px 0 5px; line-height: 1.25; }
+        .dow b { display: block; font-size: 12px; font-weight: 700; }
+        .dow small { display: block; font-family: var(--font-mono); font-size: 9.5px; color: var(--label-color); }
+        .dow.weekend { background: var(--weekend-bg); color: var(--stamp-red); }
+        .dow.weekend small { color: var(--stamp-red); }
+        .pad { background: var(--th-bg); opacity: 0.45; border-top: 1px solid var(--td-border); border-right: 1px solid var(--td-border); }
+        .day {
+            position: relative; min-height: 76px; padding: 5px 3px 4px; border: 0;
+            border-top: 1px solid var(--td-border); border-right: 1px solid var(--td-border);
+            background: var(--container-bg); color: var(--text-color); cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center;
+            font-family: var(--font-body); overflow: hidden;
+        }
+        .cal > :nth-child(7n) { border-right: 0; }
+        .day .dn { font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
+        .day .da {
+            font-size: 10px; line-height: 1.25; width: 100%; word-break: break-word;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 700;
+        }
+        .day .dm { font-family: var(--font-mono); font-size: 10px; color: var(--label-color); }
+        .day.weekend { background: color-mix(in srgb, var(--weekend-bg) 55%, var(--container-bg)); }
+        .day.weekend .dn { color: var(--stamp-red); }
+        .day .hdot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--stamp-ochre); }
+        .day.cell-worked { background: var(--tint-worked-bg); box-shadow: inset 0 0 0 2px var(--tint-worked-border); }
+        .day.cell-leave { background: var(--tint-leave-bg); box-shadow: inset 0 0 0 2px var(--tint-leave-border); }
+        .day.cell-holiday { background: var(--tint-holiday-bg); box-shadow: inset 0 0 0 2px var(--tint-holiday-border); }
+        .day.cell-worked .da { color: var(--paddy); }
+        .day.cell-leave .da { color: var(--tint-leave-border); }
+        .day.cell-holiday .da { color: var(--stamp-ochre); }
+        [data-theme="dark"] .day.cell-worked .da { color: var(--tint-worked-border); }
+        .day.today .dn::after { content: ""; display: block; height: 2px; margin-top: 1px; background: var(--text-color); border-radius: 1px; }
+        @media (min-width: 640px) {
+            .day { min-height: 96px; }
+            .day .dn { font-size: 16px; }
+            .day .da { font-size: 12px; }
+            .day .dm { font-size: 12px; }
         }
 
-        th, td {
-            border: 1px solid var(--td-border);
-            padding: 6px 4px;
-            text-align: center;
-            font-size: 12px;
-            white-space: nowrap;
-        }
+        .live-sum { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+        .live-sum div { background: var(--th-bg); border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 11px; color: var(--label-color); line-height: 1.3; }
+        .live-sum b { display: block; font-family: var(--font-mono); font-size: 18px; color: var(--text-color); }
 
-        th {
-            background-color: var(--th-bg);
-            color: var(--th-color);
-            font-family: var(--font-mono);
-            font-weight: 700;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
+        .hol-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+        .hol-list li { display: flex; gap: 12px; align-items: center; border: 1.5px solid var(--tint-holiday-border); background: var(--tint-holiday-bg); border-radius: 10px; padding: 8px 12px; }
+        .hol-list .hd { font-family: var(--font-mono); font-weight: 700; font-size: 14px; min-width: 52px; text-align: center; }
+        .hol-list .ht { font-size: 12.5px; line-height: 1.4; }
+        .hol-list .ht small { display: block; color: var(--label-color); font-size: 11px; }
+        .hol-note { margin: 10px 2px 0; font-size: 11px; color: var(--label-color); }
 
-        th.weekend {
-            background-color: var(--weekend-bg);
-            color: var(--stamp-red);
-        }
+        /* ---------- Day sheet ---------- */
+        .scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
+        .scrim.open { display: flex; }
+        .sheet { width: 100%; max-width: 520px; background: var(--container-bg); color: var(--text-color); border-radius: 18px 18px 0 0; padding: 18px 18px 22px; max-height: 90vh; overflow: auto; }
+        .sheet h4 { margin: 0 0 4px; font-size: 16px; font-family: var(--font-body); }
+        .sheet .sh-hol { margin: 0 0 8px; font-size: 12.5px; font-weight: 700; color: var(--stamp-ochre); }
+        .sheet .sh-kind { margin: 6px 0 0; font-size: 12px; font-weight: 700; min-height: 18px; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 12px; }
+        .chips .chip { border-style: solid; }
+        .sheet .acts { display: flex; gap: 10px; margin-top: 16px; }
+        .sheet .save { flex: 1; min-height: 46px; border: 0; border-radius: 10px; background: var(--paddy); color: #FBEFD2; font-family: var(--font-body); font-weight: 700; font-size: 15px; cursor: pointer; }
 
-        td { background: var(--container-bg); }
-
-        .day-input-container {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            width: 78px;
-            padding: 4px;
-            border-radius: 8px;
-            border: 1px solid transparent;
-            background: transparent;
-            transition: background 0.2s, border-color 0.2s;
+        .toast {
+            position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+            background: #26301F; color: #F6F1E1; padding: 11px 18px; border-radius: 10px; font-size: 13px;
+            opacity: 0; pointer-events: none; transition: 0.2s; z-index: 60; max-width: 90vw; text-align: center;
         }
-
-        .day-input-container.cell-worked {
-            background: var(--tint-worked-bg);
-            border-color: var(--tint-worked-border);
-        }
-
-        .day-input-container.cell-leave {
-            background: var(--tint-leave-bg);
-            border-color: var(--tint-leave-border);
-        }
-
-        .day-input-container.cell-holiday {
-            background: var(--tint-holiday-bg);
-            border-color: var(--tint-holiday-border);
-        }
-
-        .activity-input, .amount-input {
-            width: 100% !important;
-            text-align: center;
-            padding: 4px;
-            font-size: 11px;
-            border-radius: 5px;
-        }
-
-        .amount-input {
-            font-family: var(--font-mono);
-            font-weight: 600;
-        }
+        .toast.show { opacity: 1; transform: translateX(-50%); }
 
         .legend {
             display: flex;
@@ -593,7 +626,7 @@
                         <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v3.5M16 3.5v3.5"/></svg></span>
                         ខែ និងឆ្នាំ (Month & Year):
                     </label>
-                    <input type="month" id="monthYear" value="2026-09" required>
+                    <input type="month" id="monthYear" required>
                 </div>
             </div>
 
@@ -615,22 +648,43 @@
             </div>
 
             <h3>តារាងសកម្មភាពប្រចាំថ្ងៃ (Daily Activities)</h3>
-            <p class="table-hint">អូសទៅឆ្វេង/ស្តាំដើម្បីមើលថ្ងៃផ្សេងទៀត — Scroll to see more days</p>
-            <div class="table-responsive">
-                <table id="daysTable">
-                    <thead>
-                        <tr id="tableDays"></tr>
-                    </thead>
-                    <tbody>
-                        <tr id="tableInputs"></tr>
-                    </tbody>
-                </table>
+            <p class="table-hint">ជ្រើសប៊ូតុងខាងក្រោម រួចចុចលើថ្ងៃក្នុងប្រតិទិន ឬចុចថ្ងៃណាមួយដោយផ្ទាល់ ដើម្បីបញ្ចូលសកម្មភាព និងទឹកប្រាក់។</p>
+
+            <div class="modes">
+                <button type="button" class="mode-btn work" id="modeWork" aria-pressed="false" onclick="setMode('worked')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    ជ្រើសថ្ងៃធ្វើការ
+                </button>
+                <button type="button" class="mode-btn off" id="modeOff" aria-pressed="false" onclick="setMode('notwork')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    ជ្រើសថ្ងៃអត់ធ្វើការ
+                </button>
             </div>
+            <div class="mode-hint" id="modeHint" aria-live="polite"></div>
+
+            <div class="tool-row">
+                <button type="button" class="btn-holiday" onclick="loadHolidays()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+                    ទាញថ្ងៃឈប់សម្រាកតាមសេចក្តីប្រកាស
+                </button>
+                <button type="button" class="btn-ghost" onclick="clearMonth()">សម្អាត</button>
+            </div>
+
+            <div class="month-bar">
+                <button type="button" class="nav-btn" onclick="stepMonth(-1)" aria-label="ខែមុន">‹</button>
+                <span id="monthTitle"></span>
+                <button type="button" class="nav-btn" onclick="stepMonth(1)" aria-label="ខែក្រោយ">›</button>
+            </div>
+            <div class="cal" id="cal"></div>
             <div class="legend">
                 <span><span class="dot worked"></span>ធ្វើការ (Worked)</span>
                 <span><span class="dot leave"></span>ឈប់សម្រាក (Leave)</span>
                 <span><span class="dot holiday"></span>ថ្ងៃបុណ្យ (Holiday)</span>
             </div>
+
+            <div class="live-sum" id="liveSum"></div>
+            <ul class="hol-list" id="holList"></ul>
+            <p class="hol-note" id="holNote"></p>
 
             <datalist id="activityListOptions"></datalist>
 
@@ -707,6 +761,31 @@
     </div>
 </div>
 
+<!-- Day detail sheet -->
+<div class="scrim" id="scrim">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+        <h4 id="shTitle"></h4>
+        <p class="sh-hol" id="shHol" hidden></p>
+        <label for="shAct">សកម្មភាព (Activity)</label>
+        <input type="text" id="shAct" list="activityListOptions" placeholder="សកម្មភាព" autocomplete="off">
+        <div class="chips" id="shChips">
+            <button type="button" class="chip" data-k="work">ធ្វើការ</button>
+            <button type="button" class="chip" data-k="notwork">អត់ធ្វើការ</button>
+            <button type="button" class="chip" data-k="sick">ឈប់ឈឺ</button>
+            <button type="button" class="chip" data-k="holiday">ថ្ងៃបុណ្យ</button>
+        </div>
+        <label for="shAmt">ទឹកប្រាក់ (Amount)</label>
+        <input type="number" id="shAmt" placeholder="ទឹកប្រាក់" inputmode="decimal" step="any">
+        <p class="sh-kind" id="shKind"></p>
+        <div class="acts">
+            <button type="button" class="btn-ghost" id="shClear">សម្អាតថ្ងៃនេះ</button>
+            <button type="button" class="btn-ghost" id="shClose">បិទ</button>
+            <button type="button" class="save" id="shSave">រក្សាទុក</button>
+        </div>
+    </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyNefEeNFtacVPHDg7gy3-tE8RomIOAZnkak0YybkmVlWY5TXQVsKUbtprEg4omHjUJEQ/exec'; // <-- ជំនួស URL របស់អ្នកនៅទីនេះ
 
@@ -749,14 +828,65 @@
         return 'worked';
     }
 
-    // Live-tints a day's mini-card the moment the staff types, so they get instant
-    // visual confirmation (matching the master sheet's colors) before submitting.
-    function updateCellStatus(container, actInput, amtInput) {
-        container.classList.remove('cell-worked', 'cell-leave', 'cell-holiday');
-        if (actInput.value === '' && amtInput.value === '') return; // untouched, stays neutral
-        container.classList.add('cell-' + classifyDay(actInput.value));
+    /* ================= Calendar state ================= */
+    let days = {};            // { 5: {activity:'External', amount:'12'} } for the month on screen
+    let mode = null;          // null | 'worked' | 'notwork'
+    let editing = null;
+    let lastMonthVal = '';
+    let workActText = localStorage.getItem('timesheetWorkActivity') || '';
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const MONTH_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const MONTH_KM = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
+    const DOW = [["អា","Sun"],["ច","Mon"],["អ","Tue"],["ពុ","Wed"],["ព្រ","Thu"],["សុ","Fri"],["សៅ","Sat"]];
+    const kmNum = n => String(n).replace(/\d/g, d => "០១២៣៤៥៦៧៨៩"[d]);
+
+    function ym() {
+        const v = $('monthYear').value || '';
+        let [y, m] = v.split('-').map(Number);
+        if (!y || !m) { const t = new Date(); y = t.getFullYear(); m = t.getMonth() + 1; }
+        return { y, m };
     }
 
+    /* ======= Cambodia public holidays 2026 =======
+       Sub-Decree No. 167 (Aug 2025) + Prakas No. 216/25, Ministry of Labour and Vocational Training (18 Sep 2025).
+       For other years add a new block, e.g. addHol(2027, 1, [1], "...", "..."). */
+    const HOL = {};
+    function addHol(y, m, ds, km, en) { (HOL[y] = HOL[y] || []).push(...ds.map(d => ({ m, d, km, en }))); }
+    addHol(2026, 1, [1], "ទិវាចូលឆ្នាំសកល", "International New Year’s Day");
+    addHol(2026, 1, [7], "ទិវាជ័យជម្នះលើរបបប្រល័យពូជសាសន៍", "Victory over Genocide Day");
+    addHol(2026, 3, [8], "ទិវាអន្តរជាតិនារី", "International Women’s Day");
+    addHol(2026, 4, [14, 15, 16], "ពិធីបុណ្យចូលឆ្នាំថ្មី ប្រពៃណីជាតិ", "Khmer New Year");
+    addHol(2026, 5, [1], "ទិវាពលកម្មអន្តរជាតិ និងពិធីបុណ្យវិសាខបូជា", "Labour Day & Visak Bochea");
+    addHol(2026, 5, [5], "ព្រះរាជពិធីច្រត់ព្រះនង្គ័ល", "Royal Ploughing Ceremony");
+    addHol(2026, 5, [14], "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី", "King’s Birthday");
+    addHol(2026, 6, [18], "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី នរោត្តម មុនីនាថ សីហនុ", "Queen Mother’s Birthday");
+    addHol(2026, 9, [24], "ទិវារដ្ឋធម្មនុញ្ញ", "Constitution Day");
+    addHol(2026, 10, [10, 11, 12], "ពិធីបុណ្យភ្ជុំបិណ្ឌ", "Pchum Ben");
+    addHol(2026, 10, [15], "ទិវាប្រារព្ធពិធីគោរពព្រះវិញ្ញាណក្ខន្ធ ព្រះបរមរតនកោដ្ឋ", "Commemoration of King Father Norodom Sihanouk");
+    addHol(2026, 10, [29], "ព្រះរាជពិធីគ្រងព្រះបរមរាជសម្បត្តិ ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី", "King’s Coronation Day");
+    addHol(2026, 11, [9], "ពិធីបុណ្យឯករាជ្យជាតិ", "Independence Day");
+    addHol(2026, 11, [23, 24, 25], "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែ អកអំបុក", "Water Festival");
+    addHol(2026, 12, [29], "ទិវាសន្តិភាពនៅកម្ពុជា", "Peace Day in Cambodia");
+
+    function holMap(y, m) {
+        const o = {};
+        (HOL[y] || []).filter(h => h.m === m).forEach(h => o[h.d] = h);
+        return o;
+    }
+
+    /* Activity text used by each button. Prefers the wording that already exists in your master list,
+       so the Apps Script colouring keeps working. */
+    function findActivity(keyword, fallback) {
+        return globalActivities.find(a => String(a).toUpperCase().includes(keyword)) || fallback;
+    }
+    const actNotWork = () => findActivity('NOT WORKING', 'Not Working');
+    const actSick = () => findActivity('SICK LEAVE', 'Sick Leave');
+    const actHoliday = () => findActivity('PUBLIC HOLIDAY', 'Public Holiday');
+    const actWork = () => (workActText || '').trim() || 'Working';
+
+    /* ================= Master data from Google Sheets ================= */
     function fetchMasterData() {
         fetch(scriptURL + '?action=getData')
             .then(response => response.json())
@@ -766,7 +896,7 @@
                     return;
                 }
 
-                const staffSelect = document.getElementById('staffName');
+                const staffSelect = $('staffName');
                 staffSelect.innerHTML = '<option value="">-- ជ្រើសរើសឈ្មោះ --</option>';
                 data.staffs.forEach(staff => {
                     const opt = document.createElement('option');
@@ -775,108 +905,261 @@
                     staffSelect.appendChild(opt);
                 });
 
-                globalActivities = data.activities;
-                const datalist = document.getElementById('activityListOptions');
+                globalActivities = data.activities || [];
+                const datalist = $('activityListOptions');
                 datalist.innerHTML = '';
-                data.activities.forEach(act => {
+                globalActivities.forEach(act => {
                     const opt = document.createElement('option');
                     opt.value = act;
                     datalist.appendChild(opt);
                 });
 
-                applyDraftMonthIfAny();
-                generateDays();
-                restoreDraftValues();
+                // default "worked" activity = first activity in the master list that counts as work
+                if (!workActText) {
+                    workActText = globalActivities.find(a => classifyDay(a) === 'worked') || 'Working';
+                }
+                restoreStaffFromDraft();
+                if (mode === 'worked') renderMode();
             })
             .catch(error => {
                 console.error('Error fetching master data:', error);
-                applyDraftMonthIfAny();
-                generateDays();
-                restoreDraftValues();
             });
     }
 
-    function generateDays() {
-        const monthYearInput = document.getElementById('monthYear').value;
-        const [year, month] = monthYearInput.split('-');
-        const daysInMonth = new Date(year, month, 0).getDate();
+    /* ================= Render ================= */
+    function render() {
+        const { y, m } = ym();
+        const hol = holMap(y, m);
+        const first = new Date(y, m - 1, 1).getDay();
+        const n = new Date(y, m, 0).getDate();
+        const t = new Date();
 
-        const daysRow = document.getElementById('tableDays');
-        const inputsRow = document.getElementById('tableInputs');
+        let h = DOW.map((d, i) => `<div class="dow${i === 0 || i === 6 ? ' weekend' : ''}"><b>${d[0]}</b><small>${d[1]}</small></div>`).join('');
+        for (let i = 0; i < first; i++) h += '<div class="pad"></div>';
 
-        daysRow.innerHTML = '';
-        inputsRow.innerHTML = '';
-
-        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dateObj = new Date(year, month - 1, i);
-            const dayOfWeek = dateObj.getDay();
-            const dayName = weekdays[dayOfWeek];
-
-            const th = document.createElement('th');
-            th.innerHTML = `${dayName}<br>${i}`;
-            if (dayOfWeek === 0 || dayOfWeek === 6) th.classList.add('weekend');
-            daysRow.appendChild(th);
-
-            const td = document.createElement('td');
-            const container = document.createElement('div');
-            container.className = 'day-input-container';
-
-            const actInput = document.createElement('input');
-            actInput.type = 'text';
-            actInput.className = 'activity-input';
-            actInput.name = `activity_${i}`;
-            actInput.placeholder = 'សកម្មភាព';
-            actInput.setAttribute('list', 'activityListOptions');
-
-            const amtInput = document.createElement('input');
-            amtInput.type = 'number';
-            amtInput.className = 'amount-input';
-            amtInput.name = `amount_${i}`;
-            amtInput.placeholder = 'ទឹកប្រាក់';
-
-            actInput.addEventListener('input', () => {
-                saveDraft();
-                updateCellStatus(container, actInput, amtInput);
-            });
-            amtInput.addEventListener('input', () => {
-                calculateTotalAllowance();
-                saveDraft();
-                updateCellStatus(container, actInput, amtInput);
-            });
-
-            container.appendChild(actInput);
-            container.appendChild(amtInput);
-            td.appendChild(container);
-            inputsRow.appendChild(td);
+        for (let d = 1; d <= n; d++) {
+            const r = days[d];
+            const has = r && (r.activity !== '' || r.amount !== '');
+            const w = new Date(y, m - 1, d).getDay();
+            const kind = has ? classifyDay(r.activity) : '';
+            const isToday = t.getFullYear() === y && t.getMonth() + 1 === m && t.getDate() === d;
+            const cls = ['day', (w === 0 || w === 6) ? 'weekend' : '', kind ? 'cell-' + kind : '', isToday ? 'today' : ''].join(' ');
+            const hd = hol[d];
+            h += `<button type="button" class="${cls}" data-d="${d}" aria-label="${d} ${MONTH_EN[m-1]}${hd ? ', ' + esc(hd.en) : ''}">
+                ${hd && kind !== 'holiday' ? '<span class="hdot"></span>' : ''}
+                <span class="dn">${d}</span>
+                <span class="da">${has ? esc(r.activity) : ''}</span>
+                <span class="dm">${has && r.amount !== '' ? esc(r.amount) : ''}</span>
+            </button>`;
         }
+        $('cal').innerHTML = h;
+        $('monthTitle').textContent = `${MONTH_KM[m-1]} ${kmNum(y)} (${MONTH_EN[m-1]} ${y})`;
+
+        // live counters
+        const c = { worked: 0, leave: 0, holiday: 0 };
+        let filled = 0;
+        Object.values(days).forEach(r => {
+            if (r.activity === '' && r.amount === '') return;
+            filled++; c[classifyDay(r.activity)]++;
+        });
+        $('liveSum').innerHTML =
+            `<div><b>${c.worked}</b>ធ្វើការ</div><div><b>${c.leave}</b>ឈប់សម្រាក</div><div><b>${c.holiday}</b>ថ្ងៃបុណ្យ</div><div><b>${Math.max(n - filled, 0)}</b>មិនទាន់បំពេញ</div>`;
+
+        // official holidays of this month
+        const keys = Object.keys(hol).map(Number).sort((a, b) => a - b);
+        $('holList').innerHTML = keys.map(d =>
+            `<li><span class="hd">${d} ${MONTH_EN[m-1].slice(0,3)}</span><span class="ht">${esc(hol[d].km)}<small>${esc(hol[d].en)}</small></span></li>`).join('');
+        $('holNote').textContent = !HOL[y]
+            ? `មិនទាន់មានបញ្ជីថ្ងៃបុណ្យឆ្នាំ ${y} ក្នុងប្រព័ន្ធ។`
+            : (keys.length ? 'តាមប្រកាសលេខ ២១៦/២៥ ក្រសួងការងារ និងបណ្តុះបណ្តាលវិជ្ជាជីវៈ។' : 'ខែនេះគ្មានថ្ងៃបុណ្យជាតិទេ។');
+
         calculateTotalAllowance();
     }
 
+    function generateDays() { render(); }   // kept for compatibility
+
     function calculateTotalAllowance() {
         let total = 0;
-        const amountInputs = document.querySelectorAll('.amount-input');
-        amountInputs.forEach(input => {
-            const val = parseFloat(input.value);
-            if (!isNaN(val)) {
-                total += val;
-            }
+        Object.values(days).forEach(r => {
+            const v = parseFloat(r.amount);
+            if (!isNaN(v)) total += v;
         });
-        document.getElementById('fieldAllowance').value = total > 0 ? total : '';
+        $('fieldAllowance').value = total > 0 ? total : '';
     }
 
+    /* ================= Modes (worked / not working) ================= */
+    function setMode(k) {
+        mode = (mode === k) ? null : k;
+        renderMode();
+    }
+
+    function renderMode() {
+        $('modeWork').setAttribute('aria-pressed', mode === 'worked');
+        $('modeOff').setAttribute('aria-pressed', mode === 'notwork');
+        const hint = $('modeHint');
+        hint.innerHTML = '';
+        if (mode === 'worked') {
+            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
+                <input type="text" id="workActivity" list="activityListOptions" autocomplete="off" value="${esc(workActText)}">
+                <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`;
+            $('workActivity').addEventListener('input', e => {
+                workActText = e.target.value;
+                localStorage.setItem('timesheetWorkActivity', workActText);
+            });
+        } else if (mode === 'notwork') {
+            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ «${esc(actNotWork())}»</span>
+                <button type="button" class="chip" onclick="fillWeek('notwork')">ជ្រើស សៅរ៍–អាទិត្យ ទាំងអស់</button>`;
+        }
+    }
+
+    // Fill every EMPTY weekday (worked) or weekend day (not working); public holidays and filled days are skipped
+    function fillWeek(k) {
+        const { y, m } = ym();
+        const hol = holMap(y, m);
+        const n = new Date(y, m, 0).getDate();
+        let count = 0;
+        for (let d = 1; d <= n; d++) {
+            const w = new Date(y, m - 1, d).getDay();
+            const weekend = (w === 0 || w === 6);
+            if (hol[d]) continue;
+            if (days[d] && days[d].activity !== '') continue;
+            if (k === 'worked' && !weekend) { days[d] = { activity: actWork(), amount: (days[d] && days[d].amount) || '' }; count++; }
+            if (k === 'notwork' && weekend) { days[d] = { activity: actNotWork(), amount: (days[d] && days[d].amount) || '' }; count++; }
+        }
+        render(); saveDraft();
+        toast(`បានកំណត់ ${count} ថ្ងៃ (មិនរាប់ថ្ងៃបុណ្យ និងថ្ងៃដែលមានទិន្នន័យរួច)`);
+    }
+
+    function paint(d) {
+        const act = mode === 'worked' ? actWork() : actNotWork();
+        const cur = days[d];
+        if (cur && cur.activity === act) {
+            if (cur.amount !== '') days[d] = { activity: '', amount: cur.amount };
+            else delete days[d];
+        } else {
+            days[d] = { activity: act, amount: cur ? cur.amount : '' };
+        }
+        render(); saveDraft();
+    }
+
+    $('cal').addEventListener('click', e => {
+        const b = e.target.closest('.day');
+        if (!b) return;
+        const d = +b.dataset.d;
+        if (mode) paint(d); else openSheet(d);
+    });
+
+    /* ================= Public holidays ================= */
+    function loadHolidays() {
+        const { y, m } = ym();
+        if (!HOL[y]) { toast(`មិនទាន់មានបញ្ជីថ្ងៃបុណ្យឆ្នាំ ${y}`); return; }
+        const hol = holMap(y, m);
+        const ds = Object.keys(hol).map(Number);
+        if (!ds.length) { toast('ខែនេះគ្មានថ្ងៃបុណ្យជាតិទេ'); return; }
+        const act = actHoliday();
+        let set = 0, skipped = 0;
+        ds.forEach(d => {
+            const cur = days[d];
+            if (cur && cur.activity !== '' && classifyDay(cur.activity) !== 'holiday') { skipped++; return; }
+            days[d] = { activity: act, amount: cur ? cur.amount : '' };
+            set++;
+        });
+        render(); saveDraft();
+        toast(`បានទាញថ្ងៃបុណ្យ ${set} ថ្ងៃ` + (skipped ? ` (រំលង ${skipped} ថ្ងៃដែលមានសកម្មភាពរួច)` : ''));
+    }
+
+    function clearMonth() {
+        if (!Object.keys(days).length) return;
+        if (confirm('សម្អាតទិន្នន័យទាំងអស់នៃខែនេះ?')) { days = {}; render(); saveDraft(); }
+    }
+
+    /* ================= Month navigation ================= */
+    function stepMonth(k) {
+        let { y, m } = ym();
+        m += k;
+        if (m < 1) { m = 12; y--; }
+        if (m > 12) { m = 1; y++; }
+        $('monthYear').value = `${y}-${String(m).padStart(2, '0')}`;
+        $('monthYear').dispatchEvent(new Event('change'));
+    }
+
+    /* ================= Day sheet ================= */
+    function openSheet(d) {
+        editing = d;
+        const { y, m } = ym();
+        const r = days[d] || { activity: '', amount: '' };
+        const hd = holMap(y, m)[d];
+        $('shTitle').textContent = `${DOW[new Date(y, m - 1, d).getDay()][1]} ${d} ${MONTH_EN[m-1]} ${y}`;
+        $('shHol').hidden = !hd;
+        if (hd) $('shHol').textContent = 'ថ្ងៃបុណ្យ៖ ' + hd.km;
+        $('shAct').value = r.activity;
+        $('shAmt').value = r.amount;
+        updateKind();
+        $('scrim').classList.add('open');
+    }
+    function closeSheet() { $('scrim').classList.remove('open'); editing = null; }
+    function updateKind() {
+        const el = $('shKind');
+        if ($('shAct').value === '' && $('shAmt').value === '') { el.textContent = ''; return; }
+        const k = classifyDay($('shAct').value);
+        el.textContent = k === 'worked' ? '● ធ្វើការ (Worked)' : k === 'leave' ? '● ឈប់សម្រាក (Leave)' : '● ថ្ងៃបុណ្យ (Holiday)';
+        el.style.color = k === 'worked' ? 'var(--paddy-light)' : k === 'leave' ? 'var(--stamp-red)' : 'var(--stamp-ochre)';
+    }
+    $('shAct').addEventListener('input', updateKind);
+    $('shAmt').addEventListener('input', updateKind);
+    $('shChips').addEventListener('click', e => {
+        const b = e.target.closest('.chip');
+        if (!b) return;
+        const k = b.dataset.k;
+        $('shAct').value = k === 'work' ? actWork() : k === 'notwork' ? actNotWork() : k === 'sick' ? actSick() : actHoliday();
+        updateKind();
+    });
+    $('shClose').onclick = closeSheet;
+    $('scrim').addEventListener('click', e => { if (e.target.id === 'scrim') closeSheet(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+    $('shClear').onclick = () => { delete days[editing]; closeSheet(); render(); saveDraft(); };
+    $('shSave').onclick = () => {
+        const act = $('shAct').value.trim(), amt = $('shAmt').value;
+        if (act === '' && amt === '') delete days[editing];
+        else days[editing] = { activity: act, amount: amt };
+        closeSheet(); render(); saveDraft();
+    };
+
+    let toastTimer;
+    function toast(msg) {
+        const t = $('toast');
+        t.textContent = msg; t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    /* ================= Form listeners ================= */
     document.getElementById('staffName').addEventListener('change', saveDraft);
     document.getElementById('grossSalary').addEventListener('input', saveDraft);
 
     document.getElementById('monthYear').addEventListener('change', () => {
-        generateDays();
+        const v = $('monthYear').value;
+        if (!v) { $('monthYear').value = lastMonthVal; return; }
+        if (Object.keys(days).length && !confirm('ប្តូរខែនឹងលុបទិន្នន័យដែលបានបញ្ចូលក្នុងខែនេះ។ បន្តឬ?')) {
+            $('monthYear').value = lastMonthVal;
+            return;
+        }
+        days = {};
+        lastMonthVal = v;
+        render();
         // New month selected: the previous month's summary no longer applies
         document.getElementById('summaryModal').classList.remove('show');
         localStorage.removeItem('timesheetLastSummary');
         saveDraft();
     });
+
     window.onload = function() {
+        const t = new Date();
+        $('monthYear').value = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}`;
+        applyDraftMonthIfAny();
+        lastMonthVal = $('monthYear').value;
+        restoreDraftValues();      // fills `days` + salary from the saved draft
+        render();                  // calendar shows immediately, even before the sheet responds
         fetchMasterData();
         restoreSummary();
     };
@@ -886,20 +1169,11 @@
         const staff = document.getElementById('staffName').value;
         const monthYear = document.getElementById('monthYear').value;
         const grossSalary = document.getElementById('grossSalary').value;
-        const [y, m] = monthYear.split('-');
-        const totalDays = new Date(y, m, 0).getDate();
 
         const dailyActivities = {};
-        for (let i = 1; i <= totalDays; i++) {
-            const actInput = document.querySelector(`[name="activity_${i}"]`);
-            const amtInput = document.querySelector(`[name="amount_${i}"]`);
-            if (!actInput || !amtInput) continue;
-            const actVal = actInput.value;
-            const amtVal = amtInput.value;
-            if (actVal !== "" || amtVal !== "") {
-                dailyActivities[`day_${i}`] = { activity: actVal, amount: amtVal };
-            }
-        }
+        Object.entries(days).forEach(([d, r]) => {
+            if (r.activity !== '' || r.amount !== '') dailyActivities[`day_${d}`] = { activity: r.activity, amount: r.amount };
+        });
 
         // Nothing meaningful entered yet -> don't keep a stale/empty draft around
         if (!staff && !grossSalary && Object.keys(dailyActivities).length === 0) {
@@ -928,43 +1202,30 @@
         }
     }
 
-    function restoreDraftValues() {
+    function readDraft() {
         const raw = localStorage.getItem('timesheetDraft');
-        if (!raw) return;
-        let draft;
-        try {
-            draft = JSON.parse(raw);
-        } catch (e) {
-            localStorage.removeItem('timesheetDraft');
-            return;
-        }
+        if (!raw) return null;
+        try { return JSON.parse(raw); }
+        catch (e) { localStorage.removeItem('timesheetDraft'); return null; }
+    }
 
-        if (draft.staffName) {
-            const sel = document.getElementById('staffName');
-            const optionExists = Array.from(sel.options).some(o => o.value === draft.staffName);
-            if (optionExists) sel.value = draft.staffName;
-        }
-        if (draft.grossSalary) {
-            document.getElementById('grossSalary').value = draft.grossSalary;
-        }
+    function restoreStaffFromDraft() {
+        const draft = readDraft();
+        if (!draft || !draft.staffName) return;
+        const sel = document.getElementById('staffName');
+        if (Array.from(sel.options).some(o => o.value === draft.staffName)) sel.value = draft.staffName;
+    }
+
+    function restoreDraftValues() {
+        const draft = readDraft();
+        if (!draft) return;
+        if (draft.grossSalary) document.getElementById('grossSalary').value = draft.grossSalary;
+        days = {};
         if (draft.dailyActivities) {
             Object.entries(draft.dailyActivities).forEach(([key, d]) => {
-                const dayNum = key.replace('day_', '');
-                const actInput = document.querySelector(`[name="activity_${dayNum}"]`);
-                const amtInput = document.querySelector(`[name="amount_${dayNum}"]`);
-                if (actInput) actInput.value = d.activity || '';
-                if (amtInput) amtInput.value = d.amount || '';
+                days[key.replace('day_', '')] = { activity: d.activity || '', amount: d.amount || '' };
             });
         }
-
-        // Re-apply the live worked/leave/holiday tint to every restored day cell
-        document.querySelectorAll('.day-input-container').forEach(container => {
-            const actInput = container.querySelector('.activity-input');
-            const amtInput = container.querySelector('.amount-input');
-            if (actInput && amtInput) updateCellStatus(container, actInput, amtInput);
-        });
-
-        calculateTotalAllowance();
     }
 
     function restoreSummary() {
@@ -996,15 +1257,18 @@
         const totalDays = new Date(y, m, 0).getDate();
 
         for (let i = 1; i <= totalDays; i++) {
-            const actVal = document.querySelector(`[name="activity_${i}"]`).value;
-            const amtVal = document.querySelector(`[name="amount_${i}"]`).value;
-
-            if (actVal !== "" || amtVal !== "") {
+            const r = days[i];
+            if (r && (r.activity !== "" || r.amount !== "")) {
                 dailyData[`day_${i}`] = {
-                    activity: actVal,
-                    amount: amtVal
+                    activity: r.activity,
+                    amount: r.amount
                 };
             }
+        }
+
+        if (Object.keys(dailyData).length === 0) {
+            alert('សូមជ្រើសថ្ងៃយ៉ាងហោចណាស់មួយថ្ងៃជាមុនសិន!');
+            return;
         }
 
         const formData = {
@@ -1072,9 +1336,11 @@
             // Submission succeeded — the in-progress draft for this month is no longer needed
             localStorage.removeItem('timesheetDraft');
 
-            document.getElementById('timesheetForm').reset();
+            days = {};
+            document.getElementById('staffName').value = '';
+            document.getElementById('grossSalary').value = '';
             document.getElementById('monthYear').value = `${y}-${m}`;
-            generateDays();
+            render();
         })
         .catch(error => {
             document.getElementById('loading').style.display = 'none';
