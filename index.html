@@ -24,6 +24,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Moul&family=Hanuman:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js" defer></script>
+
     <style>
         :root {
             /* Rice-paddy ledger palette */
@@ -286,7 +288,16 @@
         .mode-btn.work[aria-pressed="true"] { background: var(--paddy); border-color: var(--paddy); color: #FBEFD2; }
         .mode-btn.off[aria-pressed="true"] { background: var(--stamp-red); border-color: var(--stamp-red); color: #fff; }
         .mode-hint { margin: 8px 2px 0; font-size: 12.5px; color: var(--label-color); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 20px; }
-        .mode-hint input { width: 170px; padding: 6px 9px; font-size: 13px; }
+        .mode-hint .clearable input { width: 210px; padding: 6px 34px 6px 9px; font-size: 13px; }
+        .clearable { position: relative; display: inline-block; }
+        .sheet .clearable { display: block; }
+        .clearable input { padding-right: 40px; }
+        .clearable .clr {
+            display: none; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+            width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--th-bg);
+            color: var(--label-color); font-size: 20px; line-height: 1; cursor: pointer; padding: 0;
+        }
+        .clearable.has .clr { display: block; }
         .chip {
             border: 1.5px dashed var(--label-color); background: transparent; color: var(--text-color);
             border-radius: 999px; padding: 5px 12px; font-size: 12px; font-family: var(--font-body); cursor: pointer;
@@ -335,6 +346,7 @@
         .day .dm { font-family: var(--font-mono); font-size: 10px; color: var(--label-color); }
         .day .dp { font-family: var(--font-mono); font-weight: 700; font-size: 11px; background: var(--text-color); color: var(--container-bg); border-radius: 4px; padding: 0 6px; line-height: 1.5; }
         .mode-hint select { width: 130px; padding: 6px 9px; font-size: 13px; }
+        .mode-hint input[type="number"] { width: 100px; padding: 6px 9px; font-size: 13px; }
         .day.weekend { background: color-mix(in srgb, var(--weekend-bg) 55%, var(--container-bg)); }
         .day.weekend .dn { color: var(--stamp-red); }
         .day .hdot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--stamp-ochre); }
@@ -375,6 +387,14 @@
         .chips .chip { border-style: solid; }
         .sheet .acts { display: flex; gap: 10px; margin-top: 16px; }
         .sheet .save { flex: 1; min-height: 46px; border: 0; border-radius: 10px; background: var(--paddy); color: #FBEFD2; font-family: var(--font-body); font-weight: 700; font-size: 15px; cursor: pointer; }
+
+        .btn-export {
+            width: 100%; margin-top: 10px; min-height: 46px; border-radius: 9px; cursor: pointer;
+            border: 2px solid var(--paddy); background: transparent; color: var(--paddy);
+            font-family: var(--font-body); font-weight: bold; font-size: 14px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        [data-theme="dark"] .btn-export { border-color: var(--tint-worked-border); color: var(--tint-worked-border); }
 
         .toast {
             position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
@@ -688,11 +708,17 @@
             <ul class="hol-list" id="holList"></ul>
             <p class="hol-note" id="holNote"></p>
 
-            <datalist id="activityListOptions"></datalist>
+            <datalist id="activityListOptions"></datalist>        <!-- សកម្មភាពធ្វើការ (Staff!B) -->
+            <datalist id="offActivityListOptions"></datalist>     <!-- ថ្ងៃសម្រាក (Staff!E) -->
+            <datalist id="allActivityListOptions"></datalist>     <!-- ទាំងពីរ (សម្រាប់ផ្ទាំងកែថ្ងៃ) -->
 
             <button type="button" class="btn-submit" onclick="saveData()">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
                 រក្សាទុក និងបញ្ជូនទិន្នន័យ (Submit Data)
+            </button>
+            <button type="button" class="btn-export" onclick="exportCurrent()">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+                ទាញយកជា Excel (Export)
             </button>
             <div id="loading">កំពុងបញ្ជូនទិន្នន័យទៅកាន់ Google Sheets... សូមរង់ចាំបន្តិច!</div>
         </form>
@@ -755,6 +781,11 @@
                 </div>
             </div>
 
+            <button type="button" class="btn-export" onclick="exportLast()">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+                ទាញយកជា Excel (Export)
+            </button>
+
             <button type="button" class="summary-clear-btn" onclick="clearSummaryHistory()">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg>
                 លុបប្រវត្តិសង្ខេប (Clear History)
@@ -769,7 +800,7 @@
         <h4 id="shTitle"></h4>
         <p class="sh-hol" id="shHol" hidden></p>
         <label for="shAct">សកម្មភាព (Activity)</label>
-        <input type="text" id="shAct" list="activityListOptions" placeholder="សកម្មភាព" autocomplete="off">
+        <span class="clearable"><input type="text" id="shAct" list="allActivityListOptions" placeholder="សកម្មភាព" autocomplete="off"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
         <div class="chips" id="shChips">
             <button type="button" class="chip" data-k="work">ធ្វើការ</button>
             <button type="button" class="chip" data-k="notwork">អត់ធ្វើការ</button>
@@ -793,7 +824,8 @@
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyNefEeNFtacVPHDg7gy3-tE8RomIOAZnkak0YybkmVlWY5TXQVsKUbtprEg4omHjUJEQ/exec'; // <-- ជំនួស URL របស់អ្នកនៅទីនេះ
 
-    let globalActivities = [];
+    let globalActivities = [];        // work activities only
+    let globalOffActivities = [];     // rest / leave / holiday activities only
 
     function toggleTheme() {
         const body = document.body;
@@ -837,19 +869,36 @@
     let mode = null;          // null | 'worked' | 'notwork'
     let editing = null;
     let lastMonthVal = '';
-    let workActText = localStorage.getItem('timesheetWorkActivity') || '';
-    let workProject = localStorage.getItem('timesheetWorkProject') || '';
+    // Activity / project start EMPTY: the user must pick an activity before tapping any day.
+    let workActText = '';
+    let workProject = '';
+    let offActText = '';
+    let offProject = '';
+    const LEAVE_CODES = ['AL', 'PL', 'ML', 'CL', 'SL'];
+    // Default amount ($) applied to each worked day; editable. "Office Work" never gets an amount.
+    let workAmount = localStorage.getItem('timesheetWorkAmount');
+    if (workAmount === null) workAmount = '3';
+    const isOfficeWork = a => String(a || '').toUpperCase().includes('OFFICE WORK');
+    const amtFor = a => isOfficeWork(a) ? '' : String(workAmount);
     // Project codes shown in the dropdowns. If your Apps Script getData also returns "projects": ["IR","CE","RE"],
     // that list replaces this one automatically.
-    let PROJECTS = ['IR', 'CE', 'RE'];
+    let PROJECTS = ['IR', 'CE', 'RE'];          // work projects only
+    let OFF_PROJECTS = ['AL', 'CL', 'ML', 'PL', 'SL'];   // leave codes only
     // Default project for each activity (Staff sheet: Column B -> Column C). Empty string = no fixed project.
     let ACT_PROJ = {};
+    // which project list fits an activity text
+    function projKind(act) {
+        if (!String(act || '').trim()) return 'all';
+        return classifyDay(act) === 'worked' ? 'work' : 'off';
+    }
     function projFor(act) {
         const k = String(act || '').trim();
         return Object.prototype.hasOwnProperty.call(ACT_PROJ, k) ? ACT_PROJ[k] : null;   // null = unknown activity
     }
-    function projOptions(sel) {
-        const list = (sel && !PROJECTS.includes(sel)) ? [...PROJECTS, sel] : PROJECTS;
+    // kind: 'work' = work projects only, 'off' = leave codes only, 'all' = both
+    function projOptions(sel, kind) {
+        const base = kind === 'off' ? OFF_PROJECTS : kind === 'all' ? [...PROJECTS, ...OFF_PROJECTS] : PROJECTS;
+        const list = (sel && !base.includes(sel)) ? [...base, sel] : base;
         return '<option value="">គម្រោង: គ្មាន</option>' +
             list.map(p => `<option value="${esc(p)}"${p === sel ? ' selected' : ''}>${esc(p)}</option>`).join('');
     }
@@ -898,12 +947,13 @@
     /* Activity text used by each button. Prefers the wording that already exists in your master list,
        so the Apps Script colouring keeps working. */
     function findActivity(keyword, fallback) {
-        return globalActivities.find(a => String(a).toUpperCase().includes(keyword)) || fallback;
+        return [...globalOffActivities, ...globalActivities].find(a => String(a).toUpperCase().includes(keyword)) || fallback;
     }
     const actNotWork = () => findActivity('NOT WORKING', 'Not Working');
     const actSick = () => findActivity('SICK LEAVE', 'Sick Leave');
     const actHoliday = () => findActivity('PUBLIC HOLIDAY', 'Public Holiday');
     const actWork = () => (workActText || '').trim() || 'Working';
+    const actOff = () => (offActText || '').trim() || actNotWork();
 
     /* ================= Master data from Google Sheets ================= */
     function fetchMasterData() {
@@ -924,24 +974,38 @@
                     staffSelect.appendChild(opt);
                 });
 
-                globalActivities = data.activities || [];
-                if (Array.isArray(data.projects) && data.projects.length) PROJECTS = data.projects.map(String);
-                ACT_PROJ = data.activityProjects || {};
-                const datalist = $('activityListOptions');
-                datalist.innerHTML = '';
-                globalActivities.forEach(act => {
-                    const opt = document.createElement('option');
-                    opt.value = act;
-                    datalist.appendChild(opt);
-                });
+                // Work side (Staff!B:C) and rest side (Staff!E:F) are kept apart.
+                // Fallback: if the old Apps Script is still deployed, split the single list by classifyDay().
+                const allActs = data.activities || [];
+                globalActivities = allActs.filter(a => classifyDay(a) === 'worked');
+                globalOffActivities = Array.isArray(data.offActivities)
+                    ? data.offActivities
+                    : allActs.filter(a => classifyDay(a) !== 'worked');
 
-                // default "worked" activity = first activity in the master list that counts as work
-                if (!workActText) {
-                    workActText = globalActivities.find(a => classifyDay(a) === 'worked') || 'Working';
-                }
-                if (!workProject && projFor(workActText) !== null) workProject = projFor(workActText);
+                const allProjs = (data.projects || []).map(String);
+                const isLeaveCode = p => LEAVE_CODES.includes(p.toUpperCase());
+                const wp = allProjs.filter(p => !isLeaveCode(p));
+                if (wp.length) PROJECTS = wp;
+                const op = Array.isArray(data.offProjects) ? data.offProjects.map(String) : allProjs.filter(isLeaveCode);
+                if (op.length) OFF_PROJECTS = op;
+
+                ACT_PROJ = Object.assign({}, data.activityProjects || {}, data.offActivityProjects || {});
+
+                const fillList = (id, arr) => {
+                    const dl = $(id);
+                    dl.innerHTML = '';
+                    arr.forEach(act => {
+                        const opt = document.createElement('option');
+                        opt.value = act;
+                        dl.appendChild(opt);
+                    });
+                };
+                fillList('activityListOptions', globalActivities);
+                fillList('offActivityListOptions', globalOffActivities);
+                fillList('allActivityListOptions', [...globalActivities, ...globalOffActivities]);
+
                 restoreStaffFromDraft();
-                if (mode === 'worked') renderMode();
+                if (mode) renderMode();
             })
             .catch(error => {
                 console.error('Error fetching master data:', error);
@@ -1023,31 +1087,69 @@
         hint.innerHTML = '';
         if (mode === 'worked') {
             hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
-                <input type="text" id="workActivity" list="activityListOptions" autocomplete="off" value="${esc(workActText)}">
-                <select id="workProject" aria-label="គម្រោង">${projOptions(workProject)}</select>
+                <span class="clearable"><input type="text" id="workActivity" list="activityListOptions" autocomplete="off" value="${esc(workActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+                <select id="workProject" aria-label="គម្រោង">${projOptions(workProject, 'work')}</select>
+                <input type="number" id="workAmount" inputmode="decimal" step="any" min="0" placeholder="ទឹកប្រាក់ $" aria-label="ទឹកប្រាក់ ($)" value="${esc(amtFor(workActText))}"${isOfficeWork(workActText) ? ' disabled' : ''}>
                 <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`;
+            syncClear($('workActivity'));
             $('workProject').addEventListener('change', e => {
                 workProject = e.target.value;
-                localStorage.setItem('timesheetWorkProject', workProject);
+            });
+            $('workAmount').addEventListener('input', e => {
+                workAmount = e.target.value;
+                localStorage.setItem('timesheetWorkAmount', workAmount);
             });
             $('workActivity').addEventListener('input', e => {
                 workActText = e.target.value;
-                localStorage.setItem('timesheetWorkActivity', workActText);
-                const p = projFor(workActText);          // auto-pick the activity's project; you can still change it
+                const p = workActText.trim() === '' ? '' : projFor(workActText);   // cleared -> no project; else auto-pick (still editable)
                 if (p !== null) {
                     workProject = p;
-                    localStorage.setItem('timesheetWorkProject', workProject);
-                    $('workProject').innerHTML = projOptions(workProject);
+                    $('workProject').innerHTML = projOptions(workProject, 'work');
                 }
+                const ao = $('workAmount');              // Office Work -> no amount; other activities -> default/edited amount
+                ao.disabled = isOfficeWork(workActText);
+                ao.value = amtFor(workActText);
             });
         } else if (mode === 'notwork') {
-            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ «${esc(actNotWork())}»</span>
+            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ថ្ងៃសម្រាក៖</span>
+                <span class="clearable"><input type="text" id="offActivity" list="offActivityListOptions" autocomplete="off" value="${esc(offActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+                <select id="offProject" aria-label="កូដ">${projOptions(offProject, 'off')}</select>
                 <button type="button" class="chip" onclick="fillWeek('notwork')">ជ្រើស សៅរ៍–អាទិត្យ ទាំងអស់</button>`;
+            syncClear($('offActivity'));
+            $('offProject').addEventListener('change', e => {
+                offProject = e.target.value;
+            });
+            $('offActivity').addEventListener('input', e => {
+                offActText = e.target.value;
+                const p = offActText.trim() === '' ? '' : projFor(offActText);     // cleared -> no code; else auto-pick (still editable)
+                if (p !== null) {
+                    offProject = p;
+                    $('offProject').innerHTML = projOptions(offProject, 'off');
+                }
+            });
         }
+    }
+
+    // The activity of the current mode must be chosen (and be one from the master list) before any day can be set
+    function modeActivityOk(k) {
+        const txt = (k === 'worked' ? workActText : offActText).trim();
+        const list = k === 'worked' ? globalActivities : globalOffActivities;
+        if (!txt) {
+            toast(k === 'worked' ? 'សូមជ្រើសរើសសកម្មភាពជាមុនសិន' : 'សូមជ្រើសរើសប្រភេទថ្ងៃសម្រាកជាមុនសិន');
+            const el = $(k === 'worked' ? 'workActivity' : 'offActivity');
+            if (el) el.focus();
+            return false;
+        }
+        if (list.length && !list.includes(txt)) {
+            toast('សកម្មភាពមិនមានក្នុងបញ្ជី សូមជ្រើសពីបញ្ជី');
+            return false;
+        }
+        return true;
     }
 
     // Fill every EMPTY weekday (worked) or weekend day (not working); public holidays and filled days are skipped
     function fillWeek(k) {
+        if (!modeActivityOk(k)) return;
         const { y, m } = ym();
         const hol = holMap(y, m);
         const n = new Date(y, m, 0).getDate();
@@ -1057,22 +1159,25 @@
             const weekend = (w === 0 || w === 6);
             if (hol[d]) continue;
             if (days[d] && days[d].activity !== '') continue;
-            if (k === 'worked' && !weekend) { days[d] = { activity: actWork(), amount: (days[d] && days[d].amount) || '', project: workProject }; count++; }
-            if (k === 'notwork' && weekend) { days[d] = { activity: actNotWork(), amount: (days[d] && days[d].amount) || '', project: '' }; count++; }
+            if (k === 'worked' && !weekend) { days[d] = { activity: actWork(), amount: (days[d] && days[d].amount) || amtFor(actWork()), project: workProject }; count++; }
+            if (k === 'notwork' && weekend) { days[d] = { activity: actOff(), amount: '', project: offProject }; count++; }
         }
         render(); saveDraft();
         toast(`បានកំណត់ ${count} ថ្ងៃ (មិនរាប់ថ្ងៃបុណ្យ និងថ្ងៃដែលមានទិន្នន័យរួច)`);
     }
 
     function paint(d) {
-        const act = mode === 'worked' ? actWork() : actNotWork();
-        const proj = mode === 'worked' ? workProject : '';
+        if (!modeActivityOk(mode)) return;
+        const act = mode === 'worked' ? actWork() : actOff();
+        const proj = mode === 'worked' ? workProject : offProject;
+        const amt = mode === 'worked' ? amtFor(act) : '';   // worked: default/edited $ (blank for Office Work); not working: none
         const cur = days[d];
         if (cur && cur.activity === act && (cur.project || '') === proj) {
-            if (cur.amount !== '') days[d] = { activity: '', amount: cur.amount, project: '' };
+            // tap again = un-select; keep the amount only if it was typed by hand
+            if (cur.amount !== '' && cur.amount !== amt) days[d] = { activity: '', amount: cur.amount, project: '' };
             else delete days[d];
         } else {
-            days[d] = { activity: act, amount: cur ? cur.amount : '', project: proj };
+            days[d] = { activity: act, amount: amt, project: proj };
         }
         render(); saveDraft();
     }
@@ -1128,7 +1233,8 @@
         $('shHol').hidden = !hd;
         if (hd) $('shHol').textContent = 'ថ្ងៃបុណ្យ៖ ' + hd.km;
         $('shAct').value = r.activity;
-        $('shProj').innerHTML = projOptions(r.project || '');
+        syncClear($('shAct'));
+        $('shProj').innerHTML = projOptions(r.project || '', projKind(r.activity));
         $('shAmt').value = r.amount;
         updateKind();
         $('scrim').classList.add('open');
@@ -1144,7 +1250,7 @@
     $('shAct').addEventListener('input', () => {
         updateKind();
         const p = projFor($('shAct').value);             // auto-pick the activity's project; you can still change it
-        if (p !== null) $('shProj').innerHTML = projOptions(p);
+        if (p !== null) $('shProj').innerHTML = projOptions(p, projKind($('shAct').value));
     });
     $('shAmt').addEventListener('input', updateKind);
     $('shChips').addEventListener('click', e => {
@@ -1152,8 +1258,9 @@
         if (!b) return;
         const k = b.dataset.k;
         $('shAct').value = k === 'work' ? actWork() : k === 'notwork' ? actNotWork() : k === 'sick' ? actSick() : actHoliday();
+        syncClear($('shAct'));
         const p = projFor($('shAct').value);
-        $('shProj').innerHTML = projOptions(p !== null ? p : (k === 'work' ? workProject : ''));
+        $('shProj').innerHTML = projOptions(p !== null ? p : (k === 'work' ? workProject : ''), projKind($('shAct').value));
         updateKind();
     });
     $('shClose').onclick = closeSheet;
@@ -1162,10 +1269,231 @@
     $('shClear').onclick = () => { delete days[editing]; closeSheet(); render(); saveDraft(); };
     $('shSave').onclick = () => {
         const act = $('shAct').value.trim(), amt = $('shAmt').value;
+        if (act === '' && amt !== '') { toast('សូមជ្រើសរើសសកម្មភាពជាមុនសិន'); $('shAct').focus(); return; }
         if (act === '' && amt === '') delete days[editing];
         else days[editing] = { activity: act, amount: amt, project: $('shProj').value };
         closeSheet(); render(); saveDraft();
     };
+
+    /* ================= Export to Excel (ExcelJS) =================
+       Sheet 1 "Summary"  -> same figures as the summary card
+       Sheet 2 "Oct 2026" -> same layout as the Google Sheet monthly tab                       */
+    function computeStats(d) {
+        const n = new Date(d.y, d.m, 0).getDate();
+        let worked = 0, leave = 0, holiday = 0, total = 0, hiN = null, hiV = -Infinity;
+        Object.entries(d.days).forEach(([k, r]) => {
+            if (r.activity === '' && r.amount === '') return;
+            const c = classifyDay(r.activity);
+            if (c === 'leave') leave++; else if (c === 'holiday') holiday++; else worked++;
+            const v = parseFloat(r.amount);
+            if (!isNaN(v)) { total += v; if (v > hiV) { hiV = v; hiN = k; } }
+        });
+        return { n, worked, leave, holiday, unfilled: Math.max(n - worked - leave - holiday, 0),
+                 gross: parseFloat(d.gross) || 0, total, avg: worked ? total / worked : 0, hiN, hiV };
+    }
+
+    function exportCurrent() {
+        const staff = $('staffName').value;
+        if (!staff) { alert('សូមជ្រើសរើសឈ្មោះបុគ្គលិកជាមុនសិន!'); return; }
+        const { y, m } = ym();
+        const dd = {};
+        Object.entries(days).forEach(([k, r]) => { if (r.activity !== '' || r.amount !== '') dd[k] = r; });
+        if (!Object.keys(dd).length) { alert('សូមជ្រើសថ្ងៃយ៉ាងហោចណាស់មួយថ្ងៃជាមុនសិន!'); return; }
+        exportExcel({ staff, y, m, gross: $('grossSalary').value, days: dd });
+    }
+
+    function exportLast() {
+        const raw = localStorage.getItem('timesheetLastExport');
+        if (!raw) { alert('មិនមានទិន្នន័យដែលបានបញ្ជូនចុងក្រោយទេ'); return; }
+        try { exportExcel(JSON.parse(raw)); } catch (e) { alert('ទិន្នន័យខូច សូមបញ្ជូនម្តងទៀត'); }
+    }
+
+    async function exportExcel(d) {
+        if (typeof ExcelJS === 'undefined') {
+            alert('មិនអាចផ្ទុកឧបករណ៍ Excel បានទេ សូមភ្ជាប់អ៊ីនធឺណិត រួចព្យាយាមម្តងទៀត។');
+            return;
+        }
+        toast('កំពុងបង្កើតឯកសារ Excel...');
+        const st = computeStats(d), n = st.n;
+        const MON = MONTH_EN[d.m - 1], mon3 = MON.slice(0, 3);
+        const line = c => ({ style: 'thin', color: { argb: c || 'FF000000' } });
+        const box = c => ({ top: line(c), left: line(c), bottom: line(c), right: line(c) });
+        const solid = argb => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
+        const wb = new ExcelJS.Workbook();
+        wb.creator = 'Rising Phoenix Co., Ltd';
+
+        /* ---------- Sheet 1: Summary ---------- */
+        const s1 = wb.addWorksheet('Summary', { views: [{ showGridLines: false }] });
+        s1.columns = [{ width: 30 }, { width: 30 }, { width: 30 }];
+        s1.mergeCells('A1:C1');
+        const t = s1.getCell('A1');
+        t.value = 'សង្ខេបទិន្នន័យដែលបានបញ្ជូនចុងក្រោយ';
+        t.font = { size: 16, bold: true, color: { argb: 'FF2F5233' } };
+        t.alignment = { horizontal: 'center', vertical: 'middle' };
+        s1.getRow(1).height = 32;
+        s1.mergeCells('A2:C2');
+        const sub = s1.getCell('A2');
+        sub.value = `${d.staff} — ${MON} ${d.y}`;
+        sub.font = { size: 11, color: { argb: 'FF6B6350' } };
+        sub.alignment = { horizontal: 'center' };
+
+        [[st.worked, 'ថ្ងៃធ្វើការ (Worked)', 'FF2F5233', 'FFE9F2E7'],
+         [st.leave, 'ថ្ងៃឈប់សម្រាក (Leave)', 'FFA6402F', 'FFFBEAE6'],
+         [st.holiday, 'ថ្ងៃឈប់បុណ្យ (Public Holiday)', 'FFC68A1F', 'FFFBF1D9']].forEach((c, i) => {
+            const a = s1.getCell(4, i + 1), b = s1.getCell(5, i + 1);
+            a.value = c[0]; a.font = { size: 22, bold: true, color: { argb: c[2] } };
+            b.value = c[1]; b.font = { size: 10, color: { argb: 'FF6B6350' } };
+            [a, b].forEach(x => {
+                x.fill = solid(c[3]);
+                x.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                x.border = box('FFDCD2B4');
+            });
+        });
+        s1.getRow(4).height = 38; s1.getRow(5).height = 22;
+
+        const dash = v => v > 0 ? v : '-';
+        [['ចំនួនថ្ងៃសរុបក្នុងខែ (Total Days)', `${n} ថ្ងៃ`],
+         ['ថ្ងៃមិនទាន់បំពេញ (Not Yet Filled)', `${st.unfilled} ថ្ងៃ`],
+         ['ប្រាក់ខែគោល (Gross Salary)', dash(st.gross)],
+         ['ប្រាក់ឧបត្ថម្ភទីវាលសរុប (Total Field Allowance)', st.total],
+         ['ចំណូលសរុប (Salary + Allowance)', st.gross + st.total],
+         ['មធ្យមភាគប្រាក់/ថ្ងៃធ្វើការ (Avg / Worked Day)', st.worked ? st.avg : '-'],
+         ['ថ្ងៃដែលទទួលបានប្រាក់ខ្ពស់បំផុត (Highest Day)', st.hiN ? `ថ្ងៃទី ${st.hiN} ($${st.hiV.toFixed(2)})` : '-']
+        ].forEach((r, i) => {
+            const row = 7 + i;
+            s1.mergeCells(row, 1, row, 2);
+            const l = s1.getCell(row, 1), v = s1.getCell(row, 3);
+            l.value = r[0]; l.font = { color: { argb: 'FF6B6350' } };
+            v.value = r[1]; v.font = { bold: true }; v.alignment = { horizontal: 'right' };
+            if (typeof r[1] === 'number') v.numFmt = '$#,##0.00';
+            const dot = { bottom: { style: 'dotted', color: { argb: 'FFB8AE90' } } };
+            [1, 2, 3].forEach(c => { s1.getCell(row, c).border = dot; });
+            s1.getRow(row).height = 22;
+        });
+
+        /* ---------- Sheet 2: monthly timesheet (same layout as Google Sheet) ---------- */
+        const ws = wb.addWorksheet(`${mon3} ${d.y}`, { views: [{ state: 'frozen', xSplit: 4, ySplit: 5 }] });
+        const lastCol = 4 + n, valCol = lastCol + 1, lblCol = lastCol + 2;
+        ws.getColumn(1).width = 5; ws.getColumn(2).width = 22; ws.getColumn(3).width = 22; ws.getColumn(4).width = 11;
+        for (let c = 5; c <= lastCol; c++) ws.getColumn(c).width = 5.3;
+        ws.getColumn(valCol).width = 11; ws.getColumn(lblCol).width = 30;
+
+        ws.getCell('A1').value = 'RISING PHOENIX CO., LTD';
+        ws.getCell('A1').font = { bold: true, size: 12 };
+        ws.getCell('A2').value = `CDU STAFF Timesheet for ${MON} ${d.y}`;
+        ws.getCell('A2').font = { size: 11 };
+
+        ['A3:A5', 'B3:B5', 'C3:C5', 'D3:D5'].forEach(r => ws.mergeCells(r));
+        ws.mergeCells(3, 5, 3, lastCol);
+        ws.getCell('A3').value = 'No';
+        ws.getCell('B3').value = 'POSITION';
+        ws.getCell('C3').value = 'NAME';
+        ws.getCell('D3').value = 'Gross\nSalary';
+        ws.getCell(3, 5).value = `${mon3}-${String(d.y).slice(2)}`;
+        for (let day = 1; day <= n; day++) {
+            const w = new Date(d.y, d.m - 1, day).getDay(), col = 4 + day;
+            ws.getCell(4, col).value = DOW[w][1];
+            ws.getCell(5, col).value = day;
+            if (w === 0 || w === 6) {
+                ws.getCell(4, col).font = { color: { argb: 'FFFF0000' }, size: 9 };
+                ws.getCell(5, col).font = { color: { argb: 'FFFF0000' } };
+            } else {
+                ws.getCell(4, col).font = { size: 9 };
+            }
+        }
+        for (let r = 3; r <= 5; r++) for (let c = 1; c <= lastCol; c++) {
+            const cell = ws.getCell(r, c);
+            cell.fill = solid('FFF3F3F3');
+            cell.border = box();
+            cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+            if (r === 3 && (c <= 4 || c === 5)) cell.font = Object.assign({ bold: true }, cell.font || {});
+        }
+        ws.getRow(4).height = 18;
+
+        // staff block (5 rows): r = project/colour row, r+1 Salary, r+2 Field Allowance, r+3 Field Ration or Allowance, r+4 Total
+        const r = 6;
+        ws.getCell(r, 1).value = 1;
+        ws.getCell(r, 3).value = d.staff;
+        if (st.gross > 0) ws.getCell(r, 4).value = st.gross;
+        for (let rr = r; rr <= r + 4; rr++) for (let c = 1; c <= lastCol; c++) ws.getCell(rr, c).border = box();
+        ws.getCell(r, 1).alignment = { horizontal: 'center' };
+
+        const FILL = { worked: ['FF3D85C6', 'FF000000'], leave: ['FFFF0000', 'FFFFFFFF'], holiday: ['FFFFFF00', 'FF000000'] };
+        Object.entries(d.days).forEach(([k, rec]) => {
+            const day = +k;
+            if (!(day >= 1 && day <= n)) return;
+            if (rec.activity === '' && rec.amount === '') return;
+            const col = 4 + day;
+            const f = FILL[classifyDay(rec.activity)];
+            const pc = ws.getCell(r, col);
+            pc.value = rec.project || '';
+            pc.fill = solid(f[0]);
+            pc.font = { color: { argb: f[1] }, size: 9 };
+            pc.alignment = { horizontal: 'center', vertical: 'middle' };
+            const rc = ws.getCell(r + 3, col);
+            if (rec.amount !== '' && !isNaN(parseFloat(rec.amount))) rc.value = parseFloat(rec.amount);
+            rc.alignment = { horizontal: 'center' };
+            rc.font = { size: 9 };
+            if (rec.activity !== '' && classifyDay(rec.activity) === 'worked') rc.note = `${d.staff} - សកម្មភាព: ${rec.activity}`;   // no note on leave / holiday days
+        });
+
+        const first = ws.getColumn(5).letter, last = ws.getColumn(lastCol).letter, vL = ws.getColumn(valCol).letter;
+        const lines = [
+            ['Salary', st.gross],
+            ['Field Allowance', 0],
+            ['Field Ration or Allowance', { formula: `SUM(${first}${r + 3}:${last}${r + 3})`, result: st.total }],
+            ['Total payment', { formula: `SUM(${vL}${r + 1}:${vL}${r + 3})`, result: st.gross + st.total }]
+        ];
+        lines.forEach((ln, i) => {
+            const row = r + 1 + i;
+            const lc = ws.getCell(row, lblCol), vc = ws.getCell(row, valCol);
+            lc.value = ln[0]; vc.value = ln[1];
+            vc.numFmt = '#,##0.##';
+            lc.border = box(); vc.border = box();
+            if (i === 3) { lc.font = { bold: true }; vc.font = { bold: true }; lc.fill = solid('FFD9D9D9'); vc.fill = solid('FFD9D9D9'); }
+        });
+
+        /* ---------- Save / share ---------- */
+        const buf = await wb.xlsx.writeBuffer();
+        const mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        const blob = new Blob([buf], { type: mime });
+        const fname = `Timesheet_${String(d.staff).replace(/[^\w\-]+/g, '_')}_${d.y}-${String(d.m).padStart(2, '0')}.xlsx`;
+
+        // Installed app (standalone) on a phone: use the share sheet so the file can be saved / opened in Excel
+        const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
+        if (standalone && /Android|iPhone|iPad/i.test(navigator.userAgent) && navigator.canShare) {
+            const file = new File([blob], fname, { type: mime });
+            if (navigator.canShare({ files: [file] })) {
+                try { await navigator.share({ files: [file], title: fname }); return; }
+                catch (e) { if (e && e.name === 'AbortError') return; }
+            }
+        }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+        toast('បានទាញយកឯកសារ Excel');
+    }
+
+    /* ===== "×" button inside activity inputs: clears everything in one tap ===== */
+    function syncClear(inp) {
+        if (inp && inp.parentElement) inp.parentElement.classList.toggle('has', inp.value !== '');
+    }
+    document.addEventListener('input', e => {
+        if (e.target.matches && e.target.matches('.clearable input')) syncClear(e.target);
+    });
+    document.addEventListener('click', e => {
+        const b = e.target.closest && e.target.closest('.clr');
+        if (!b) return;
+        const inp = b.parentElement.querySelector('input');
+        inp.value = '';
+        inp.dispatchEvent(new Event('input', { bubbles: true }));   // lets the page update state (activity, project, colour hint)
+        syncClear(inp);
+        inp.focus();
+    });
 
     let toastTimer;
     function toast(msg) {
@@ -1191,7 +1519,7 @@
         render();
         // New month selected: the previous month's summary no longer applies
         document.getElementById('summaryModal').classList.remove('show');
-        localStorage.removeItem('timesheetLastSummary');
+        localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport');
         saveDraft();
     });
 
@@ -1277,12 +1605,12 @@
             const s = JSON.parse(saved);
             showSummary(s, false); // false = don't re-save, it's already saved
         } catch (e) {
-            localStorage.removeItem('timesheetLastSummary');
+            localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport');
         }
     }
 
     function clearSummaryHistory() {
-        localStorage.removeItem('timesheetLastSummary');
+        localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport');
         document.getElementById('summaryModal').classList.remove('show');
     }
 
@@ -1307,6 +1635,12 @@
                     project: r.project || ''
                 };
             }
+        }
+
+        const noAct = Object.keys(dailyData).filter(k => (dailyData[k].activity || '').trim() === '');
+        if (noAct.length) {
+            alert('មានថ្ងៃដែលមិនទាន់មានសកម្មភាព (ថ្ងៃទី ' + noAct.map(k => k.replace('day_', '')).join(', ') + ') សូមជ្រើសរើសសកម្មភាពជាមុនសិន!');
+            return;
         }
 
         if (Object.keys(dailyData).length === 0) {
@@ -1375,6 +1709,11 @@
                 highestDayNum,
                 highestDayAmt
             });
+
+            // Keep a copy of what was just submitted so the summary card can export it to Excel
+            const snapDays = {};
+            Object.entries(dailyData).forEach(([k, r]) => { snapDays[k.replace('day_', '')] = r; });
+            localStorage.setItem('timesheetLastExport', JSON.stringify({ staff, y: +y, m: +m, gross: formData.grossSalary, days: snapDays }));
 
             // Submission succeeded — the in-progress draft for this month is no longer needed
             localStorage.removeItem('timesheetDraft');
