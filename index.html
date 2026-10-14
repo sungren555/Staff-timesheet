@@ -320,7 +320,7 @@
         .dow.weekend small { color: var(--stamp-red); }
         .pad { background: var(--th-bg); opacity: 0.45; border-top: 1px solid var(--td-border); border-right: 1px solid var(--td-border); }
         .day {
-            position: relative; min-height: 76px; padding: 5px 3px 4px; border: 0;
+            position: relative; min-height: 90px; padding: 5px 3px 4px; border: 0;
             border-top: 1px solid var(--td-border); border-right: 1px solid var(--td-border);
             background: var(--container-bg); color: var(--text-color); cursor: pointer;
             display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center;
@@ -333,6 +333,8 @@
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 700;
         }
         .day .dm { font-family: var(--font-mono); font-size: 10px; color: var(--label-color); }
+        .day .dp { font-family: var(--font-mono); font-weight: 700; font-size: 11px; background: var(--text-color); color: var(--container-bg); border-radius: 4px; padding: 0 6px; line-height: 1.5; }
+        .mode-hint select { width: 130px; padding: 6px 9px; font-size: 13px; }
         .day.weekend { background: color-mix(in srgb, var(--weekend-bg) 55%, var(--container-bg)); }
         .day.weekend .dn { color: var(--stamp-red); }
         .day .hdot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--stamp-ochre); }
@@ -345,7 +347,7 @@
         [data-theme="dark"] .day.cell-worked .da { color: var(--tint-worked-border); }
         .day.today .dn::after { content: ""; display: block; height: 2px; margin-top: 1px; background: var(--text-color); border-radius: 1px; }
         @media (min-width: 640px) {
-            .day { min-height: 96px; }
+            .day { min-height: 108px; }
             .day .dn { font-size: 16px; }
             .day .da { font-size: 12px; }
             .day .dm { font-size: 12px; }
@@ -774,7 +776,9 @@
             <button type="button" class="chip" data-k="sick">ឈប់ឈឺ</button>
             <button type="button" class="chip" data-k="holiday">ថ្ងៃបុណ្យ</button>
         </div>
-        <label for="shAmt">ទឹកប្រាក់ (Amount)</label>
+        <label for="shProj">គម្រោង (Project)</label>
+        <select id="shProj"></select>
+        <label for="shAmt" style="margin-top:10px">ទឹកប្រាក់ (Amount)</label>
         <input type="number" id="shAmt" placeholder="ទឹកប្រាក់" inputmode="decimal" step="any">
         <p class="sh-kind" id="shKind"></p>
         <div class="acts">
@@ -834,6 +838,21 @@
     let editing = null;
     let lastMonthVal = '';
     let workActText = localStorage.getItem('timesheetWorkActivity') || '';
+    let workProject = localStorage.getItem('timesheetWorkProject') || '';
+    // Project codes shown in the dropdowns. If your Apps Script getData also returns "projects": ["IR","CE","RE"],
+    // that list replaces this one automatically.
+    let PROJECTS = ['IR', 'CE', 'RE'];
+    // Default project for each activity (Staff sheet: Column B -> Column C). Empty string = no fixed project.
+    let ACT_PROJ = {};
+    function projFor(act) {
+        const k = String(act || '').trim();
+        return Object.prototype.hasOwnProperty.call(ACT_PROJ, k) ? ACT_PROJ[k] : null;   // null = unknown activity
+    }
+    function projOptions(sel) {
+        const list = (sel && !PROJECTS.includes(sel)) ? [...PROJECTS, sel] : PROJECTS;
+        return '<option value="">គម្រោង: គ្មាន</option>' +
+            list.map(p => `<option value="${esc(p)}"${p === sel ? ' selected' : ''}>${esc(p)}</option>`).join('');
+    }
 
     const $ = id => document.getElementById(id);
     const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -906,6 +925,8 @@
                 });
 
                 globalActivities = data.activities || [];
+                if (Array.isArray(data.projects) && data.projects.length) PROJECTS = data.projects.map(String);
+                ACT_PROJ = data.activityProjects || {};
                 const datalist = $('activityListOptions');
                 datalist.innerHTML = '';
                 globalActivities.forEach(act => {
@@ -918,6 +939,7 @@
                 if (!workActText) {
                     workActText = globalActivities.find(a => classifyDay(a) === 'worked') || 'Working';
                 }
+                if (!workProject && projFor(workActText) !== null) workProject = projFor(workActText);
                 restoreStaffFromDraft();
                 if (mode === 'worked') renderMode();
             })
@@ -948,6 +970,7 @@
             h += `<button type="button" class="${cls}" data-d="${d}" aria-label="${d} ${MONTH_EN[m-1]}${hd ? ', ' + esc(hd.en) : ''}">
                 ${hd && kind !== 'holiday' ? '<span class="hdot"></span>' : ''}
                 <span class="dn">${d}</span>
+                ${has && r.project ? `<span class="dp">${esc(r.project)}</span>` : ''}
                 <span class="da">${has ? esc(r.activity) : ''}</span>
                 <span class="dm">${has && r.amount !== '' ? esc(r.amount) : ''}</span>
             </button>`;
@@ -1001,10 +1024,21 @@
         if (mode === 'worked') {
             hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
                 <input type="text" id="workActivity" list="activityListOptions" autocomplete="off" value="${esc(workActText)}">
+                <select id="workProject" aria-label="គម្រោង">${projOptions(workProject)}</select>
                 <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`;
+            $('workProject').addEventListener('change', e => {
+                workProject = e.target.value;
+                localStorage.setItem('timesheetWorkProject', workProject);
+            });
             $('workActivity').addEventListener('input', e => {
                 workActText = e.target.value;
                 localStorage.setItem('timesheetWorkActivity', workActText);
+                const p = projFor(workActText);          // auto-pick the activity's project; you can still change it
+                if (p !== null) {
+                    workProject = p;
+                    localStorage.setItem('timesheetWorkProject', workProject);
+                    $('workProject').innerHTML = projOptions(workProject);
+                }
             });
         } else if (mode === 'notwork') {
             hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ «${esc(actNotWork())}»</span>
@@ -1023,8 +1057,8 @@
             const weekend = (w === 0 || w === 6);
             if (hol[d]) continue;
             if (days[d] && days[d].activity !== '') continue;
-            if (k === 'worked' && !weekend) { days[d] = { activity: actWork(), amount: (days[d] && days[d].amount) || '' }; count++; }
-            if (k === 'notwork' && weekend) { days[d] = { activity: actNotWork(), amount: (days[d] && days[d].amount) || '' }; count++; }
+            if (k === 'worked' && !weekend) { days[d] = { activity: actWork(), amount: (days[d] && days[d].amount) || '', project: workProject }; count++; }
+            if (k === 'notwork' && weekend) { days[d] = { activity: actNotWork(), amount: (days[d] && days[d].amount) || '', project: '' }; count++; }
         }
         render(); saveDraft();
         toast(`បានកំណត់ ${count} ថ្ងៃ (មិនរាប់ថ្ងៃបុណ្យ និងថ្ងៃដែលមានទិន្នន័យរួច)`);
@@ -1032,12 +1066,13 @@
 
     function paint(d) {
         const act = mode === 'worked' ? actWork() : actNotWork();
+        const proj = mode === 'worked' ? workProject : '';
         const cur = days[d];
-        if (cur && cur.activity === act) {
-            if (cur.amount !== '') days[d] = { activity: '', amount: cur.amount };
+        if (cur && cur.activity === act && (cur.project || '') === proj) {
+            if (cur.amount !== '') days[d] = { activity: '', amount: cur.amount, project: '' };
             else delete days[d];
         } else {
-            days[d] = { activity: act, amount: cur ? cur.amount : '' };
+            days[d] = { activity: act, amount: cur ? cur.amount : '', project: proj };
         }
         render(); saveDraft();
     }
@@ -1061,7 +1096,7 @@
         ds.forEach(d => {
             const cur = days[d];
             if (cur && cur.activity !== '' && classifyDay(cur.activity) !== 'holiday') { skipped++; return; }
-            days[d] = { activity: act, amount: cur ? cur.amount : '' };
+            days[d] = { activity: act, amount: cur ? cur.amount : '', project: '' };
             set++;
         });
         render(); saveDraft();
@@ -1093,6 +1128,7 @@
         $('shHol').hidden = !hd;
         if (hd) $('shHol').textContent = 'ថ្ងៃបុណ្យ៖ ' + hd.km;
         $('shAct').value = r.activity;
+        $('shProj').innerHTML = projOptions(r.project || '');
         $('shAmt').value = r.amount;
         updateKind();
         $('scrim').classList.add('open');
@@ -1105,13 +1141,19 @@
         el.textContent = k === 'worked' ? '● ធ្វើការ (Worked)' : k === 'leave' ? '● ឈប់សម្រាក (Leave)' : '● ថ្ងៃបុណ្យ (Holiday)';
         el.style.color = k === 'worked' ? 'var(--paddy-light)' : k === 'leave' ? 'var(--stamp-red)' : 'var(--stamp-ochre)';
     }
-    $('shAct').addEventListener('input', updateKind);
+    $('shAct').addEventListener('input', () => {
+        updateKind();
+        const p = projFor($('shAct').value);             // auto-pick the activity's project; you can still change it
+        if (p !== null) $('shProj').innerHTML = projOptions(p);
+    });
     $('shAmt').addEventListener('input', updateKind);
     $('shChips').addEventListener('click', e => {
         const b = e.target.closest('.chip');
         if (!b) return;
         const k = b.dataset.k;
         $('shAct').value = k === 'work' ? actWork() : k === 'notwork' ? actNotWork() : k === 'sick' ? actSick() : actHoliday();
+        const p = projFor($('shAct').value);
+        $('shProj').innerHTML = projOptions(p !== null ? p : (k === 'work' ? workProject : ''));
         updateKind();
     });
     $('shClose').onclick = closeSheet;
@@ -1121,7 +1163,7 @@
     $('shSave').onclick = () => {
         const act = $('shAct').value.trim(), amt = $('shAmt').value;
         if (act === '' && amt === '') delete days[editing];
-        else days[editing] = { activity: act, amount: amt };
+        else days[editing] = { activity: act, amount: amt, project: $('shProj').value };
         closeSheet(); render(); saveDraft();
     };
 
@@ -1172,7 +1214,7 @@
 
         const dailyActivities = {};
         Object.entries(days).forEach(([d, r]) => {
-            if (r.activity !== '' || r.amount !== '') dailyActivities[`day_${d}`] = { activity: r.activity, amount: r.amount };
+            if (r.activity !== '' || r.amount !== '') dailyActivities[`day_${d}`] = { activity: r.activity, amount: r.amount, project: r.project || '' };
         });
 
         // Nothing meaningful entered yet -> don't keep a stale/empty draft around
@@ -1223,7 +1265,7 @@
         days = {};
         if (draft.dailyActivities) {
             Object.entries(draft.dailyActivities).forEach(([key, d]) => {
-                days[key.replace('day_', '')] = { activity: d.activity || '', amount: d.amount || '' };
+                days[key.replace('day_', '')] = { activity: d.activity || '', amount: d.amount || '', project: d.project || '' };
             });
         }
     }
@@ -1261,7 +1303,8 @@
             if (r && (r.activity !== "" || r.amount !== "")) {
                 dailyData[`day_${i}`] = {
                     activity: r.activity,
-                    amount: r.amount
+                    amount: r.amount,
+                    project: r.project || ''
                 };
             }
         }
