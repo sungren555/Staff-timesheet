@@ -345,15 +345,23 @@
         }
         .day .dm { font-family: var(--font-mono); font-size: 10px; color: var(--label-color); }
         .day .dp { font-family: var(--font-mono); font-weight: 700; font-size: 11px; background: var(--text-color); color: var(--container-bg); border-radius: 4px; padding: 0 6px; line-height: 1.5; }
-        .combo-panel { position: fixed; z-index: 99999; display: none; overflow-y: auto; -webkit-overflow-scrolling: touch;
-            background: var(--container-bg); color: var(--text-color); border: 2px solid var(--input-border);
-            border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,.28); }
-        .combo-panel.open { display: block; }
-        .combo-panel button { display: block; width: 100%; text-align: left; background: transparent; color: inherit;
-            border: 0; border-bottom: 1px solid var(--input-border); padding: 11px 14px; font: inherit; font-size: 14px;
-            line-height: 1.35; cursor: pointer; }
-        .combo-panel button:last-child { border-bottom: 0; }
-        .combo-panel button:hover, .combo-panel button:active { background: var(--input-bg); }
+        input[data-combo] { cursor: pointer; }
+        .pick-scrim { position: fixed; inset: 0; z-index: 100000; display: none; align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,.45); }
+        .pick-scrim.open { display: flex; }
+        .pick-sheet { width: 100%; max-width: 560px; height: min(78vh, 600px); height: min(78dvh, 600px); display: flex; flex-direction: column;
+            background: var(--container-bg); color: var(--text-color); border-radius: 18px 18px 0 0; padding: 14px 14px 10px;
+            box-shadow: 0 -8px 30px rgba(0,0,0,.3); }
+        .pick-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-weight: 700; font-size: 16px; }
+        .pick-head button { border: 0; background: var(--input-bg); color: inherit; width: 38px; height: 38px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+        .pick-sheet input.pick-search { width: 100%; font-size: 16px; padding: 11px 12px; margin-bottom: 8px; }
+        .pick-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; border-top: 1px solid var(--input-border); }
+        .pick-list button { display: block; width: 100%; text-align: left; background: transparent; color: inherit; border: 0;
+            border-bottom: 1px solid var(--input-border); padding: 14px 8px; min-height: 52px; font: inherit; font-size: 15px; line-height: 1.4; cursor: pointer; }
+        .pick-list button:active { background: var(--input-bg); }
+        .pick-list button.cur { font-weight: 800; color: var(--paddy); }
+        .pick-list button.new { color: var(--stamp-red); font-weight: 700; }
+        .pick-empty { padding: 18px 8px; color: var(--label-color); font-size: 14px; }
         .team-row { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
         .team-row .mode-btn { flex: 1 1 0; min-width: 90px; min-height: 40px; padding: 8px 10px; font-size: 14px; }
         .mode-btn.team { color: var(--paddy); }
@@ -918,61 +926,72 @@
         if (mode !== 'notwork' && team && TEAM_MAP[team] && has(TEAM_MAP[team])) return TEAM_MAP[team][k];
         return has(ACT_PROJ) ? ACT_PROJ[k] : null;   // null = unknown activity (user may type activity + project freely)
     }
-    /* ---------- Vertical dropdown list (replaces <datalist>, which Android shows as a horizontal strip) ---------- */
-    let comboPanel = null, comboInput = null, comboSuppress = false;
-    function comboHide() { if (comboPanel) comboPanel.classList.remove('open'); comboInput = null; }
-    function comboShow(input, getOpts) {
-        if (!comboPanel) {
-            comboPanel = document.createElement('div');
-            comboPanel.className = 'combo-panel';
-            document.body.appendChild(comboPanel);
-            window.addEventListener('scroll', e => { if (comboPanel && !comboPanel.contains(e.target)) comboHide(); }, true);
-        }
-        const opts = [...new Set(getOpts())];
-        const q = input.value.trim().toLowerCase();
-        // a value that is already an exact option (pre-filled / just picked) -> show the whole list
-        const list = (q && !opts.some(o => o.toLowerCase() === q)) ? opts.filter(o => o.toLowerCase().includes(q)) : opts;
-        if (!list.length) { comboHide(); return; }
-        comboInput = input;
-        comboPanel.innerHTML = '';
-        list.forEach(o => {
+    /* ---------- Picker (bottom sheet) for activity / project ----------
+       Works the same on iPhone, Android and desktop: big tap targets, own search box,
+       no native <datalist> (Android shows it as a horizontal strip, iOS makes it hard to use). */
+    let pickEl = null, pickState = null;
+    function pickClose() { if (pickEl) pickEl.classList.remove('open'); pickState = null; }
+    function pickRender() {
+        const st = pickState; if (!st) return;
+        const q = pickEl.querySelector('.pick-search').value.trim();
+        const ql = q.toLowerCase();
+        const opts = [...new Set(st.getOpts())];
+        const list = ql ? opts.filter(o => o.toLowerCase().includes(ql)) : opts;
+        const box = pickEl.querySelector('.pick-list');
+        box.innerHTML = '';
+        const add = (label, value, cls) => {
             const b = document.createElement('button');
             b.type = 'button';
-            b.textContent = o;
-            b.addEventListener('click', () => {
-                input.value = o;
-                comboSuppress = true;
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                comboSuppress = false;
-                comboHide();
-                input.blur();
-            });
-            comboPanel.appendChild(b);
-        });
-        const r = input.getBoundingClientRect();
-        const vv = window.visualViewport;
-        const vh = vv ? vv.height : window.innerHeight;
-        const vw = vv ? vv.width : window.innerWidth;
-        const width = Math.min(Math.max(r.width, 280), vw - 16);
-        const left = Math.max(8, Math.min(r.left, vw - width - 8));
-        const below = vh - r.bottom - 12;
-        const above = r.top - 12;
-        let top, maxH;
-        if (below >= 160 || below >= above) { top = r.bottom + 4; maxH = Math.max(120, below); }
-        else { maxH = Math.max(120, above); top = Math.max(4, r.top - 4 - Math.min(maxH, list.length * 46)); }
-        Object.assign(comboPanel.style, { left: left + 'px', top: top + 'px', width: width + 'px', maxHeight: Math.min(maxH, 360) + 'px' });
-        comboPanel.classList.add('open');
+            if (cls) b.className = cls;
+            b.textContent = label;
+            b.addEventListener('click', () => pickChoose(value));
+            box.appendChild(b);
+        };
+        if (!q && st.allowEmpty) add('— គ្មាន —', '', '');
+        if (q && !opts.some(o => o.toLowerCase() === ql)) add('＋ ប្រើ «' + q + '» (បញ្ចូលថ្មី)', q, 'new');
+        list.forEach(o => add(o, o, o === st.current ? 'cur' : ''));
+        if (!list.length && !q) box.innerHTML = '<div class="pick-empty">មិនមានបញ្ជី — សូមវាយបញ្ចូល</div>';
     }
-    function attachCombo(input, getOpts) {
+    function pickChoose(v) {
+        const st = pickState; if (!st) return;
+        pickClose();
+        st.input.value = v;
+        st.input.dispatchEvent(new Event('input', { bubbles: true }));   // lets the page update project / amount / state
+    }
+    function pickOpen(input, getOpts, title, allowEmpty) {
+        if (!pickEl) {
+            pickEl = document.createElement('div');
+            pickEl.className = 'pick-scrim';
+            pickEl.innerHTML = '<div class="pick-sheet" role="dialog" aria-modal="true"><div class="pick-head"><span class="pick-title"></span><button type="button" class="pick-x" aria-label="បិទ">×</button></div>' +
+                '<input type="text" class="pick-search" autocomplete="off" autocapitalize="off" placeholder="ស្វែងរក ឬវាយថ្មី...">' +
+                '<div class="pick-list"></div></div>';
+            document.body.appendChild(pickEl);
+            pickEl.addEventListener('click', e => { if (e.target === pickEl) pickClose(); });
+            pickEl.querySelector('.pick-x').addEventListener('click', pickClose);
+            const sr = pickEl.querySelector('.pick-search');
+            sr.addEventListener('input', pickRender);
+            sr.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.preventDefault(); const v = sr.value.trim(); if (v) pickChoose(v); }
+                if (e.key === 'Escape') pickClose();
+            });
+        }
+        pickState = { input, getOpts, allowEmpty: !!allowEmpty, current: input.value.trim() };
+        pickEl.querySelector('.pick-title').textContent = title || 'ជ្រើសរើស';
+        pickEl.querySelector('.pick-search').value = '';
+        pickRender();
+        pickEl.classList.add('open');
+        pickEl.querySelector('.pick-list').scrollTop = 0;
+        // no auto-focus on the search box: the keyboard would cover the list; staff can tap it when they want to type
+    }
+    function attachCombo(input, getOpts, title, allowEmpty) {
         if (!input || input.dataset.combo) return;
         input.dataset.combo = '1';
-        input.setAttribute('autocomplete', 'off');
-        input.addEventListener('focus', () => comboShow(input, getOpts));
-        input.addEventListener('click', () => comboShow(input, getOpts));
-        input.addEventListener('input', () => { if (!comboSuppress) comboShow(input, getOpts); });
-        input.addEventListener('blur', () => setTimeout(() => { if (comboInput === input) comboHide(); }, 220));
-        input.addEventListener('keydown', e => { if (e.key === 'Escape') comboHide(); });
+        input.readOnly = true;                       // tap opens the picker; no keyboard pops up
+        input.setAttribute('inputmode', 'none');
+        if (!input.placeholder) input.placeholder = 'ចុចដើម្បីជ្រើសរើស';
+        input.addEventListener('click', () => pickOpen(input, getOpts, title, allowEmpty));
     }
+    const comboHide = pickClose;
     const allActivityNames = () => [...TEAMS.flatMap(x => x.items.map(i => i.a)), ...globalOffActivities];
     const allProjectNames = () => [...TEAMS.flatMap(x => x.items.map(i => i.p).filter(Boolean)), ...OFF_PROJECTS];
 
@@ -1200,8 +1219,8 @@
                 renderMode();
             }));
             if (needTeam) return;
-            attachCombo($('workActivity'), () => globalActivities);
-            attachCombo($('workProject'), () => PROJECTS);
+            attachCombo($('workActivity'), () => globalActivities, 'សកម្មភាព (ក្រុម ' + team + ')');
+            attachCombo($('workProject'), () => PROJECTS, 'គម្រោង', true);
             syncClear($('workActivity'));
             $('workProject').addEventListener('input', e => {
                 workProject = e.target.value.trim();         // free typing allowed (new project)
@@ -1226,8 +1245,8 @@
                 <span class="clearable"><input type="text" id="offActivity" autocomplete="off" value="${esc(offActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
                 <input type="text" id="offProject" class="proj" autocomplete="off" placeholder="កូដ" aria-label="កូដ" value="${esc(offProject)}">
                 <button type="button" class="chip" onclick="fillWeek('notwork')">ជ្រើស សៅរ៍–អាទិត្យ ទាំងអស់</button>`;
-            attachCombo($('offActivity'), () => globalOffActivities);
-            attachCombo($('offProject'), () => OFF_PROJECTS);
+            attachCombo($('offActivity'), () => globalOffActivities, 'ប្រភេទថ្ងៃសម្រាក');
+            attachCombo($('offProject'), () => OFF_PROJECTS, 'កូដ', true);
             syncClear($('offActivity'));
             $('offProject').addEventListener('input', e => {
                 offProject = e.target.value.trim();
@@ -1371,8 +1390,8 @@
         if (p !== null) $('shProj').value = p;
     });
     $('shAmt').addEventListener('input', updateKind);
-    attachCombo($('shAct'), allActivityNames);
-    attachCombo($('shProj'), allProjectNames);
+    attachCombo($('shAct'), allActivityNames, 'សកម្មភាព');
+    attachCombo($('shProj'), allProjectNames, 'គម្រោង', true);
     $('shChips').addEventListener('click', e => {
         const b = e.target.closest('.chip');
         if (!b) return;
