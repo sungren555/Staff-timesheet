@@ -345,8 +345,14 @@
         }
         .day .dm { font-family: var(--font-mono); font-size: 10px; color: var(--label-color); }
         .day .dp { font-family: var(--font-mono); font-weight: 700; font-size: 11px; background: var(--text-color); color: var(--container-bg); border-radius: 4px; padding: 0 6px; line-height: 1.5; }
+        .team-row { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+        .team-row .mode-btn { flex: 1 1 0; min-width: 90px; min-height: 40px; padding: 8px 10px; font-size: 14px; }
+        .mode-btn.team { color: var(--paddy); }
+        [data-theme="dark"] .mode-btn.team { color: var(--tint-worked-border); }
+        .mode-btn.team[aria-pressed="true"] { background: var(--paddy); border-color: var(--paddy); color: #FBEFD2; }
         .mode-hint select { width: 130px; padding: 6px 9px; font-size: 13px; }
         .mode-hint input[type="number"] { width: 100px; padding: 6px 9px; font-size: 13px; }
+        .mode-hint input.proj { width: 120px; padding: 6px 9px; font-size: 13px; }
         .day.weekend { background: color-mix(in srgb, var(--weekend-bg) 55%, var(--container-bg)); }
         .day.weekend .dn { color: var(--stamp-red); }
         .day .hdot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--stamp-ochre); }
@@ -711,6 +717,9 @@
             <datalist id="activityListOptions"></datalist>        <!-- សកម្មភាពធ្វើការ (Staff!B) -->
             <datalist id="offActivityListOptions"></datalist>     <!-- ថ្ងៃសម្រាក (Staff!E) -->
             <datalist id="allActivityListOptions"></datalist>     <!-- ទាំងពីរ (សម្រាប់ផ្ទាំងកែថ្ងៃ) -->
+            <datalist id="projectListOptions"></datalist>
+            <datalist id="offProjectListOptions"></datalist>
+            <datalist id="allProjectListOptions"></datalist>
 
             <button type="button" class="btn-submit" onclick="saveData()">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
@@ -808,7 +817,7 @@
             <button type="button" class="chip" data-k="holiday">ថ្ងៃបុណ្យ</button>
         </div>
         <label for="shProj">គម្រោង (Project)</label>
-        <select id="shProj"></select>
+        <input type="text" id="shProj" list="allProjectListOptions" autocomplete="off" placeholder="គម្រោង">
         <label for="shAmt" style="margin-top:10px">ទឹកប្រាក់ (Amount)</label>
         <input type="number" id="shAmt" placeholder="ទឹកប្រាក់" inputmode="decimal" step="any">
         <p class="sh-kind" id="shKind"></p>
@@ -879,28 +888,42 @@
     let workAmount = localStorage.getItem('timesheetWorkAmount');
     if (workAmount === null) workAmount = '3';
     const isOfficeWork = a => String(a || '').toUpperCase().includes('OFFICE WORK');
-    const amtFor = a => isOfficeWork(a) ? '' : String(workAmount);
+    // Activities written in RED in the Staff sheet (Office Work, CDU Meeting...) -> no amount and no comment
+    let RED_ACTS = new Set();
+    const isNoAmount = a => RED_ACTS.has(String(a || '').trim()) || isOfficeWork(a);
+    const amtFor = a => isNoAmount(a) ? '' : String(workAmount);
     // Project codes shown in the dropdowns. If your Apps Script getData also returns "projects": ["IR","CE","RE"],
     // that list replaces this one automatically.
     let PROJECTS = ['IR', 'CE', 'RE'];          // work projects only
     let OFF_PROJECTS = ['AL', 'CL', 'ML', 'PL', 'SL'];   // leave codes only
     // Default project for each activity (Staff sheet: Column B -> Column C). Empty string = no fixed project.
     let ACT_PROJ = {};
-    // which project list fits an activity text
-    function projKind(act) {
-        if (!String(act || '').trim()) return 'all';
-        return classifyDay(act) === 'worked' ? 'work' : 'off';
-    }
+    // Teams (Staff sheet: IBIS Rice / CE / Admin ...). Each team has its own activities and default projects.
+    let TEAMS = [];                      // work teams: [{name, items:[{a,p,red}]}]
+    let TEAM_MAP = {};                   // { team: { activity: project } }
+    let team = '';                       // starts empty: staff must pick a team first
+    const teamRequired = () => TEAMS.some(t => t.name);
     function projFor(act) {
         const k = String(act || '').trim();
-        return Object.prototype.hasOwnProperty.call(ACT_PROJ, k) ? ACT_PROJ[k] : null;   // null = unknown activity
+        const has = (o) => Object.prototype.hasOwnProperty.call(o, k);
+        if (mode !== 'notwork' && team && TEAM_MAP[team] && has(TEAM_MAP[team])) return TEAM_MAP[team][k];
+        return has(ACT_PROJ) ? ACT_PROJ[k] : null;   // null = unknown activity (user may type activity + project freely)
     }
-    // kind: 'work' = work projects only, 'off' = leave codes only, 'all' = both
-    function projOptions(sel, kind) {
-        const base = kind === 'off' ? OFF_PROJECTS : kind === 'all' ? [...PROJECTS, ...OFF_PROJECTS] : PROJECTS;
-        const list = (sel && !base.includes(sel)) ? [...base, sel] : base;
-        return '<option value="">គម្រោង: គ្មាន</option>' +
-            list.map(p => `<option value="${esc(p)}"${p === sel ? ' selected' : ''}>${esc(p)}</option>`).join('');
+    function fillList(id, arr) {
+        const dl = $(id);
+        dl.innerHTML = '';
+        [...new Set(arr)].forEach(v => { const o = document.createElement('option'); o.value = v; dl.appendChild(o); });
+    }
+    // work activities / projects offered = only those of the chosen team (all teams if none chosen)
+    function refreshWorkLists() {
+        const t = TEAMS.find(x => x.name === team);
+        const items = t ? t.items : (teamRequired() ? [] : TEAMS.flatMap(x => x.items));   // no team chosen -> nothing offered
+        globalActivities = [...new Set(items.map(i => i.a))];
+        PROJECTS = [...new Set(items.map(i => i.p).filter(Boolean))];
+        fillList('activityListOptions', globalActivities);
+        fillList('projectListOptions', PROJECTS);
+        fillList('allActivityListOptions', [...TEAMS.flatMap(x => x.items.map(i => i.a)), ...globalOffActivities]);
+        fillList('allProjectListOptions', [...TEAMS.flatMap(x => x.items.map(i => i.p).filter(Boolean)), ...OFF_PROJECTS]);
     }
 
     const $ = id => document.getElementById(id);
@@ -974,35 +997,39 @@
                     staffSelect.appendChild(opt);
                 });
 
-                // Work side (Staff!B:C) and rest side (Staff!E:F) are kept apart.
-                // Fallback: if the old Apps Script is still deployed, split the single list by classifyDay().
-                const allActs = data.activities || [];
-                globalActivities = allActs.filter(a => classifyDay(a) === 'worked');
-                globalOffActivities = Array.isArray(data.offActivities)
-                    ? data.offActivities
-                    : allActs.filter(a => classifyDay(a) !== 'worked');
+                // Teams come from the Staff sheet. Old Apps Script (no "teams") is converted to one nameless team.
+                let tdata = data.teams;
+                if (!Array.isArray(tdata)) {
+                    const ap = data.activityProjects || {}, op0 = data.offActivityProjects || {};
+                    const allActs = data.activities || [];
+                    const workA = allActs.filter(a => classifyDay(a) === 'worked');
+                    const offA = Array.isArray(data.offActivities) ? data.offActivities : allActs.filter(a => classifyDay(a) !== 'worked');
+                    tdata = [
+                        { name: '', off: false, items: workA.map(a => ({ a, p: ap[a] || '', red: false })) },
+                        { name: '', off: true, items: offA.map(a => ({ a, p: ap[a] || op0[a] || '', red: false })) }
+                    ];
+                }
+                TEAMS = tdata.filter(t => !t.off);
+                const offItems = tdata.filter(t => t.off).flatMap(t => t.items);
 
-                const allProjs = (data.projects || []).map(String);
-                const isLeaveCode = p => LEAVE_CODES.includes(p.toUpperCase());
-                const wp = allProjs.filter(p => !isLeaveCode(p));
-                if (wp.length) PROJECTS = wp;
-                const op = Array.isArray(data.offProjects) ? data.offProjects.map(String) : allProjs.filter(isLeaveCode);
+                ACT_PROJ = {}; TEAM_MAP = {}; RED_ACTS = new Set();
+                TEAMS.forEach(t => {
+                    TEAM_MAP[t.name] = {};
+                    t.items.forEach(it => {
+                        if (!(it.a in TEAM_MAP[t.name])) TEAM_MAP[t.name][it.a] = it.p || '';
+                        if (!(it.a in ACT_PROJ)) ACT_PROJ[it.a] = it.p || '';
+                        if (it.red) RED_ACTS.add(it.a);
+                    });
+                });
+                globalOffActivities = [...new Set(offItems.map(i => i.a))];
+                offItems.forEach(it => { if (!(it.a in ACT_PROJ)) ACT_PROJ[it.a] = it.p || ''; });
+                const op = [...new Set(offItems.map(i => i.p).filter(Boolean))];
                 if (op.length) OFF_PROJECTS = op;
 
-                ACT_PROJ = Object.assign({}, data.activityProjects || {}, data.offActivityProjects || {});
-
-                const fillList = (id, arr) => {
-                    const dl = $(id);
-                    dl.innerHTML = '';
-                    arr.forEach(act => {
-                        const opt = document.createElement('option');
-                        opt.value = act;
-                        dl.appendChild(opt);
-                    });
-                };
-                fillList('activityListOptions', globalActivities);
+                if (team && !TEAMS.some(t => t.name === team)) team = '';
                 fillList('offActivityListOptions', globalOffActivities);
-                fillList('allActivityListOptions', [...globalActivities, ...globalOffActivities]);
+                fillList('offProjectListOptions', OFF_PROJECTS);
+                refreshWorkLists();
 
                 restoreStaffFromDraft();
                 if (mode) renderMode();
@@ -1086,14 +1113,28 @@
         const hint = $('modeHint');
         hint.innerHTML = '';
         if (mode === 'worked') {
-            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
+            const teamBtns = teamRequired()
+                ? `<div class="team-row" role="group" aria-label="ក្រុម (Team)">${TEAMS.map(t => `<button type="button" class="mode-btn team" data-team="${esc(t.name)}" aria-pressed="${t.name === team}">${esc(t.name)}</button>`).join('')}</div>`
+                : '';
+            const needTeam = teamRequired() && !team;
+            hint.innerHTML = teamBtns + (needTeam
+                ? `<span>សូមជ្រើសរើសក្រុមជាមុនសិន</span>`
+                : `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
                 <span class="clearable"><input type="text" id="workActivity" list="activityListOptions" autocomplete="off" value="${esc(workActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
-                <select id="workProject" aria-label="គម្រោង">${projOptions(workProject, 'work')}</select>
-                <input type="number" id="workAmount" inputmode="decimal" step="any" min="0" placeholder="ទឹកប្រាក់ $" aria-label="ទឹកប្រាក់ ($)" value="${esc(amtFor(workActText))}"${isOfficeWork(workActText) ? ' disabled' : ''}>
-                <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`;
+                <input type="text" id="workProject" class="proj" list="projectListOptions" autocomplete="off" placeholder="គម្រោង" aria-label="គម្រោង" value="${esc(workProject)}">
+                <input type="number" id="workAmount" inputmode="decimal" step="any" min="0" placeholder="ទឹកប្រាក់ $" aria-label="ទឹកប្រាក់ ($)" value="${esc(amtFor(workActText))}"${isNoAmount(workActText) ? ' disabled' : ''}>
+                <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`);
+            hint.querySelectorAll('.mode-btn.team').forEach(b => b.addEventListener('click', () => {
+                if (team === b.dataset.team) return;
+                team = b.dataset.team;
+                workActText = ''; workProject = '';          // activities differ per team -> start empty again
+                refreshWorkLists();
+                renderMode();
+            }));
+            if (needTeam) return;
             syncClear($('workActivity'));
-            $('workProject').addEventListener('change', e => {
-                workProject = e.target.value;
+            $('workProject').addEventListener('input', e => {
+                workProject = e.target.value.trim();         // free typing allowed (new project)
             });
             $('workAmount').addEventListener('input', e => {
                 workAmount = e.target.value;
@@ -1104,44 +1145,45 @@
                 const p = workActText.trim() === '' ? '' : projFor(workActText);   // cleared -> no project; else auto-pick (still editable)
                 if (p !== null) {
                     workProject = p;
-                    $('workProject').innerHTML = projOptions(workProject, 'work');
+                    $('workProject').value = workProject;
                 }
-                const ao = $('workAmount');              // Office Work -> no amount; other activities -> default/edited amount
-                ao.disabled = isOfficeWork(workActText);
+                const ao = $('workAmount');              // red activity (Office Work...) -> no amount; others -> default/edited amount
+                ao.disabled = isNoAmount(workActText);
                 ao.value = amtFor(workActText);
             });
         } else if (mode === 'notwork') {
             hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ថ្ងៃសម្រាក៖</span>
                 <span class="clearable"><input type="text" id="offActivity" list="offActivityListOptions" autocomplete="off" value="${esc(offActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
-                <select id="offProject" aria-label="កូដ">${projOptions(offProject, 'off')}</select>
+                <input type="text" id="offProject" class="proj" list="offProjectListOptions" autocomplete="off" placeholder="កូដ" aria-label="កូដ" value="${esc(offProject)}">
                 <button type="button" class="chip" onclick="fillWeek('notwork')">ជ្រើស សៅរ៍–អាទិត្យ ទាំងអស់</button>`;
             syncClear($('offActivity'));
-            $('offProject').addEventListener('change', e => {
-                offProject = e.target.value;
+            $('offProject').addEventListener('input', e => {
+                offProject = e.target.value.trim();
             });
             $('offActivity').addEventListener('input', e => {
                 offActText = e.target.value;
                 const p = offActText.trim() === '' ? '' : projFor(offActText);     // cleared -> no code; else auto-pick (still editable)
                 if (p !== null) {
                     offProject = p;
-                    $('offProject').innerHTML = projOptions(offProject, 'off');
+                    $('offProject').value = offProject;
                 }
             });
         }
     }
 
-    // The activity of the current mode must be chosen (and be one from the master list) before any day can be set
+    // A team (work mode) and an activity must be chosen/typed before any day can be set.
+    // The activity may be a new one that is not in the list; the project can be typed freely too.
     function modeActivityOk(k) {
-        const txt = (k === 'worked' ? workActText : offActText).trim();
-        const list = k === 'worked' ? globalActivities : globalOffActivities;
-        if (!txt) {
-            toast(k === 'worked' ? 'សូមជ្រើសរើសសកម្មភាពជាមុនសិន' : 'សូមជ្រើសរើសប្រភេទថ្ងៃសម្រាកជាមុនសិន');
-            const el = $(k === 'worked' ? 'workActivity' : 'offActivity');
-            if (el) el.focus();
+        if (k === 'worked' && teamRequired() && !team) {
+            toast('សូមជ្រើសរើសក្រុម (Team) ជាមុនសិន');
+            const hint0 = document.querySelector('.mode-btn.team'); if (hint0) hint0.focus();
             return false;
         }
-        if (list.length && !list.includes(txt)) {
-            toast('សកម្មភាពមិនមានក្នុងបញ្ជី សូមជ្រើសពីបញ្ជី');
+        const txt = (k === 'worked' ? workActText : offActText).trim();
+        if (!txt) {
+            toast(k === 'worked' ? 'សូមជ្រើសរើស ឬវាយសកម្មភាពជាមុនសិន' : 'សូមជ្រើសរើសប្រភេទថ្ងៃសម្រាកជាមុនសិន');
+            const el = $(k === 'worked' ? 'workActivity' : 'offActivity');
+            if (el) el.focus();
             return false;
         }
         return true;
@@ -1234,8 +1276,9 @@
         if (hd) $('shHol').textContent = 'ថ្ងៃបុណ្យ៖ ' + hd.km;
         $('shAct').value = r.activity;
         syncClear($('shAct'));
-        $('shProj').innerHTML = projOptions(r.project || '', projKind(r.activity));
+        $('shProj').value = r.project || '';
         $('shAmt').value = r.amount;
+        $('shAmt').disabled = isNoAmount(r.activity);
         updateKind();
         $('scrim').classList.add('open');
     }
@@ -1249,8 +1292,11 @@
     }
     $('shAct').addEventListener('input', () => {
         updateKind();
+        const noAmt = isNoAmount($('shAct').value);      // red activity: no amount
+        $('shAmt').disabled = noAmt;
+        if (noAmt) $('shAmt').value = '';
         const p = projFor($('shAct').value);             // auto-pick the activity's project; you can still change it
-        if (p !== null) $('shProj').innerHTML = projOptions(p, projKind($('shAct').value));
+        if (p !== null) $('shProj').value = p;
     });
     $('shAmt').addEventListener('input', updateKind);
     $('shChips').addEventListener('click', e => {
@@ -1260,7 +1306,9 @@
         $('shAct').value = k === 'work' ? actWork() : k === 'notwork' ? actNotWork() : k === 'sick' ? actSick() : actHoliday();
         syncClear($('shAct'));
         const p = projFor($('shAct').value);
-        $('shProj').innerHTML = projOptions(p !== null ? p : (k === 'work' ? workProject : ''), projKind($('shAct').value));
+        $('shProj').value = p !== null ? p : (k === 'work' ? workProject : '');
+        $('shAmt').disabled = isNoAmount($('shAct').value);
+        if ($('shAmt').disabled) $('shAmt').value = '';
         updateKind();
     });
     $('shClose').onclick = closeSheet;
@@ -1271,7 +1319,7 @@
         const act = $('shAct').value.trim(), amt = $('shAmt').value;
         if (act === '' && amt !== '') { toast('សូមជ្រើសរើសសកម្មភាពជាមុនសិន'); $('shAct').focus(); return; }
         if (act === '' && amt === '') delete days[editing];
-        else days[editing] = { activity: act, amount: amt, project: $('shProj').value };
+        else days[editing] = { activity: act, amount: amt, project: $('shProj').value.trim() };
         closeSheet(); render(); saveDraft();
     };
 
@@ -1434,7 +1482,7 @@
             if (rec.amount !== '' && !isNaN(parseFloat(rec.amount))) rc.value = parseFloat(rec.amount);
             rc.alignment = { horizontal: 'center' };
             rc.font = { size: 9 };
-            if (rec.activity !== '' && classifyDay(rec.activity) === 'worked') rc.note = `${d.staff} - សកម្មភាព: ${rec.activity}`;   // no note on leave / holiday days
+            if (rec.activity !== '' && classifyDay(rec.activity) === 'worked' && !isNoAmount(rec.activity)) rc.note = `${d.staff} - សកម្មភាព: ${rec.activity}`;   // no note on leave / holiday days
         });
 
         const first = ws.getColumn(5).letter, last = ws.getColumn(lastCol).letter, vL = ws.getColumn(valCol).letter;
@@ -1631,8 +1679,9 @@
             if (r && (r.activity !== "" || r.amount !== "")) {
                 dailyData[`day_${i}`] = {
                     activity: r.activity,
-                    amount: r.amount,
-                    project: r.project || ''
+                    amount: isNoAmount(r.activity) ? '' : r.amount,
+                    project: r.project || '',
+                    noNote: isNoAmount(r.activity)
                 };
             }
         }
