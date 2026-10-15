@@ -901,9 +901,8 @@
     let offActText = '';
     let offProject = '';
     const LEAVE_CODES = ['AL', 'PL', 'ML', 'CL', 'SL'];
-    // Default amount ($) applied to each worked day; editable. "Office Work" never gets an amount.
-    let workAmount = localStorage.getItem('timesheetWorkAmount');
-    if (workAmount === null) workAmount = '3';
+    // Amount ($) applied to each worked day, typed by staff (empty = no amount). "Office Work" never gets an amount.
+    let workAmount = '';          // empty by default: staff types the amount themselves (not every field day is paid)
     const isOfficeWork = a => String(a || '').toUpperCase().includes('OFFICE WORK');
     // Activities written in RED in the Staff sheet (Office Work, CDU Meeting...) -> no amount and no comment
     let RED_ACTS = new Set();
@@ -1214,7 +1213,7 @@
             hint.querySelectorAll('.mode-btn.team').forEach(b => b.addEventListener('click', () => {
                 if (team === b.dataset.team) return;
                 team = b.dataset.team;
-                workActText = ''; workProject = '';          // activities differ per team -> start empty again
+                workActText = ''; workProject = ''; workAmount = '';   // activities differ per team -> start empty again
                 refreshWorkLists();
                 renderMode();
             }));
@@ -1227,10 +1226,11 @@
             });
             $('workAmount').addEventListener('input', e => {
                 workAmount = e.target.value;
-                localStorage.setItem('timesheetWorkAmount', workAmount);
             });
             $('workActivity').addEventListener('input', e => {
+                const changed = e.target.value !== workActText;
                 workActText = e.target.value;
+                if (changed) workAmount = '';            // new activity -> amount box starts empty again (no carry-over)
                 const p = workActText.trim() === '' ? '' : projFor(workActText);   // cleared -> no project; else auto-pick (still editable)
                 if (p !== null) {
                     workProject = p;
@@ -1238,7 +1238,7 @@
                 }
                 const ao = $('workAmount');              // red activity (Office Work...) -> no amount; others -> default/edited amount
                 ao.disabled = isNoAmount(workActText);
-                ao.value = amtFor(workActText);
+                ao.value = amtFor(workActText);   // '' unless the staff types an amount
             });
         } else if (mode === 'notwork') {
             hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ថ្ងៃសម្រាក៖</span>
