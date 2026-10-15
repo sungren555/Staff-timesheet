@@ -345,6 +345,15 @@
         }
         .day .dm { font-family: var(--font-mono); font-size: 10px; color: var(--label-color); }
         .day .dp { font-family: var(--font-mono); font-weight: 700; font-size: 11px; background: var(--text-color); color: var(--container-bg); border-radius: 4px; padding: 0 6px; line-height: 1.5; }
+        .combo-panel { position: fixed; z-index: 99999; display: none; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            background: var(--container-bg); color: var(--text-color); border: 2px solid var(--input-border);
+            border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,.28); }
+        .combo-panel.open { display: block; }
+        .combo-panel button { display: block; width: 100%; text-align: left; background: transparent; color: inherit;
+            border: 0; border-bottom: 1px solid var(--input-border); padding: 11px 14px; font: inherit; font-size: 14px;
+            line-height: 1.35; cursor: pointer; }
+        .combo-panel button:last-child { border-bottom: 0; }
+        .combo-panel button:hover, .combo-panel button:active { background: var(--input-bg); }
         .team-row { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
         .team-row .mode-btn { flex: 1 1 0; min-width: 90px; min-height: 40px; padding: 8px 10px; font-size: 14px; }
         .mode-btn.team { color: var(--paddy); }
@@ -809,7 +818,7 @@
         <h4 id="shTitle"></h4>
         <p class="sh-hol" id="shHol" hidden></p>
         <label for="shAct">សកម្មភាព (Activity)</label>
-        <span class="clearable"><input type="text" id="shAct" list="allActivityListOptions" placeholder="សកម្មភាព" autocomplete="off"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+        <span class="clearable"><input type="text" id="shAct" placeholder="សកម្មភាព" autocomplete="off"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
         <div class="chips" id="shChips">
             <button type="button" class="chip" data-k="work">ធ្វើការ</button>
             <button type="button" class="chip" data-k="notwork">អត់ធ្វើការ</button>
@@ -817,7 +826,7 @@
             <button type="button" class="chip" data-k="holiday">ថ្ងៃបុណ្យ</button>
         </div>
         <label for="shProj">គម្រោង (Project)</label>
-        <input type="text" id="shProj" list="allProjectListOptions" autocomplete="off" placeholder="គម្រោង">
+        <input type="text" id="shProj" autocomplete="off" placeholder="គម្រោង">
         <label for="shAmt" style="margin-top:10px">ទឹកប្រាក់ (Amount)</label>
         <input type="number" id="shAmt" placeholder="ទឹកប្រាក់" inputmode="decimal" step="any">
         <p class="sh-kind" id="shKind"></p>
@@ -909,6 +918,64 @@
         if (mode !== 'notwork' && team && TEAM_MAP[team] && has(TEAM_MAP[team])) return TEAM_MAP[team][k];
         return has(ACT_PROJ) ? ACT_PROJ[k] : null;   // null = unknown activity (user may type activity + project freely)
     }
+    /* ---------- Vertical dropdown list (replaces <datalist>, which Android shows as a horizontal strip) ---------- */
+    let comboPanel = null, comboInput = null, comboSuppress = false;
+    function comboHide() { if (comboPanel) comboPanel.classList.remove('open'); comboInput = null; }
+    function comboShow(input, getOpts) {
+        if (!comboPanel) {
+            comboPanel = document.createElement('div');
+            comboPanel.className = 'combo-panel';
+            document.body.appendChild(comboPanel);
+            window.addEventListener('scroll', e => { if (comboPanel && !comboPanel.contains(e.target)) comboHide(); }, true);
+        }
+        const opts = [...new Set(getOpts())];
+        const q = input.value.trim().toLowerCase();
+        // a value that is already an exact option (pre-filled / just picked) -> show the whole list
+        const list = (q && !opts.some(o => o.toLowerCase() === q)) ? opts.filter(o => o.toLowerCase().includes(q)) : opts;
+        if (!list.length) { comboHide(); return; }
+        comboInput = input;
+        comboPanel.innerHTML = '';
+        list.forEach(o => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = o;
+            b.addEventListener('click', () => {
+                input.value = o;
+                comboSuppress = true;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                comboSuppress = false;
+                comboHide();
+                input.blur();
+            });
+            comboPanel.appendChild(b);
+        });
+        const r = input.getBoundingClientRect();
+        const vv = window.visualViewport;
+        const vh = vv ? vv.height : window.innerHeight;
+        const vw = vv ? vv.width : window.innerWidth;
+        const width = Math.min(Math.max(r.width, 280), vw - 16);
+        const left = Math.max(8, Math.min(r.left, vw - width - 8));
+        const below = vh - r.bottom - 12;
+        const above = r.top - 12;
+        let top, maxH;
+        if (below >= 160 || below >= above) { top = r.bottom + 4; maxH = Math.max(120, below); }
+        else { maxH = Math.max(120, above); top = Math.max(4, r.top - 4 - Math.min(maxH, list.length * 46)); }
+        Object.assign(comboPanel.style, { left: left + 'px', top: top + 'px', width: width + 'px', maxHeight: Math.min(maxH, 360) + 'px' });
+        comboPanel.classList.add('open');
+    }
+    function attachCombo(input, getOpts) {
+        if (!input || input.dataset.combo) return;
+        input.dataset.combo = '1';
+        input.setAttribute('autocomplete', 'off');
+        input.addEventListener('focus', () => comboShow(input, getOpts));
+        input.addEventListener('click', () => comboShow(input, getOpts));
+        input.addEventListener('input', () => { if (!comboSuppress) comboShow(input, getOpts); });
+        input.addEventListener('blur', () => setTimeout(() => { if (comboInput === input) comboHide(); }, 220));
+        input.addEventListener('keydown', e => { if (e.key === 'Escape') comboHide(); });
+    }
+    const allActivityNames = () => [...TEAMS.flatMap(x => x.items.map(i => i.a)), ...globalOffActivities];
+    const allProjectNames = () => [...TEAMS.flatMap(x => x.items.map(i => i.p).filter(Boolean)), ...OFF_PROJECTS];
+
     function fillList(id, arr) {
         const dl = $(id);
         dl.innerHTML = '';
@@ -1103,6 +1170,7 @@
 
     /* ================= Modes (worked / not working) ================= */
     function setMode(k) {
+        comboHide();
         mode = (mode === k) ? null : k;
         renderMode();
     }
@@ -1120,8 +1188,8 @@
             hint.innerHTML = teamBtns + (needTeam
                 ? `<span>សូមជ្រើសរើសក្រុមជាមុនសិន</span>`
                 : `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
-                <span class="clearable"><input type="text" id="workActivity" list="activityListOptions" autocomplete="off" value="${esc(workActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
-                <input type="text" id="workProject" class="proj" list="projectListOptions" autocomplete="off" placeholder="គម្រោង" aria-label="គម្រោង" value="${esc(workProject)}">
+                <span class="clearable"><input type="text" id="workActivity" autocomplete="off" value="${esc(workActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+                <input type="text" id="workProject" class="proj" autocomplete="off" placeholder="គម្រោង" aria-label="គម្រោង" value="${esc(workProject)}">
                 <input type="number" id="workAmount" inputmode="decimal" step="any" min="0" placeholder="ទឹកប្រាក់ $" aria-label="ទឹកប្រាក់ ($)" value="${esc(amtFor(workActText))}"${isNoAmount(workActText) ? ' disabled' : ''}>
                 <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`);
             hint.querySelectorAll('.mode-btn.team').forEach(b => b.addEventListener('click', () => {
@@ -1132,6 +1200,8 @@
                 renderMode();
             }));
             if (needTeam) return;
+            attachCombo($('workActivity'), () => globalActivities);
+            attachCombo($('workProject'), () => PROJECTS);
             syncClear($('workActivity'));
             $('workProject').addEventListener('input', e => {
                 workProject = e.target.value.trim();         // free typing allowed (new project)
@@ -1153,9 +1223,11 @@
             });
         } else if (mode === 'notwork') {
             hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ថ្ងៃសម្រាក៖</span>
-                <span class="clearable"><input type="text" id="offActivity" list="offActivityListOptions" autocomplete="off" value="${esc(offActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
-                <input type="text" id="offProject" class="proj" list="offProjectListOptions" autocomplete="off" placeholder="កូដ" aria-label="កូដ" value="${esc(offProject)}">
+                <span class="clearable"><input type="text" id="offActivity" autocomplete="off" value="${esc(offActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+                <input type="text" id="offProject" class="proj" autocomplete="off" placeholder="កូដ" aria-label="កូដ" value="${esc(offProject)}">
                 <button type="button" class="chip" onclick="fillWeek('notwork')">ជ្រើស សៅរ៍–អាទិត្យ ទាំងអស់</button>`;
+            attachCombo($('offActivity'), () => globalOffActivities);
+            attachCombo($('offProject'), () => OFF_PROJECTS);
             syncClear($('offActivity'));
             $('offProject').addEventListener('input', e => {
                 offProject = e.target.value.trim();
@@ -1299,6 +1371,8 @@
         if (p !== null) $('shProj').value = p;
     });
     $('shAmt').addEventListener('input', updateKind);
+    attachCombo($('shAct'), allActivityNames);
+    attachCombo($('shProj'), allProjectNames);
     $('shChips').addEventListener('click', e => {
         const b = e.target.closest('.chip');
         if (!b) return;
