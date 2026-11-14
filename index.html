@@ -345,7 +345,31 @@
         }
         .day .dm { font-family: var(--font-mono); font-size: 10px; color: var(--label-color); }
         .day .dp { font-family: var(--font-mono); font-weight: 700; font-size: 11px; background: var(--text-color); color: var(--container-bg); border-radius: 4px; padding: 0 6px; line-height: 1.5; }
+        input[data-combo] { cursor: pointer; }
+        .pick-scrim { position: fixed; inset: 0; z-index: 100000; display: none; align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,.45); }
+        .pick-scrim.open { display: flex; }
+        .pick-sheet { width: 100%; max-width: 560px; height: min(78vh, 600px); height: min(78dvh, 600px); display: flex; flex-direction: column;
+            background: var(--container-bg); color: var(--text-color); border-radius: 18px 18px 0 0; padding: 14px 14px 10px;
+            box-shadow: 0 -8px 30px rgba(0,0,0,.3); }
+        .pick-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-weight: 700; font-size: 16px; }
+        .pick-head button { border: 0; background: var(--input-bg); color: inherit; width: 38px; height: 38px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+        .pick-sheet input.pick-search { width: 100%; font-size: 16px; padding: 11px 12px; margin-bottom: 8px; }
+        .pick-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; border-top: 1px solid var(--input-border); }
+        .pick-list button { display: block; width: 100%; text-align: left; background: transparent; color: inherit; border: 0;
+            border-bottom: 1px solid var(--input-border); padding: 14px 8px; min-height: 52px; font: inherit; font-size: 15px; line-height: 1.4; cursor: pointer; }
+        .pick-list button:active { background: var(--input-bg); }
+        .pick-list button.cur { font-weight: 800; color: var(--paddy); }
+        .pick-list button.new { color: var(--stamp-red); font-weight: 700; }
+        .pick-empty { padding: 18px 8px; color: var(--label-color); font-size: 14px; }
+        .team-row { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+        .team-row .mode-btn { flex: 1 1 0; min-width: 90px; min-height: 40px; padding: 8px 10px; font-size: 14px; }
+        .mode-btn.team { color: var(--paddy); }
+        [data-theme="dark"] .mode-btn.team { color: var(--tint-worked-border); }
+        .mode-btn.team[aria-pressed="true"] { background: var(--paddy); border-color: var(--paddy); color: #FBEFD2; }
         .mode-hint select { width: 130px; padding: 6px 9px; font-size: 13px; }
+        .mode-hint input[type="number"] { width: 100px; padding: 6px 9px; font-size: 13px; }
+        .mode-hint input.proj { width: 120px; padding: 6px 9px; font-size: 13px; }
         .day.weekend { background: color-mix(in srgb, var(--weekend-bg) 55%, var(--container-bg)); }
         .day.weekend .dn { color: var(--stamp-red); }
         .day .hdot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--stamp-ochre); }
@@ -707,7 +731,12 @@
             <ul class="hol-list" id="holList"></ul>
             <p class="hol-note" id="holNote"></p>
 
-            <datalist id="activityListOptions"></datalist>
+            <datalist id="activityListOptions"></datalist>        <!-- សកម្មភាពធ្វើការ (Staff!B) -->
+            <datalist id="offActivityListOptions"></datalist>     <!-- ថ្ងៃសម្រាក (Staff!E) -->
+            <datalist id="allActivityListOptions"></datalist>     <!-- ទាំងពីរ (សម្រាប់ផ្ទាំងកែថ្ងៃ) -->
+            <datalist id="projectListOptions"></datalist>
+            <datalist id="offProjectListOptions"></datalist>
+            <datalist id="allProjectListOptions"></datalist>
 
             <button type="button" class="btn-submit" onclick="saveData()">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
@@ -797,7 +826,7 @@
         <h4 id="shTitle"></h4>
         <p class="sh-hol" id="shHol" hidden></p>
         <label for="shAct">សកម្មភាព (Activity)</label>
-        <span class="clearable"><input type="text" id="shAct" list="activityListOptions" placeholder="សកម្មភាព" autocomplete="off"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+        <span class="clearable"><input type="text" id="shAct" placeholder="សកម្មភាព" autocomplete="off"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
         <div class="chips" id="shChips">
             <button type="button" class="chip" data-k="work">ធ្វើការ</button>
             <button type="button" class="chip" data-k="notwork">អត់ធ្វើការ</button>
@@ -805,7 +834,7 @@
             <button type="button" class="chip" data-k="holiday">ថ្ងៃបុណ្យ</button>
         </div>
         <label for="shProj">គម្រោង (Project)</label>
-        <select id="shProj"></select>
+        <input type="text" id="shProj" autocomplete="off" placeholder="គម្រោង">
         <label for="shAmt" style="margin-top:10px">ទឹកប្រាក់ (Amount)</label>
         <input type="number" id="shAmt" placeholder="ទឹកប្រាក់" inputmode="decimal" step="any">
         <p class="sh-kind" id="shKind"></p>
@@ -821,7 +850,8 @@
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyNefEeNFtacVPHDg7gy3-tE8RomIOAZnkak0YybkmVlWY5TXQVsKUbtprEg4omHjUJEQ/exec'; // <-- ជំនួស URL របស់អ្នកនៅទីនេះ
 
-    let globalActivities = [];
+    let globalActivities = [];        // work activities only
+    let globalOffActivities = [];     // rest / leave / holiday activities only
 
     function toggleTheme() {
         const body = document.body;
@@ -865,21 +895,120 @@
     let mode = null;          // null | 'worked' | 'notwork'
     let editing = null;
     let lastMonthVal = '';
-    let workActText = localStorage.getItem('timesheetWorkActivity') || '';
-    let workProject = localStorage.getItem('timesheetWorkProject') || '';
+    // Activity / project start EMPTY: the user must pick an activity before tapping any day.
+    let workActText = '';
+    let workProject = '';
+    let offActText = '';
+    let offProject = '';
+    const LEAVE_CODES = ['AL', 'PL', 'ML', 'CL', 'SL'];
+    // Amount ($) applied to each worked day, typed by staff (empty = no amount). "Office Work" never gets an amount.
+    let workAmount = '';          // empty by default: staff types the amount themselves (not every field day is paid)
+    const isOfficeWork = a => String(a || '').toUpperCase().includes('OFFICE WORK');
+    // Activities written in RED in the Staff sheet (Office Work, CDU Meeting...) -> no amount and no comment
+    let RED_ACTS = new Set();
+    const isNoAmount = a => RED_ACTS.has(String(a || '').trim()) || isOfficeWork(a);
+    const amtFor = a => isNoAmount(a) ? '' : String(workAmount);
     // Project codes shown in the dropdowns. If your Apps Script getData also returns "projects": ["IR","CE","RE"],
     // that list replaces this one automatically.
-    let PROJECTS = ['IR', 'CE', 'RE'];
+    let PROJECTS = ['IR', 'CE', 'RE'];          // work projects only
+    let OFF_PROJECTS = ['AL', 'CL', 'ML', 'PL', 'SL'];   // leave codes only
     // Default project for each activity (Staff sheet: Column B -> Column C). Empty string = no fixed project.
     let ACT_PROJ = {};
+    // Teams (Staff sheet: IBIS Rice / CE / Admin ...). Each team has its own activities and default projects.
+    let TEAMS = [];                      // work teams: [{name, items:[{a,p,red}]}]
+    let TEAM_MAP = {};                   // { team: { activity: project } }
+    let team = '';                       // starts empty: staff must pick a team first
+    const teamRequired = () => TEAMS.some(t => t.name);
     function projFor(act) {
         const k = String(act || '').trim();
-        return Object.prototype.hasOwnProperty.call(ACT_PROJ, k) ? ACT_PROJ[k] : null;   // null = unknown activity
+        const has = (o) => Object.prototype.hasOwnProperty.call(o, k);
+        if (mode !== 'notwork' && team && TEAM_MAP[team] && has(TEAM_MAP[team])) return TEAM_MAP[team][k];
+        return has(ACT_PROJ) ? ACT_PROJ[k] : null;   // null = unknown activity (user may type activity + project freely)
     }
-    function projOptions(sel) {
-        const list = (sel && !PROJECTS.includes(sel)) ? [...PROJECTS, sel] : PROJECTS;
-        return '<option value="">គម្រោង: គ្មាន</option>' +
-            list.map(p => `<option value="${esc(p)}"${p === sel ? ' selected' : ''}>${esc(p)}</option>`).join('');
+    /* ---------- Picker (bottom sheet) for activity / project ----------
+       Works the same on iPhone, Android and desktop: big tap targets, own search box,
+       no native <datalist> (Android shows it as a horizontal strip, iOS makes it hard to use). */
+    let pickEl = null, pickState = null;
+    function pickClose() { if (pickEl) pickEl.classList.remove('open'); pickState = null; }
+    function pickRender() {
+        const st = pickState; if (!st) return;
+        const q = pickEl.querySelector('.pick-search').value.trim();
+        const ql = q.toLowerCase();
+        const opts = [...new Set(st.getOpts())];
+        const list = ql ? opts.filter(o => o.toLowerCase().includes(ql)) : opts;
+        const box = pickEl.querySelector('.pick-list');
+        box.innerHTML = '';
+        const add = (label, value, cls) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            if (cls) b.className = cls;
+            b.textContent = label;
+            b.addEventListener('click', () => pickChoose(value));
+            box.appendChild(b);
+        };
+        if (!q && st.allowEmpty) add('— គ្មាន —', '', '');
+        if (q && !opts.some(o => o.toLowerCase() === ql)) add('＋ ប្រើ «' + q + '» (បញ្ចូលថ្មី)', q, 'new');
+        list.forEach(o => add(o, o, o === st.current ? 'cur' : ''));
+        if (!list.length && !q) box.innerHTML = '<div class="pick-empty">មិនមានបញ្ជី — សូមវាយបញ្ចូល</div>';
+    }
+    function pickChoose(v) {
+        const st = pickState; if (!st) return;
+        pickClose();
+        st.input.value = v;
+        st.input.dispatchEvent(new Event('input', { bubbles: true }));   // lets the page update project / amount / state
+    }
+    function pickOpen(input, getOpts, title, allowEmpty) {
+        if (!pickEl) {
+            pickEl = document.createElement('div');
+            pickEl.className = 'pick-scrim';
+            pickEl.innerHTML = '<div class="pick-sheet" role="dialog" aria-modal="true"><div class="pick-head"><span class="pick-title"></span><button type="button" class="pick-x" aria-label="បិទ">×</button></div>' +
+                '<input type="text" class="pick-search" autocomplete="off" autocapitalize="off" placeholder="ស្វែងរក ឬវាយថ្មី...">' +
+                '<div class="pick-list"></div></div>';
+            document.body.appendChild(pickEl);
+            pickEl.addEventListener('click', e => { if (e.target === pickEl) pickClose(); });
+            pickEl.querySelector('.pick-x').addEventListener('click', pickClose);
+            const sr = pickEl.querySelector('.pick-search');
+            sr.addEventListener('input', pickRender);
+            sr.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.preventDefault(); const v = sr.value.trim(); if (v) pickChoose(v); }
+                if (e.key === 'Escape') pickClose();
+            });
+        }
+        pickState = { input, getOpts, allowEmpty: !!allowEmpty, current: input.value.trim() };
+        pickEl.querySelector('.pick-title').textContent = title || 'ជ្រើសរើស';
+        pickEl.querySelector('.pick-search').value = '';
+        pickRender();
+        pickEl.classList.add('open');
+        pickEl.querySelector('.pick-list').scrollTop = 0;
+        // no auto-focus on the search box: the keyboard would cover the list; staff can tap it when they want to type
+    }
+    function attachCombo(input, getOpts, title, allowEmpty) {
+        if (!input || input.dataset.combo) return;
+        input.dataset.combo = '1';
+        input.readOnly = true;                       // tap opens the picker; no keyboard pops up
+        input.setAttribute('inputmode', 'none');
+        if (!input.placeholder) input.placeholder = 'ចុចដើម្បីជ្រើសរើស';
+        input.addEventListener('click', () => pickOpen(input, getOpts, title, allowEmpty));
+    }
+    const comboHide = pickClose;
+    const allActivityNames = () => [...TEAMS.flatMap(x => x.items.map(i => i.a)), ...globalOffActivities];
+    const allProjectNames = () => [...TEAMS.flatMap(x => x.items.map(i => i.p).filter(Boolean)), ...OFF_PROJECTS];
+
+    function fillList(id, arr) {
+        const dl = $(id);
+        dl.innerHTML = '';
+        [...new Set(arr)].forEach(v => { const o = document.createElement('option'); o.value = v; dl.appendChild(o); });
+    }
+    // work activities / projects offered = only those of the chosen team (all teams if none chosen)
+    function refreshWorkLists() {
+        const t = TEAMS.find(x => x.name === team);
+        const items = t ? t.items : (teamRequired() ? [] : TEAMS.flatMap(x => x.items));   // no team chosen -> nothing offered
+        globalActivities = [...new Set(items.map(i => i.a))];
+        PROJECTS = [...new Set(items.map(i => i.p).filter(Boolean))];
+        fillList('activityListOptions', globalActivities);
+        fillList('projectListOptions', PROJECTS);
+        fillList('allActivityListOptions', [...TEAMS.flatMap(x => x.items.map(i => i.a)), ...globalOffActivities]);
+        fillList('allProjectListOptions', [...TEAMS.flatMap(x => x.items.map(i => i.p).filter(Boolean)), ...OFF_PROJECTS]);
     }
 
     const $ = id => document.getElementById(id);
@@ -926,12 +1055,13 @@
     /* Activity text used by each button. Prefers the wording that already exists in your master list,
        so the Apps Script colouring keeps working. */
     function findActivity(keyword, fallback) {
-        return globalActivities.find(a => String(a).toUpperCase().includes(keyword)) || fallback;
+        return [...globalOffActivities, ...globalActivities].find(a => String(a).toUpperCase().includes(keyword)) || fallback;
     }
     const actNotWork = () => findActivity('NOT WORKING', 'Not Working');
     const actSick = () => findActivity('SICK LEAVE', 'Sick Leave');
     const actHoliday = () => findActivity('PUBLIC HOLIDAY', 'Public Holiday');
     const actWork = () => (workActText || '').trim() || 'Working';
+    const actOff = () => (offActText || '').trim() || actNotWork();
 
     /* ================= Master data from Google Sheets ================= */
     function fetchMasterData() {
@@ -952,24 +1082,42 @@
                     staffSelect.appendChild(opt);
                 });
 
-                globalActivities = data.activities || [];
-                if (Array.isArray(data.projects) && data.projects.length) PROJECTS = data.projects.map(String);
-                ACT_PROJ = data.activityProjects || {};
-                const datalist = $('activityListOptions');
-                datalist.innerHTML = '';
-                globalActivities.forEach(act => {
-                    const opt = document.createElement('option');
-                    opt.value = act;
-                    datalist.appendChild(opt);
-                });
-
-                // default "worked" activity = first activity in the master list that counts as work
-                if (!workActText) {
-                    workActText = globalActivities.find(a => classifyDay(a) === 'worked') || 'Working';
+                // Teams come from the Staff sheet. Old Apps Script (no "teams") is converted to one nameless team.
+                let tdata = data.teams;
+                if (!Array.isArray(tdata)) {
+                    const ap = data.activityProjects || {}, op0 = data.offActivityProjects || {};
+                    const allActs = data.activities || [];
+                    const workA = allActs.filter(a => classifyDay(a) === 'worked');
+                    const offA = Array.isArray(data.offActivities) ? data.offActivities : allActs.filter(a => classifyDay(a) !== 'worked');
+                    tdata = [
+                        { name: '', off: false, items: workA.map(a => ({ a, p: ap[a] || '', red: false })) },
+                        { name: '', off: true, items: offA.map(a => ({ a, p: ap[a] || op0[a] || '', red: false })) }
+                    ];
                 }
-                if (!workProject && projFor(workActText) !== null) workProject = projFor(workActText);
+                TEAMS = tdata.filter(t => !t.off);
+                const offItems = tdata.filter(t => t.off).flatMap(t => t.items);
+
+                ACT_PROJ = {}; TEAM_MAP = {}; RED_ACTS = new Set();
+                TEAMS.forEach(t => {
+                    TEAM_MAP[t.name] = {};
+                    t.items.forEach(it => {
+                        if (!(it.a in TEAM_MAP[t.name])) TEAM_MAP[t.name][it.a] = it.p || '';
+                        if (!(it.a in ACT_PROJ)) ACT_PROJ[it.a] = it.p || '';
+                        if (it.red) RED_ACTS.add(it.a);
+                    });
+                });
+                globalOffActivities = [...new Set(offItems.map(i => i.a))];
+                offItems.forEach(it => { if (!(it.a in ACT_PROJ)) ACT_PROJ[it.a] = it.p || ''; });
+                const op = [...new Set(offItems.map(i => i.p).filter(Boolean))];
+                if (op.length) OFF_PROJECTS = op;
+
+                if (team && !TEAMS.some(t => t.name === team)) team = '';
+                fillList('offActivityListOptions', globalOffActivities);
+                fillList('offProjectListOptions', OFF_PROJECTS);
+                refreshWorkLists();
+
                 restoreStaffFromDraft();
-                if (mode === 'worked') renderMode();
+                if (mode) renderMode();
             })
             .catch(error => {
                 console.error('Error fetching master data:', error);
@@ -1040,6 +1188,7 @@
 
     /* ================= Modes (worked / not working) ================= */
     function setMode(k) {
+        comboHide();
         mode = (mode === k) ? null : k;
         renderMode();
     }
@@ -1050,33 +1199,90 @@
         const hint = $('modeHint');
         hint.innerHTML = '';
         if (mode === 'worked') {
-            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
-                <span class="clearable"><input type="text" id="workActivity" list="activityListOptions" autocomplete="off" value="${esc(workActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
-                <select id="workProject" aria-label="គម្រោង">${projOptions(workProject)}</select>
-                <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`;
+            const teamBtns = teamRequired()
+                ? `<div class="team-row" role="group" aria-label="ក្រុម (Team)">${TEAMS.map(t => `<button type="button" class="mode-btn team" data-team="${esc(t.name)}" aria-pressed="${t.name === team}">${esc(t.name)}</button>`).join('')}</div>`
+                : '';
+            const needTeam = teamRequired() && !team;
+            hint.innerHTML = teamBtns + (needTeam
+                ? `<span>សូមជ្រើសរើសក្រុមជាមុនសិន</span>`
+                : `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
+                <span class="clearable"><input type="text" id="workActivity" autocomplete="off" value="${esc(workActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+                <input type="text" id="workProject" class="proj" autocomplete="off" placeholder="គម្រោង" aria-label="គម្រោង" value="${esc(workProject)}">
+                <input type="number" id="workAmount" inputmode="decimal" step="any" min="0" placeholder="ទឹកប្រាក់ $" aria-label="ទឹកប្រាក់ ($)" value="${esc(amtFor(workActText))}"${isNoAmount(workActText) ? ' disabled' : ''}>
+                <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`);
+            hint.querySelectorAll('.mode-btn.team').forEach(b => b.addEventListener('click', () => {
+                if (team === b.dataset.team) return;
+                team = b.dataset.team;
+                workActText = ''; workProject = ''; workAmount = '';   // activities differ per team -> start empty again
+                refreshWorkLists();
+                renderMode();
+            }));
+            if (needTeam) return;
+            attachCombo($('workActivity'), () => globalActivities, 'សកម្មភាព (ក្រុម ' + team + ')');
+            attachCombo($('workProject'), () => PROJECTS, 'គម្រោង', true);
             syncClear($('workActivity'));
-            $('workProject').addEventListener('change', e => {
-                workProject = e.target.value;
-                localStorage.setItem('timesheetWorkProject', workProject);
+            $('workProject').addEventListener('input', e => {
+                workProject = e.target.value.trim();         // free typing allowed (new project)
+            });
+            $('workAmount').addEventListener('input', e => {
+                workAmount = e.target.value;
             });
             $('workActivity').addEventListener('input', e => {
+                const changed = e.target.value !== workActText;
                 workActText = e.target.value;
-                localStorage.setItem('timesheetWorkActivity', workActText);
-                const p = projFor(workActText);          // auto-pick the activity's project; you can still change it
+                if (changed) workAmount = '';            // new activity -> amount box starts empty again (no carry-over)
+                const p = workActText.trim() === '' ? '' : projFor(workActText);   // cleared -> no project; else auto-pick (still editable)
                 if (p !== null) {
                     workProject = p;
-                    localStorage.setItem('timesheetWorkProject', workProject);
-                    $('workProject').innerHTML = projOptions(workProject);
+                    $('workProject').value = workProject;
                 }
+                const ao = $('workAmount');              // red activity (Office Work...) -> no amount; others -> default/edited amount
+                ao.disabled = isNoAmount(workActText);
+                ao.value = amtFor(workActText);   // '' unless the staff types an amount
             });
         } else if (mode === 'notwork') {
-            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ «${esc(actNotWork())}»</span>
+            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ថ្ងៃសម្រាក៖</span>
+                <span class="clearable"><input type="text" id="offActivity" autocomplete="off" value="${esc(offActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+                <input type="text" id="offProject" class="proj" autocomplete="off" placeholder="កូដ" aria-label="កូដ" value="${esc(offProject)}">
                 <button type="button" class="chip" onclick="fillWeek('notwork')">ជ្រើស សៅរ៍–អាទិត្យ ទាំងអស់</button>`;
+            attachCombo($('offActivity'), () => globalOffActivities, 'ប្រភេទថ្ងៃសម្រាក');
+            attachCombo($('offProject'), () => OFF_PROJECTS, 'កូដ', true);
+            syncClear($('offActivity'));
+            $('offProject').addEventListener('input', e => {
+                offProject = e.target.value.trim();
+            });
+            $('offActivity').addEventListener('input', e => {
+                offActText = e.target.value;
+                const p = offActText.trim() === '' ? '' : projFor(offActText);     // cleared -> no code; else auto-pick (still editable)
+                if (p !== null) {
+                    offProject = p;
+                    $('offProject').value = offProject;
+                }
+            });
         }
+    }
+
+    // A team (work mode) and an activity must be chosen/typed before any day can be set.
+    // The activity may be a new one that is not in the list; the project can be typed freely too.
+    function modeActivityOk(k) {
+        if (k === 'worked' && teamRequired() && !team) {
+            toast('សូមជ្រើសរើសក្រុម (Team) ជាមុនសិន');
+            const hint0 = document.querySelector('.mode-btn.team'); if (hint0) hint0.focus();
+            return false;
+        }
+        const txt = (k === 'worked' ? workActText : offActText).trim();
+        if (!txt) {
+            toast(k === 'worked' ? 'សូមជ្រើសរើស ឬវាយសកម្មភាពជាមុនសិន' : 'សូមជ្រើសរើសប្រភេទថ្ងៃសម្រាកជាមុនសិន');
+            const el = $(k === 'worked' ? 'workActivity' : 'offActivity');
+            if (el) el.focus();
+            return false;
+        }
+        return true;
     }
 
     // Fill every EMPTY weekday (worked) or weekend day (not working); public holidays and filled days are skipped
     function fillWeek(k) {
+        if (!modeActivityOk(k)) return;
         const { y, m } = ym();
         const hol = holMap(y, m);
         const n = new Date(y, m, 0).getDate();
@@ -1086,22 +1292,25 @@
             const weekend = (w === 0 || w === 6);
             if (hol[d]) continue;
             if (days[d] && days[d].activity !== '') continue;
-            if (k === 'worked' && !weekend) { days[d] = { activity: actWork(), amount: (days[d] && days[d].amount) || '', project: workProject }; count++; }
-            if (k === 'notwork' && weekend) { days[d] = { activity: actNotWork(), amount: (days[d] && days[d].amount) || '', project: '' }; count++; }
+            if (k === 'worked' && !weekend) { days[d] = { activity: actWork(), amount: (days[d] && days[d].amount) || amtFor(actWork()), project: workProject }; count++; }
+            if (k === 'notwork' && weekend) { days[d] = { activity: actOff(), amount: '', project: offProject }; count++; }
         }
         render(); saveDraft();
         toast(`បានកំណត់ ${count} ថ្ងៃ (មិនរាប់ថ្ងៃបុណ្យ និងថ្ងៃដែលមានទិន្នន័យរួច)`);
     }
 
     function paint(d) {
-        const act = mode === 'worked' ? actWork() : actNotWork();
-        const proj = mode === 'worked' ? workProject : '';
+        if (!modeActivityOk(mode)) return;
+        const act = mode === 'worked' ? actWork() : actOff();
+        const proj = mode === 'worked' ? workProject : offProject;
+        const amt = mode === 'worked' ? amtFor(act) : '';   // worked: default/edited $ (blank for Office Work); not working: none
         const cur = days[d];
         if (cur && cur.activity === act && (cur.project || '') === proj) {
-            if (cur.amount !== '') days[d] = { activity: '', amount: cur.amount, project: '' };
+            // tap again = un-select; keep the amount only if it was typed by hand
+            if (cur.amount !== '' && cur.amount !== amt) days[d] = { activity: '', amount: cur.amount, project: '' };
             else delete days[d];
         } else {
-            days[d] = { activity: act, amount: cur ? cur.amount : '', project: proj };
+            days[d] = { activity: act, amount: amt, project: proj };
         }
         render(); saveDraft();
     }
@@ -1158,8 +1367,9 @@
         if (hd) $('shHol').textContent = 'ថ្ងៃបុណ្យ៖ ' + hd.km;
         $('shAct').value = r.activity;
         syncClear($('shAct'));
-        $('shProj').innerHTML = projOptions(r.project || '');
+        $('shProj').value = r.project || '';
         $('shAmt').value = r.amount;
+        $('shAmt').disabled = isNoAmount(r.activity);
         updateKind();
         $('scrim').classList.add('open');
     }
@@ -1173,10 +1383,15 @@
     }
     $('shAct').addEventListener('input', () => {
         updateKind();
+        const noAmt = isNoAmount($('shAct').value);      // red activity: no amount
+        $('shAmt').disabled = noAmt;
+        if (noAmt) $('shAmt').value = '';
         const p = projFor($('shAct').value);             // auto-pick the activity's project; you can still change it
-        if (p !== null) $('shProj').innerHTML = projOptions(p);
+        if (p !== null) $('shProj').value = p;
     });
     $('shAmt').addEventListener('input', updateKind);
+    attachCombo($('shAct'), allActivityNames, 'សកម្មភាព');
+    attachCombo($('shProj'), allProjectNames, 'គម្រោង', true);
     $('shChips').addEventListener('click', e => {
         const b = e.target.closest('.chip');
         if (!b) return;
@@ -1184,7 +1399,9 @@
         $('shAct').value = k === 'work' ? actWork() : k === 'notwork' ? actNotWork() : k === 'sick' ? actSick() : actHoliday();
         syncClear($('shAct'));
         const p = projFor($('shAct').value);
-        $('shProj').innerHTML = projOptions(p !== null ? p : (k === 'work' ? workProject : ''));
+        $('shProj').value = p !== null ? p : (k === 'work' ? workProject : '');
+        $('shAmt').disabled = isNoAmount($('shAct').value);
+        if ($('shAmt').disabled) $('shAmt').value = '';
         updateKind();
     });
     $('shClose').onclick = closeSheet;
@@ -1193,8 +1410,9 @@
     $('shClear').onclick = () => { delete days[editing]; closeSheet(); render(); saveDraft(); };
     $('shSave').onclick = () => {
         const act = $('shAct').value.trim(), amt = $('shAmt').value;
+        if (act === '' && amt !== '') { toast('សូមជ្រើសរើសសកម្មភាពជាមុនសិន'); $('shAct').focus(); return; }
         if (act === '' && amt === '') delete days[editing];
-        else days[editing] = { activity: act, amount: amt, project: $('shProj').value };
+        else days[editing] = { activity: act, amount: amt, project: $('shProj').value.trim() };
         closeSheet(); render(); saveDraft();
     };
 
@@ -1357,7 +1575,7 @@
             if (rec.amount !== '' && !isNaN(parseFloat(rec.amount))) rc.value = parseFloat(rec.amount);
             rc.alignment = { horizontal: 'center' };
             rc.font = { size: 9 };
-            if (rec.activity !== '' && classifyDay(rec.activity) === 'worked') rc.note = `${d.staff} - សកម្មភាព: ${rec.activity}`;   // no note on leave / holiday days
+            if (rec.activity !== '' && classifyDay(rec.activity) === 'worked' && !isNoAmount(rec.activity)) rc.note = `${d.staff} - សកម្មភាព: ${rec.activity}`;   // no note on leave / holiday days
         });
 
         const first = ws.getColumn(5).letter, last = ws.getColumn(lastCol).letter, vL = ws.getColumn(valCol).letter;
@@ -1554,10 +1772,17 @@
             if (r && (r.activity !== "" || r.amount !== "")) {
                 dailyData[`day_${i}`] = {
                     activity: r.activity,
-                    amount: r.amount,
-                    project: r.project || ''
+                    amount: isNoAmount(r.activity) ? '' : r.amount,
+                    project: r.project || '',
+                    noNote: isNoAmount(r.activity)
                 };
             }
+        }
+
+        const noAct = Object.keys(dailyData).filter(k => (dailyData[k].activity || '').trim() === '');
+        if (noAct.length) {
+            alert('មានថ្ងៃដែលមិនទាន់មានសកម្មភាព (ថ្ងៃទី ' + noAct.map(k => k.replace('day_', '')).join(', ') + ') សូមជ្រើសរើសសកម្មភាពជាមុនសិន!');
+            return;
         }
 
         if (Object.keys(dailyData).length === 0) {
