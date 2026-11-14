@@ -1,95 +1,1682 @@
 <!DOCTYPE html>
 <html lang="km">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Field Hub · ICS Monitoring &amp; Field Work Minute</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#256b30" id="themeColor">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<style>
-:root{--bar:#ffffff;--ink:#16221a;--muted:#6a776e;--line:#d9e0d6;--ics:#256b30;--fld:#2f6f6a;--rep:#6b4fa0;--icsbg:#e4f1e5;--fldbg:#dcefed;--repbg:#ebe5f5}
-:root[data-theme="dark"]{--bar:#151c17;--ink:#eaf1ec;--muted:#93a198;--line:#2b372f;--ics:#6fcf7e;--fld:#6cc2ba;--rep:#b69cf0;--icsbg:#1c3322;--fldbg:#1a3532;--repbg:#2a2440}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bar);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Khmer",sans-serif;-webkit-tap-highlight-color:transparent}
-body{display:flex;flex-direction:column;height:100vh;height:100dvh;padding-top:env(safe-area-inset-top,0px)}
-.stage{flex:1;min-height:0;position:relative;background:var(--bar)}
-.stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:none;background:var(--bar)}
-.stage iframe.on{display:block}
-nav{flex:none;display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--bar);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav button{font:inherit;border:0;background:none;color:var(--muted);padding:8px 6px 7px;display:grid;justify-items:center;gap:1px;cursor:pointer;border-top:3px solid transparent;min-height:58px}
-nav button .ic{font-size:21px;line-height:1.1}
-nav button b{font-size:13px;font-weight:700}
-nav button small{font-size:11px;opacity:.85}
-nav button.on{color:var(--c);border-top-color:var(--c)}
-nav button[data-app=ics]{--c:var(--ics)}
-nav button[data-app=fld]{--c:var(--fld)}
-nav button[data-app=rep]{--c:var(--rep)}
-nav button[data-app=ics].on{background:var(--icsbg)}
-nav button[data-app=fld].on{background:var(--fldbg)}
-nav button[data-app=rep].on{background:var(--repbg)}
-nav button:focus-visible{outline:3px solid var(--c);outline-offset:-3px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDU Staff Timesheet Submission Form</title>
+
+    <!-- PWA / Add-to-Home-Screen setup -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2F5233">
+
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <!-- iOS "Add to Home Screen" support -->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Timesheet">
+
+    <!-- Display faces: Moul (formal Khmer letterhead face) + Fraunces (Latin display serif) + Hanuman (body, KM/EN) + JetBrains Mono (figures) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Moul&family=Hanuman:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js" defer></script>
+
+    <style>
+        :root {
+            /* Rice-paddy ledger palette */
+            --ink: #24301F;
+            --paddy: #2F5233;
+            --paddy-light: #4C7A4E;
+            --paddy-dark: #203A24;
+            --paper: #F7F2E4;
+            --paper-card: #FFFEFA;
+            --gold: #C99A3E;
+            --stamp-red: #A6402F;
+            --stamp-ochre: #C68A1F;
+            --line: #DCD2B4;
+
+            --bg-color: var(--paper);
+            --container-bg: var(--paper-card);
+            --text-color: var(--ink);
+            --label-color: #6B6350;
+            --input-bg: #ffffff;
+            --input-border: var(--line);
+            --input-text: #000000;
+            --th-bg: #EFE8D3;
+            --th-color: var(--ink);
+            --td-border: var(--line);
+            --weekend-bg: #EAD9AE;
+
+            --tint-worked-bg: #E9F2E7;
+            --tint-worked-border: var(--paddy-light);
+            --tint-leave-bg: #FBEAE6;
+            --tint-leave-border: var(--stamp-red);
+            --tint-holiday-bg: #FBF1D9;
+            --tint-holiday-border: var(--stamp-ochre);
+
+            --font-display-km: 'Moul', 'Khmer OS Muol', serif;
+            --font-display-en: 'Fraunces', Georgia, serif;
+            --font-body: 'Hanuman', 'Khmer OS Battambang', 'Siemreap', Arial, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+        }
+
+        [data-theme="dark"] {
+            --ink: #ECE7D6;
+            --bg-color: #14180F;
+            --container-bg: #1C2117;
+            --text-color: #ECE7D6;
+            --label-color: #A9A28C;
+            --input-bg: #232A1D;
+            --input-border: #3B4432;
+            --input-text: #F3F0E4;
+            --th-bg: #232A1D;
+            --th-color: #ECE7D6;
+            --td-border: #3B4432;
+            --weekend-bg: #33301A;
+
+            --tint-worked-bg: #202B1E;
+            --tint-worked-border: #6FA96E;
+            --tint-leave-bg: #33201C;
+            --tint-leave-border: #D9695A;
+            --tint-holiday-bg: #332C15;
+            --tint-holiday-border: #E0B45A;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 14px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: auto;
+            background: var(--container-bg);
+            padding: 0;
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(36, 48, 31, 0.14);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ---------- Header band (letterhead) ---------- */
+        .header-band {
+            background: linear-gradient(135deg, var(--paddy) 0%, var(--paddy-dark) 100%);
+            padding: 22px 20px 20px;
+            position: relative;
+            color: #F6F1E1;
+        }
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-right: 74px;
+        }
+
+        .brand-mark {
+            flex-shrink: 0;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,214,140,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+        }
+
+        .brand-title {
+            margin: 0;
+            font-family: var(--font-display-en);
+            font-weight: 700;
+            font-size: 19px;
+            letter-spacing: 0.05em;
+            color: #FBEFD2;
+        }
+
+        .brand-subtitle {
+            margin: 3px 0 0;
+            font-family: var(--font-body);
+            font-size: 12.5px;
+            color: rgba(246,241,225,0.78);
+        }
+
+        .gold-rule {
+            height: 1px;
+            margin-top: 16px;
+            background: linear-gradient(90deg, rgba(201,154,62,0) 0%, rgba(201,154,62,0.9) 50%, rgba(201,154,62,0) 100%);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,214,140,0.35);
+            padding: 7px 11px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: var(--font-body);
+            color: #F6F1E1;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .theme-toggle .icon-sun { display: none; }
+        [data-theme="dark"] .theme-toggle .icon-sun { display: inline-flex; }
+        [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+        .theme-toggle .icon { display: inline-flex; }
+
+        /* ---------- Content ---------- */
+        .content-pad {
+            padding: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 12.5px;
+            margin-bottom: 6px;
+            color: var(--label-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        label .icon {
+            color: var(--paddy-light);
+            flex-shrink: 0;
+        }
+
+        [data-theme="dark"] label .icon {
+            color: var(--tint-worked-border);
+        }
+
+        select, input {
+            padding: 10px 11px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: var(--font-body);
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--paddy-light);
+            box-shadow: 0 0 0 3px rgba(76, 122, 78, 0.18);
+        }
+
+        #grossSalary, #fieldAllowance {
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
+
+        h3 {
+            font-family: var(--font-display-km);
+            font-size: 17px;
+            font-weight: 400;
+            margin-top: 26px;
+            margin-bottom: 4px;
+            color: var(--paddy);
+        }
+
+        [data-theme="dark"] h3 {
+            color: var(--tint-worked-border);
+        }
+
+        h3::after {
+            content: "";
+            display: block;
+            width: 46px;
+            height: 2px;
+            background: var(--gold);
+            margin-top: 6px;
+            border-radius: 2px;
+        }
+
+        .table-hint {
+            font-size: 11.5px;
+            color: var(--label-color);
+            margin: 6px 0 0;
+        }
+
+        /* ---------- Mode buttons ---------- */
+        .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .mode-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 50px; padding: 8px 10px; border-radius: 12px;
+            border: 2px solid var(--input-border); background: var(--input-bg);
+            font-family: var(--font-body); font-weight: 700; font-size: 14px;
+            cursor: pointer; line-height: 1.25; text-align: center;
+        }
+        .mode-btn.work { color: var(--paddy); }
+        .mode-btn.off { color: var(--stamp-red); }
+        [data-theme="dark"] .mode-btn.work { color: var(--tint-worked-border); }
+        [data-theme="dark"] .mode-btn.off { color: var(--tint-leave-border); }
+        .mode-btn.work[aria-pressed="true"] { background: var(--paddy); border-color: var(--paddy); color: #FBEFD2; }
+        .mode-btn.off[aria-pressed="true"] { background: var(--stamp-red); border-color: var(--stamp-red); color: #fff; }
+        .mode-hint { margin: 8px 2px 0; font-size: 12.5px; color: var(--label-color); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 20px; }
+        .mode-hint .clearable input { width: 210px; padding: 6px 34px 6px 9px; font-size: 13px; }
+        .clearable { position: relative; display: inline-block; }
+        .sheet .clearable { display: block; }
+        .clearable input { padding-right: 40px; }
+        .clearable .clr {
+            display: none; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+            width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--th-bg);
+            color: var(--label-color); font-size: 20px; line-height: 1; cursor: pointer; padding: 0;
+        }
+        .clearable.has .clr { display: block; }
+        .chip {
+            border: 1.5px dashed var(--label-color); background: transparent; color: var(--text-color);
+            border-radius: 999px; padding: 5px 12px; font-size: 12px; font-family: var(--font-body); cursor: pointer;
+        }
+        .tool-row { display: flex; gap: 10px; margin: 10px 0 14px; }
+        .btn-holiday {
+            flex: 1; min-height: 46px; border-radius: 12px; border: 2px solid var(--tint-holiday-border);
+            background: var(--tint-holiday-bg); color: var(--text-color); font-family: var(--font-body);
+            font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 8px; line-height: 1.25; padding: 6px 10px;
+        }
+        .btn-ghost {
+            min-height: 46px; border-radius: 12px; border: 1px solid var(--input-border); background: transparent;
+            color: var(--label-color); padding: 0 14px; cursor: pointer; font-family: var(--font-body); font-size: 13px;
+        }
+
+        /* ---------- Calendar ---------- */
+        .month-bar { display: flex; align-items: center; justify-content: space-between; margin: 4px 2px 8px; font-weight: 700; font-size: 14.5px; }
+        .nav-btn {
+            width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--input-border);
+            background: var(--input-bg); color: var(--text-color); cursor: pointer; font-size: 18px; line-height: 1;
+        }
+        .cal {
+            display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+            border: 1px solid var(--td-border); border-radius: 12px; overflow: hidden; background: var(--container-bg);
+        }
+        .dow { background: var(--th-bg); color: var(--th-color); text-align: center; padding: 6px 0 5px; line-height: 1.25; }
+        .dow b { display: block; font-size: 12px; font-weight: 700; }
+        .dow small { display: block; font-family: var(--font-mono); font-size: 9.5px; color: var(--label-color); }
+        .dow.weekend { background: var(--weekend-bg); color: var(--stamp-red); }
+        .dow.weekend small { color: var(--stamp-red); }
+        .pad { background: var(--th-bg); opacity: 0.45; border-top: 1px solid var(--td-border); border-right: 1px solid var(--td-border); }
+        .day {
+            position: relative; min-height: 90px; padding: 5px 3px 4px; border: 0;
+            border-top: 1px solid var(--td-border); border-right: 1px solid var(--td-border);
+            background: var(--container-bg); color: var(--text-color); cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center;
+            font-family: var(--font-body); overflow: hidden;
+        }
+        .cal > :nth-child(7n) { border-right: 0; }
+        .day .dn { font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
+        .day .da {
+            font-size: 10px; line-height: 1.25; width: 100%; word-break: break-word;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 700;
+        }
+        .day .dm { font-family: var(--font-mono); font-size: 10px; color: var(--label-color); }
+        .day .dp { font-family: var(--font-mono); font-weight: 700; font-size: 11px; background: var(--text-color); color: var(--container-bg); border-radius: 4px; padding: 0 6px; line-height: 1.5; }
+        .mode-hint select { width: 130px; padding: 6px 9px; font-size: 13px; }
+        .day.weekend { background: color-mix(in srgb, var(--weekend-bg) 55%, var(--container-bg)); }
+        .day.weekend .dn { color: var(--stamp-red); }
+        .day .hdot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--stamp-ochre); }
+        .day.cell-worked { background: var(--tint-worked-bg); box-shadow: inset 0 0 0 2px var(--tint-worked-border); }
+        .day.cell-leave { background: var(--tint-leave-bg); box-shadow: inset 0 0 0 2px var(--tint-leave-border); }
+        .day.cell-holiday { background: var(--tint-holiday-bg); box-shadow: inset 0 0 0 2px var(--tint-holiday-border); }
+        .day.cell-worked .da { color: var(--paddy); }
+        .day.cell-leave .da { color: var(--tint-leave-border); }
+        .day.cell-holiday .da { color: var(--stamp-ochre); }
+        [data-theme="dark"] .day.cell-worked .da { color: var(--tint-worked-border); }
+        .day.today .dn::after { content: ""; display: block; height: 2px; margin-top: 1px; background: var(--text-color); border-radius: 1px; }
+        @media (min-width: 640px) {
+            .day { min-height: 108px; }
+            .day .dn { font-size: 16px; }
+            .day .da { font-size: 12px; }
+            .day .dm { font-size: 12px; }
+        }
+
+        .live-sum { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+        .live-sum div { background: var(--th-bg); border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 11px; color: var(--label-color); line-height: 1.3; }
+        .live-sum b { display: block; font-family: var(--font-mono); font-size: 18px; color: var(--text-color); }
+
+        .hol-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+        .hol-list li { display: flex; gap: 12px; align-items: center; border: 1.5px solid var(--tint-holiday-border); background: var(--tint-holiday-bg); border-radius: 10px; padding: 8px 12px; }
+        .hol-list .hd { font-family: var(--font-mono); font-weight: 700; font-size: 14px; min-width: 52px; text-align: center; }
+        .hol-list .ht { font-size: 12.5px; line-height: 1.4; }
+        .hol-list .ht small { display: block; color: var(--label-color); font-size: 11px; }
+        .hol-note { margin: 10px 2px 0; font-size: 11px; color: var(--label-color); }
+
+        /* ---------- Day sheet ---------- */
+        .scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
+        .scrim.open { display: flex; }
+        .sheet { width: 100%; max-width: 520px; background: var(--container-bg); color: var(--text-color); border-radius: 18px 18px 0 0; padding: 18px 18px 22px; max-height: 90vh; overflow: auto; }
+        .sheet h4 { margin: 0 0 4px; font-size: 16px; font-family: var(--font-body); }
+        .sheet .sh-hol { margin: 0 0 8px; font-size: 12.5px; font-weight: 700; color: var(--stamp-ochre); }
+        .sheet .sh-kind { margin: 6px 0 0; font-size: 12px; font-weight: 700; min-height: 18px; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 12px; }
+        .chips .chip { border-style: solid; }
+        .sheet .acts { display: flex; gap: 10px; margin-top: 16px; }
+        .sheet .save { flex: 1; min-height: 46px; border: 0; border-radius: 10px; background: var(--paddy); color: #FBEFD2; font-family: var(--font-body); font-weight: 700; font-size: 15px; cursor: pointer; }
+
+        .btn-export {
+            width: 100%; margin-top: 10px; min-height: 46px; border-radius: 9px; cursor: pointer;
+            border: 2px solid var(--paddy); background: transparent; color: var(--paddy);
+            font-family: var(--font-body); font-weight: bold; font-size: 14px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        [data-theme="dark"] .btn-export { border-color: var(--tint-worked-border); color: var(--tint-worked-border); }
+
+        .toast {
+            position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+            background: #26301F; color: #F6F1E1; padding: 11px 18px; border-radius: 10px; font-size: 13px;
+            opacity: 0; pointer-events: none; transition: 0.2s; z-index: 60; max-width: 90vw; text-align: center;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%); }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: var(--label-color);
+        }
+
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .legend .dot.worked { background: var(--tint-worked-border); }
+        .legend .dot.leave { background: var(--tint-leave-border); }
+        .legend .dot.holiday { background: var(--tint-holiday-border); }
+
+        .btn-submit {
+            background-color: var(--paddy);
+            color: #FBEFD2;
+            border: none;
+            padding: 13px;
+            font-size: 15px;
+            font-family: var(--font-body);
+            font-weight: bold;
+            border-radius: 9px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--paddy-dark);
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            color: var(--paddy);
+            margin-top: 12px;
+            font-weight: bold;
+            font-size: 13.5px;
+        }
+
+        [data-theme="dark"] #loading { color: var(--tint-worked-border); }
+
+        /* ---------- Summary card ---------- */
+        #summaryModal {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #summaryModal.show {
+            display: block;
+            animation: summaryFadeIn 0.35s ease;
+        }
+
+        @keyframes summaryFadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .summary-box {
+            background: var(--th-bg);
+            color: var(--text-color);
+            border-radius: 14px;
+            border: 1px solid var(--td-border);
+            padding: 20px;
+        }
+
+        .summary-box h3.summary-title {
+            margin: 0 0 4px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: var(--font-display-km);
+            font-size: 18px;
+            color: var(--paddy);
+        }
+
+        .summary-box h3.summary-title::after { display: none; }
+
+        [data-theme="dark"] .summary-box h3.summary-title { color: var(--tint-worked-border); }
+
+        .summary-sub {
+            text-align: center;
+            font-size: 13px;
+            font-family: var(--font-mono);
+            color: var(--label-color);
+            margin-bottom: 18px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .summary-grid.three {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .summary-card {
+            background: var(--container-bg);
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid var(--td-border);
+        }
+
+        .summary-card .num {
+            font-family: var(--font-mono);
+            font-size: 19px;
+            font-weight: bold;
+            color: var(--paddy);
+            display: block;
+        }
+
+        [data-theme="dark"] .summary-card.worked .num { color: var(--tint-worked-border); }
+
+        .summary-card.off .num { color: var(--stamp-red); }
+        .summary-card.holiday .num { color: var(--stamp-ochre); }
+
+        .summary-card .lbl {
+            font-size: 11px;
+            color: var(--label-color);
+            margin-top: 3px;
+            display: block;
+            line-height: 1.4;
+        }
+
+        .summary-list {
+            margin-top: 14px;
+            border-top: 1px solid var(--td-border);
+            padding-top: 12px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13.5px;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--td-border);
+        }
+
+        .summary-row span:first-child {
+            color: var(--label-color);
+        }
+
+        .summary-row span:last-child {
+            font-weight: bold;
+            font-family: var(--font-mono);
+        }
+
+        .summary-clear-btn {
+            margin-top: 14px;
+            background: transparent;
+            color: var(--stamp-red);
+            border: 1px solid var(--stamp-red);
+            padding: 9px;
+            font-size: 13px;
+            font-family: var(--font-body);
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .summary-clear-btn:hover {
+            background-color: var(--stamp-red);
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            .brand-title { font-size: 16px; }
+            .brand-subtitle { font-size: 11.5px; }
+        }
+    </style>
 </head>
-<body>
-<div class="stage">
-  <iframe id="fr-ics" title="ICS Monitoring" allow="geolocation"></iframe>
-  <iframe id="fr-fld" title="Field Work Minute" allow="geolocation"></iframe>
-  <iframe id="fr-rep" title="Reports" allow="geolocation"></iframe>
+<body data-theme="light">
+
+<div class="container">
+    <div class="header-band">
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <span class="icon icon-moon"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg></span>
+            <span class="icon icon-sun"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg></span>
+            <span id="themeText">Dark</span>
+        </button>
+
+        <div class="brand-row">
+            <div class="brand-mark">
+                <svg viewBox="0 0 48 48" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M24 44V16"/>
+                    <path d="M24 16c0-6 4-10 10-12-2 6-3 10-10 12z"/>
+                    <path d="M24 22c0-5-4-9-9-11 1 5 3 9 9 11z"/>
+                    <ellipse cx="20" cy="10" rx="2.1" ry="3.2" transform="rotate(-30 20 10)"/>
+                    <ellipse cx="28" cy="7" rx="2.1" ry="3.2" transform="rotate(25 28 7)"/>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1 class="brand-title">RISING PHOENIX CO., LTD</h1>
+                <p class="brand-subtitle">Staff Timesheet Submission Form</p>
+            </div>
+        </div>
+        <div class="gold-rule"></div>
+    </div>
+
+    <div class="content-pad">
+        <form id="timesheetForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="staffName">
+                        <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg></span>
+                        ឈ្មោះបុគ្គលិក (Staff Name):
+                    </label>
+                    <select id="staffName" required>
+                        <option value="">-- កំពុងទាញយកឈ្មោះបុគ្គលិក... --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="monthYear">
+                        <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v3.5M16 3.5v3.5"/></svg></span>
+                        ខែ និងឆ្នាំ (Month & Year):
+                    </label>
+                    <input type="month" id="monthYear" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="grossSalary">
+                        <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.3 9.3c0-1 1-1.8 2.7-1.8s2.7.9 2.7 2c0 2.6-5.4 1.4-5.4 4 0 1.1 1.2 2 2.7 2s2.7-.8 2.7-1.8"/></svg></span>
+                        ប្រាក់ខែគោល (Gross Salary):
+                    </label>
+                    <input type="number" id="grossSalary" placeholder="ឧ. 500">
+                </div>
+                <div class="form-group">
+                    <label for="fieldAllowance">
+                        <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-7 2-12 6-16-6 1-9 6-9 12"/><path d="M12 21c0-6-2-10-5-13"/></svg></span>
+                        ប្រាក់ឧបត្ថម្ភទីវាល (Field Allowance):
+                    </label>
+                    <input type="number" id="fieldAllowance" placeholder="គណនាស្វ័យប្រវត្តិ" readonly style="background-color: var(--th-bg); font-weight: bold; color: var(--paddy);">
+                </div>
+            </div>
+
+            <h3>តារាងសកម្មភាពប្រចាំថ្ងៃ (Daily Activities)</h3>
+            <p class="table-hint">ជ្រើសប៊ូតុងខាងក្រោម រួចចុចលើថ្ងៃក្នុងប្រតិទិន ឬចុចថ្ងៃណាមួយដោយផ្ទាល់ ដើម្បីបញ្ចូលសកម្មភាព និងទឹកប្រាក់។</p>
+
+            <div class="modes">
+                <button type="button" class="mode-btn work" id="modeWork" aria-pressed="false" onclick="setMode('worked')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    ជ្រើសថ្ងៃធ្វើការ
+                </button>
+                <button type="button" class="mode-btn off" id="modeOff" aria-pressed="false" onclick="setMode('notwork')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    ជ្រើសថ្ងៃអត់ធ្វើការ
+                </button>
+            </div>
+            <div class="mode-hint" id="modeHint" aria-live="polite"></div>
+
+            <div class="tool-row">
+                <button type="button" class="btn-holiday" onclick="loadHolidays()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+                    ទាញថ្ងៃឈប់សម្រាកតាមសេចក្តីប្រកាស
+                </button>
+                <button type="button" class="btn-ghost" onclick="clearMonth()">សម្អាត</button>
+            </div>
+
+            <div class="month-bar">
+                <button type="button" class="nav-btn" onclick="stepMonth(-1)" aria-label="ខែមុន">‹</button>
+                <span id="monthTitle"></span>
+                <button type="button" class="nav-btn" onclick="stepMonth(1)" aria-label="ខែក្រោយ">›</button>
+            </div>
+            <div class="cal" id="cal"></div>
+            <div class="legend">
+                <span><span class="dot worked"></span>ធ្វើការ (Worked)</span>
+                <span><span class="dot leave"></span>ឈប់សម្រាក (Leave)</span>
+                <span><span class="dot holiday"></span>ថ្ងៃបុណ្យ (Holiday)</span>
+            </div>
+
+            <div class="live-sum" id="liveSum"></div>
+            <ul class="hol-list" id="holList"></ul>
+            <p class="hol-note" id="holNote"></p>
+
+            <datalist id="activityListOptions"></datalist>
+
+            <button type="button" class="btn-submit" onclick="saveData()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+                រក្សាទុក និងបញ្ជូនទិន្នន័យ (Submit Data)
+            </button>
+            <button type="button" class="btn-export" onclick="exportCurrent()">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+                ទាញយកជា Excel (Export)
+            </button>
+            <div id="loading">កំពុងបញ្ជូនទិន្នន័យទៅកាន់ Google Sheets... សូមរង់ចាំបន្តិច!</div>
+        </form>
+    </div>
 </div>
-<nav aria-label="Menu">
-  <button type="button" data-app="ics" aria-label="ICS Monitoring"><span class="ic">🌱</span><b>ICS Monitoring</b><small>ត្រួតពិនិត្យ ICS</small></button>
-  <button type="button" data-app="fld" aria-label="Field Work Minute"><span class="ic">📝</span><b>Field Work Minute</b><small>កំណត់ហេតុចុះ Field</small></button>
-  <button type="button" data-app="rep" aria-label="Reports"><span class="ic">📊</span><b>Reports</b><small>របាយការណ៍លម្អិត</small></button>
-</nav>
+
+<!-- Summary shown after a successful submit; stays visible until a new month is chosen -->
+<div class="container" id="summaryModal">
+    <div class="content-pad">
+        <div class="summary-box">
+            <h3 class="summary-title">
+                <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M8 12.3l2.6 2.6L16.5 9"/></svg>
+                សង្ខេបទិន្នន័យដែលបានបញ្ជូនចុងក្រោយ
+            </h3>
+            <div class="summary-sub" id="summaryStaffLine"></div>
+
+            <div class="summary-grid three">
+                <div class="summary-card worked">
+                    <span class="num" id="sumWorkedDays">0</span>
+                    <span class="lbl">ថ្ងៃធ្វើការ<br>(Worked)</span>
+                </div>
+                <div class="summary-card off">
+                    <span class="num" id="sumLeaveDays">0</span>
+                    <span class="lbl">ថ្ងៃឈប់សម្រាក<br>(Leave)</span>
+                </div>
+                <div class="summary-card holiday">
+                    <span class="num" id="sumHolidayDays">0</span>
+                    <span class="lbl">ថ្ងៃឈប់បុណ្យ<br>(Public Holiday)</span>
+                </div>
+            </div>
+
+            <div class="summary-list">
+                <div class="summary-row">
+                    <span>ចំនួនថ្ងៃសរុបក្នុងខែ (Total Days)</span>
+                    <span id="sumTotalDays">-</span>
+                </div>
+                <div class="summary-row" id="sumUnfilledRow" style="display:none;">
+                    <span>ថ្ងៃមិនទាន់បំពេញ (Not Yet Filled)</span>
+                    <span id="sumUnfilledDays">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>ប្រាក់ខែគោល (Gross Salary)</span>
+                    <span id="sumGrossSalary">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>ប្រាក់ឧបត្ថម្ភទីវាលសរុប (Total Field Allowance)</span>
+                    <span id="sumFieldAllowance">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>ចំណូលសរុប (Salary + Allowance)</span>
+                    <span id="sumGrandTotal">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>មធ្យមភាគប្រាក់/ថ្ងៃធ្វើការ (Avg / Worked Day)</span>
+                    <span id="sumAvgPerDay">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>ថ្ងៃដែលទទួលបានប្រាក់ខ្ពស់បំផុត (Highest Day)</span>
+                    <span id="sumHighestDay">-</span>
+                </div>
+            </div>
+
+            <button type="button" class="btn-export" onclick="exportLast()">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+                ទាញយកជា Excel (Export)
+            </button>
+
+            <button type="button" class="summary-clear-btn" onclick="clearSummaryHistory()">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/></svg>
+                លុបប្រវត្តិសង្ខេប (Clear History)
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Day detail sheet -->
+<div class="scrim" id="scrim">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+        <h4 id="shTitle"></h4>
+        <p class="sh-hol" id="shHol" hidden></p>
+        <label for="shAct">សកម្មភាព (Activity)</label>
+        <span class="clearable"><input type="text" id="shAct" list="activityListOptions" placeholder="សកម្មភាព" autocomplete="off"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+        <div class="chips" id="shChips">
+            <button type="button" class="chip" data-k="work">ធ្វើការ</button>
+            <button type="button" class="chip" data-k="notwork">អត់ធ្វើការ</button>
+            <button type="button" class="chip" data-k="sick">ឈប់ឈឺ</button>
+            <button type="button" class="chip" data-k="holiday">ថ្ងៃបុណ្យ</button>
+        </div>
+        <label for="shProj">គម្រោង (Project)</label>
+        <select id="shProj"></select>
+        <label for="shAmt" style="margin-top:10px">ទឹកប្រាក់ (Amount)</label>
+        <input type="number" id="shAmt" placeholder="ទឹកប្រាក់" inputmode="decimal" step="any">
+        <p class="sh-kind" id="shKind"></p>
+        <div class="acts">
+            <button type="button" class="btn-ghost" id="shClear">សម្អាតថ្ងៃនេះ</button>
+            <button type="button" class="btn-ghost" id="shClose">បិទ</button>
+            <button type="button" class="save" id="shSave">រក្សាទុក</button>
+        </div>
+    </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
 <script>
-(function () {
-  var SRC = { ics: 'ics.html', fld: 'field.html', rep: 'report.html' };
-  var TITLE = { ics: 'ICS Monitoring', fld: 'Field Work Minute', rep: 'Reports' };
-  var COLOR = { ics: '#256b30', fld: '#2f6f6a', rep: '#6b4fa0' };
-  var KEY = 'hub_last';
-  function get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
-  function put(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
-  var current = 'ics';
-  // The menu bar follows the light / dark choice made inside the app that is open.
-  function themeOf(app) {
-    try {
-      var a = JSON.parse(localStorage.getItem('ics_theme') || 'null'), f = localStorage.getItem('fl_theme');
-      var t = app === 'ics' ? a : (f === 'dark' || f === 'light' ? f : a);
-      if (t === 'dark' || t === 'light') return t;
-    } catch (e) {}
-    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  function applyTheme() { document.documentElement.dataset.theme = themeOf(current); }
-  window.addEventListener('storage', applyTheme);
-  function show(app) {
-    if (!SRC[app]) app = 'ics';
-    current = app; applyTheme();
-    Object.keys(SRC).forEach(function (k) {
-      var fr = document.getElementById('fr-' + k), on = k === app;
-      if (on && !fr.getAttribute('src')) fr.setAttribute('src', SRC[k]);     // load an app the first time it is opened
-      fr.classList.toggle('on', on);
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyNefEeNFtacVPHDg7gy3-tE8RomIOAZnkak0YybkmVlWY5TXQVsKUbtprEg4omHjUJEQ/exec'; // <-- ជំនួស URL របស់អ្នកនៅទីនេះ
+
+    let globalActivities = [];
+
+    function toggleTheme() {
+        const body = document.body;
+        const themeText = document.getElementById('themeText');
+
+        if (body.getAttribute('data-theme') === 'light') {
+            body.setAttribute('data-theme', 'dark');
+            themeText.textContent = 'Light';
+        } else {
+            body.setAttribute('data-theme', 'light');
+            themeText.textContent = 'Dark';
+        }
+    }
+
+    // Classify a day exactly like the Apps Script colors it in the master sheet:
+    //   Leave (red)   -> activity contains LEAVE / NOT WORKING / ច្បាប់, or the WHOLE WORD AL / PL / ML / CL / SL
+    //   Holiday (gold)-> activity contains PUBLIC HOLIDAY / HOLIDAY
+    //   Worked (green)-> anything else (including a day with only an amount, or blank activity)
+    // Note: short codes (AL, PL, ML, CL, SL) must match a whole word, not just appear inside
+    // a longer word — otherwise "EXTERNAL AUDITING" would wrongly match "AL" inside "EXTERNAL".
+    function classifyDay(activity) {
+        const raw = (activity || '').trim();
+        if (!raw) return 'worked'; // blank activity -> matches Apps Script's else-branch
+        const upper = raw.toUpperCase();
+
+        const holidayPhrases = ['PUBLIC HOLIDAY', 'HOLIDAY'];
+        if (holidayPhrases.some(k => upper.includes(k))) return 'holiday';
+
+        const leavePhrases = ['LEAVE', 'NOT WORKING', 'ច្បាប់'];
+        if (leavePhrases.some(k => upper.includes(k))) return 'leave';
+
+        const leaveCodes = ['AL', 'PL', 'ML', 'CL', 'SL'];
+        const tokens = upper.split(/[^A-Z]+/).filter(Boolean); // split into whole words only
+        if (tokens.some(t => leaveCodes.includes(t))) return 'leave';
+
+        return 'worked';
+    }
+
+    /* ================= Calendar state ================= */
+    let days = {};            // { 5: {activity:'External', amount:'12'} } for the month on screen
+    let mode = null;          // null | 'worked' | 'notwork'
+    let editing = null;
+    let lastMonthVal = '';
+    let workActText = localStorage.getItem('timesheetWorkActivity') || '';
+    let workProject = localStorage.getItem('timesheetWorkProject') || '';
+    // Project codes shown in the dropdowns. If your Apps Script getData also returns "projects": ["IR","CE","RE"],
+    // that list replaces this one automatically.
+    let PROJECTS = ['IR', 'CE', 'RE'];
+    // Default project for each activity (Staff sheet: Column B -> Column C). Empty string = no fixed project.
+    let ACT_PROJ = {};
+    function projFor(act) {
+        const k = String(act || '').trim();
+        return Object.prototype.hasOwnProperty.call(ACT_PROJ, k) ? ACT_PROJ[k] : null;   // null = unknown activity
+    }
+    function projOptions(sel) {
+        const list = (sel && !PROJECTS.includes(sel)) ? [...PROJECTS, sel] : PROJECTS;
+        return '<option value="">គម្រោង: គ្មាន</option>' +
+            list.map(p => `<option value="${esc(p)}"${p === sel ? ' selected' : ''}>${esc(p)}</option>`).join('');
+    }
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const MONTH_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const MONTH_KM = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
+    const DOW = [["អា","Sun"],["ច","Mon"],["អ","Tue"],["ពុ","Wed"],["ព្រ","Thu"],["សុ","Fri"],["សៅ","Sat"]];
+    const kmNum = n => String(n).replace(/\d/g, d => "០១២៣៤៥៦៧៨៩"[d]);
+
+    function ym() {
+        const v = $('monthYear').value || '';
+        let [y, m] = v.split('-').map(Number);
+        if (!y || !m) { const t = new Date(); y = t.getFullYear(); m = t.getMonth() + 1; }
+        return { y, m };
+    }
+
+    /* ======= Cambodia public holidays 2026 =======
+       Sub-Decree No. 167 (Aug 2025) + Prakas No. 216/25, Ministry of Labour and Vocational Training (18 Sep 2025).
+       For other years add a new block, e.g. addHol(2027, 1, [1], "...", "..."). */
+    const HOL = {};
+    function addHol(y, m, ds, km, en) { (HOL[y] = HOL[y] || []).push(...ds.map(d => ({ m, d, km, en }))); }
+    addHol(2026, 1, [1], "ទិវាចូលឆ្នាំសកល", "International New Year’s Day");
+    addHol(2026, 1, [7], "ទិវាជ័យជម្នះលើរបបប្រល័យពូជសាសន៍", "Victory over Genocide Day");
+    addHol(2026, 3, [8], "ទិវាអន្តរជាតិនារី", "International Women’s Day");
+    addHol(2026, 4, [14, 15, 16], "ពិធីបុណ្យចូលឆ្នាំថ្មី ប្រពៃណីជាតិ", "Khmer New Year");
+    addHol(2026, 5, [1], "ទិវាពលកម្មអន្តរជាតិ និងពិធីបុណ្យវិសាខបូជា", "Labour Day & Visak Bochea");
+    addHol(2026, 5, [5], "ព្រះរាជពិធីច្រត់ព្រះនង្គ័ល", "Royal Ploughing Ceremony");
+    addHol(2026, 5, [14], "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី", "King’s Birthday");
+    addHol(2026, 6, [18], "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី នរោត្តម មុនីនាថ សីហនុ", "Queen Mother’s Birthday");
+    addHol(2026, 9, [24], "ទិវារដ្ឋធម្មនុញ្ញ", "Constitution Day");
+    addHol(2026, 10, [10, 11, 12], "ពិធីបុណ្យភ្ជុំបិណ្ឌ", "Pchum Ben");
+    addHol(2026, 10, [15], "ទិវាប្រារព្ធពិធីគោរពព្រះវិញ្ញាណក្ខន្ធ ព្រះបរមរតនកោដ្ឋ", "Commemoration of King Father Norodom Sihanouk");
+    addHol(2026, 10, [29], "ព្រះរាជពិធីគ្រងព្រះបរមរាជសម្បត្តិ ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី", "King’s Coronation Day");
+    addHol(2026, 11, [9], "ពិធីបុណ្យឯករាជ្យជាតិ", "Independence Day");
+    addHol(2026, 11, [23, 24, 25], "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែ អកអំបុក", "Water Festival");
+    addHol(2026, 12, [29], "ទិវាសន្តិភាពនៅកម្ពុជា", "Peace Day in Cambodia");
+
+    function holMap(y, m) {
+        const o = {};
+        (HOL[y] || []).filter(h => h.m === m).forEach(h => o[h.d] = h);
+        return o;
+    }
+
+    /* Activity text used by each button. Prefers the wording that already exists in your master list,
+       so the Apps Script colouring keeps working. */
+    function findActivity(keyword, fallback) {
+        return globalActivities.find(a => String(a).toUpperCase().includes(keyword)) || fallback;
+    }
+    const actNotWork = () => findActivity('NOT WORKING', 'Not Working');
+    const actSick = () => findActivity('SICK LEAVE', 'Sick Leave');
+    const actHoliday = () => findActivity('PUBLIC HOLIDAY', 'Public Holiday');
+    const actWork = () => (workActText || '').trim() || 'Working';
+
+    /* ================= Master data from Google Sheets ================= */
+    function fetchMasterData() {
+        fetch(scriptURL + '?action=getData')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "error") {
+                    alert(data.message);
+                    return;
+                }
+
+                const staffSelect = $('staffName');
+                staffSelect.innerHTML = '<option value="">-- ជ្រើសរើសឈ្មោះ --</option>';
+                data.staffs.forEach(staff => {
+                    const opt = document.createElement('option');
+                    opt.value = staff;
+                    opt.textContent = staff;
+                    staffSelect.appendChild(opt);
+                });
+
+                globalActivities = data.activities || [];
+                if (Array.isArray(data.projects) && data.projects.length) PROJECTS = data.projects.map(String);
+                ACT_PROJ = data.activityProjects || {};
+                const datalist = $('activityListOptions');
+                datalist.innerHTML = '';
+                globalActivities.forEach(act => {
+                    const opt = document.createElement('option');
+                    opt.value = act;
+                    datalist.appendChild(opt);
+                });
+
+                // default "worked" activity = first activity in the master list that counts as work
+                if (!workActText) {
+                    workActText = globalActivities.find(a => classifyDay(a) === 'worked') || 'Working';
+                }
+                if (!workProject && projFor(workActText) !== null) workProject = projFor(workActText);
+                restoreStaffFromDraft();
+                if (mode === 'worked') renderMode();
+            })
+            .catch(error => {
+                console.error('Error fetching master data:', error);
+            });
+    }
+
+    /* ================= Render ================= */
+    function render() {
+        const { y, m } = ym();
+        const hol = holMap(y, m);
+        const first = new Date(y, m - 1, 1).getDay();
+        const n = new Date(y, m, 0).getDate();
+        const t = new Date();
+
+        let h = DOW.map((d, i) => `<div class="dow${i === 0 || i === 6 ? ' weekend' : ''}"><b>${d[0]}</b><small>${d[1]}</small></div>`).join('');
+        for (let i = 0; i < first; i++) h += '<div class="pad"></div>';
+
+        for (let d = 1; d <= n; d++) {
+            const r = days[d];
+            const has = r && (r.activity !== '' || r.amount !== '');
+            const w = new Date(y, m - 1, d).getDay();
+            const kind = has ? classifyDay(r.activity) : '';
+            const isToday = t.getFullYear() === y && t.getMonth() + 1 === m && t.getDate() === d;
+            const cls = ['day', (w === 0 || w === 6) ? 'weekend' : '', kind ? 'cell-' + kind : '', isToday ? 'today' : ''].join(' ');
+            const hd = hol[d];
+            h += `<button type="button" class="${cls}" data-d="${d}" aria-label="${d} ${MONTH_EN[m-1]}${hd ? ', ' + esc(hd.en) : ''}">
+                ${hd && kind !== 'holiday' ? '<span class="hdot"></span>' : ''}
+                <span class="dn">${d}</span>
+                ${has && r.project ? `<span class="dp">${esc(r.project)}</span>` : ''}
+                <span class="da">${has ? esc(r.activity) : ''}</span>
+                <span class="dm">${has && r.amount !== '' ? esc(r.amount) : ''}</span>
+            </button>`;
+        }
+        $('cal').innerHTML = h;
+        $('monthTitle').textContent = `${MONTH_KM[m-1]} ${kmNum(y)} (${MONTH_EN[m-1]} ${y})`;
+
+        // live counters
+        const c = { worked: 0, leave: 0, holiday: 0 };
+        let filled = 0;
+        Object.values(days).forEach(r => {
+            if (r.activity === '' && r.amount === '') return;
+            filled++; c[classifyDay(r.activity)]++;
+        });
+        $('liveSum').innerHTML =
+            `<div><b>${c.worked}</b>ធ្វើការ</div><div><b>${c.leave}</b>ឈប់សម្រាក</div><div><b>${c.holiday}</b>ថ្ងៃបុណ្យ</div><div><b>${Math.max(n - filled, 0)}</b>មិនទាន់បំពេញ</div>`;
+
+        // official holidays of this month
+        const keys = Object.keys(hol).map(Number).sort((a, b) => a - b);
+        $('holList').innerHTML = keys.map(d =>
+            `<li><span class="hd">${d} ${MONTH_EN[m-1].slice(0,3)}</span><span class="ht">${esc(hol[d].km)}<small>${esc(hol[d].en)}</small></span></li>`).join('');
+        $('holNote').textContent = !HOL[y]
+            ? `មិនទាន់មានបញ្ជីថ្ងៃបុណ្យឆ្នាំ ${y} ក្នុងប្រព័ន្ធ។`
+            : (keys.length ? 'តាមប្រកាសលេខ ២១៦/២៥ ក្រសួងការងារ និងបណ្តុះបណ្តាលវិជ្ជាជីវៈ។' : 'ខែនេះគ្មានថ្ងៃបុណ្យជាតិទេ។');
+
+        calculateTotalAllowance();
+    }
+
+    function generateDays() { render(); }   // kept for compatibility
+
+    function calculateTotalAllowance() {
+        let total = 0;
+        Object.values(days).forEach(r => {
+            const v = parseFloat(r.amount);
+            if (!isNaN(v)) total += v;
+        });
+        $('fieldAllowance').value = total > 0 ? total : '';
+    }
+
+    /* ================= Modes (worked / not working) ================= */
+    function setMode(k) {
+        mode = (mode === k) ? null : k;
+        renderMode();
+    }
+
+    function renderMode() {
+        $('modeWork').setAttribute('aria-pressed', mode === 'worked');
+        $('modeOff').setAttribute('aria-pressed', mode === 'notwork');
+        const hint = $('modeHint');
+        hint.innerHTML = '';
+        if (mode === 'worked') {
+            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
+                <span class="clearable"><input type="text" id="workActivity" list="activityListOptions" autocomplete="off" value="${esc(workActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
+                <select id="workProject" aria-label="គម្រោង">${projOptions(workProject)}</select>
+                <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`;
+            syncClear($('workActivity'));
+            $('workProject').addEventListener('change', e => {
+                workProject = e.target.value;
+                localStorage.setItem('timesheetWorkProject', workProject);
+            });
+            $('workActivity').addEventListener('input', e => {
+                workActText = e.target.value;
+                localStorage.setItem('timesheetWorkActivity', workActText);
+                const p = projFor(workActText);          // auto-pick the activity's project; you can still change it
+                if (p !== null) {
+                    workProject = p;
+                    localStorage.setItem('timesheetWorkProject', workProject);
+                    $('workProject').innerHTML = projOptions(workProject);
+                }
+            });
+        } else if (mode === 'notwork') {
+            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ «${esc(actNotWork())}»</span>
+                <button type="button" class="chip" onclick="fillWeek('notwork')">ជ្រើស សៅរ៍–អាទិត្យ ទាំងអស់</button>`;
+        }
+    }
+
+    // Fill every EMPTY weekday (worked) or weekend day (not working); public holidays and filled days are skipped
+    function fillWeek(k) {
+        const { y, m } = ym();
+        const hol = holMap(y, m);
+        const n = new Date(y, m, 0).getDate();
+        let count = 0;
+        for (let d = 1; d <= n; d++) {
+            const w = new Date(y, m - 1, d).getDay();
+            const weekend = (w === 0 || w === 6);
+            if (hol[d]) continue;
+            if (days[d] && days[d].activity !== '') continue;
+            if (k === 'worked' && !weekend) { days[d] = { activity: actWork(), amount: (days[d] && days[d].amount) || '', project: workProject }; count++; }
+            if (k === 'notwork' && weekend) { days[d] = { activity: actNotWork(), amount: (days[d] && days[d].amount) || '', project: '' }; count++; }
+        }
+        render(); saveDraft();
+        toast(`បានកំណត់ ${count} ថ្ងៃ (មិនរាប់ថ្ងៃបុណ្យ និងថ្ងៃដែលមានទិន្នន័យរួច)`);
+    }
+
+    function paint(d) {
+        const act = mode === 'worked' ? actWork() : actNotWork();
+        const proj = mode === 'worked' ? workProject : '';
+        const cur = days[d];
+        if (cur && cur.activity === act && (cur.project || '') === proj) {
+            if (cur.amount !== '') days[d] = { activity: '', amount: cur.amount, project: '' };
+            else delete days[d];
+        } else {
+            days[d] = { activity: act, amount: cur ? cur.amount : '', project: proj };
+        }
+        render(); saveDraft();
+    }
+
+    $('cal').addEventListener('click', e => {
+        const b = e.target.closest('.day');
+        if (!b) return;
+        const d = +b.dataset.d;
+        if (mode) paint(d); else openSheet(d);
     });
-    document.querySelectorAll('nav button').forEach(function (b) {
-      var on = b.getAttribute('data-app') === app;
-      b.classList.toggle('on', on);
-      b.setAttribute('aria-current', on ? 'page' : 'false');
+
+    /* ================= Public holidays ================= */
+    function loadHolidays() {
+        const { y, m } = ym();
+        if (!HOL[y]) { toast(`មិនទាន់មានបញ្ជីថ្ងៃបុណ្យឆ្នាំ ${y}`); return; }
+        const hol = holMap(y, m);
+        const ds = Object.keys(hol).map(Number);
+        if (!ds.length) { toast('ខែនេះគ្មានថ្ងៃបុណ្យជាតិទេ'); return; }
+        const act = actHoliday();
+        let set = 0, skipped = 0;
+        ds.forEach(d => {
+            const cur = days[d];
+            if (cur && cur.activity !== '' && classifyDay(cur.activity) !== 'holiday') { skipped++; return; }
+            days[d] = { activity: act, amount: cur ? cur.amount : '', project: '' };
+            set++;
+        });
+        render(); saveDraft();
+        toast(`បានទាញថ្ងៃបុណ្យ ${set} ថ្ងៃ` + (skipped ? ` (រំលង ${skipped} ថ្ងៃដែលមានសកម្មភាពរួច)` : ''));
+    }
+
+    function clearMonth() {
+        if (!Object.keys(days).length) return;
+        if (confirm('សម្អាតទិន្នន័យទាំងអស់នៃខែនេះ?')) { days = {}; render(); saveDraft(); }
+    }
+
+    /* ================= Month navigation ================= */
+    function stepMonth(k) {
+        let { y, m } = ym();
+        m += k;
+        if (m < 1) { m = 12; y--; }
+        if (m > 12) { m = 1; y++; }
+        $('monthYear').value = `${y}-${String(m).padStart(2, '0')}`;
+        $('monthYear').dispatchEvent(new Event('change'));
+    }
+
+    /* ================= Day sheet ================= */
+    function openSheet(d) {
+        editing = d;
+        const { y, m } = ym();
+        const r = days[d] || { activity: '', amount: '' };
+        const hd = holMap(y, m)[d];
+        $('shTitle').textContent = `${DOW[new Date(y, m - 1, d).getDay()][1]} ${d} ${MONTH_EN[m-1]} ${y}`;
+        $('shHol').hidden = !hd;
+        if (hd) $('shHol').textContent = 'ថ្ងៃបុណ្យ៖ ' + hd.km;
+        $('shAct').value = r.activity;
+        syncClear($('shAct'));
+        $('shProj').innerHTML = projOptions(r.project || '');
+        $('shAmt').value = r.amount;
+        updateKind();
+        $('scrim').classList.add('open');
+    }
+    function closeSheet() { $('scrim').classList.remove('open'); editing = null; }
+    function updateKind() {
+        const el = $('shKind');
+        if ($('shAct').value === '' && $('shAmt').value === '') { el.textContent = ''; return; }
+        const k = classifyDay($('shAct').value);
+        el.textContent = k === 'worked' ? '● ធ្វើការ (Worked)' : k === 'leave' ? '● ឈប់សម្រាក (Leave)' : '● ថ្ងៃបុណ្យ (Holiday)';
+        el.style.color = k === 'worked' ? 'var(--paddy-light)' : k === 'leave' ? 'var(--stamp-red)' : 'var(--stamp-ochre)';
+    }
+    $('shAct').addEventListener('input', () => {
+        updateKind();
+        const p = projFor($('shAct').value);             // auto-pick the activity's project; you can still change it
+        if (p !== null) $('shProj').innerHTML = projOptions(p);
     });
-    document.title = TITLE[app];
-    document.getElementById('themeColor').setAttribute('content', COLOR[app]);
-    put(app);
-    try { history.replaceState(null, '', '#' + app); } catch (e) {}
-  }
-  document.querySelectorAll('nav button').forEach(function (b) {
-    b.onclick = function () { show(b.getAttribute('data-app')); };
-  });
-  var h = (location.hash || '').replace('#', '');
-  show(SRC[h] ? h : (SRC[get()] ? get() : 'ics'));
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    navigator.serviceWorker.register('sw.js').catch(function () {});
-  }
-})();
+    $('shAmt').addEventListener('input', updateKind);
+    $('shChips').addEventListener('click', e => {
+        const b = e.target.closest('.chip');
+        if (!b) return;
+        const k = b.dataset.k;
+        $('shAct').value = k === 'work' ? actWork() : k === 'notwork' ? actNotWork() : k === 'sick' ? actSick() : actHoliday();
+        syncClear($('shAct'));
+        const p = projFor($('shAct').value);
+        $('shProj').innerHTML = projOptions(p !== null ? p : (k === 'work' ? workProject : ''));
+        updateKind();
+    });
+    $('shClose').onclick = closeSheet;
+    $('scrim').addEventListener('click', e => { if (e.target.id === 'scrim') closeSheet(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+    $('shClear').onclick = () => { delete days[editing]; closeSheet(); render(); saveDraft(); };
+    $('shSave').onclick = () => {
+        const act = $('shAct').value.trim(), amt = $('shAmt').value;
+        if (act === '' && amt === '') delete days[editing];
+        else days[editing] = { activity: act, amount: amt, project: $('shProj').value };
+        closeSheet(); render(); saveDraft();
+    };
+
+    /* ================= Export to Excel (ExcelJS) =================
+       Sheet 1 "Summary"  -> same figures as the summary card
+       Sheet 2 "Oct 2026" -> same layout as the Google Sheet monthly tab                       */
+    function computeStats(d) {
+        const n = new Date(d.y, d.m, 0).getDate();
+        let worked = 0, leave = 0, holiday = 0, total = 0, hiN = null, hiV = -Infinity;
+        Object.entries(d.days).forEach(([k, r]) => {
+            if (r.activity === '' && r.amount === '') return;
+            const c = classifyDay(r.activity);
+            if (c === 'leave') leave++; else if (c === 'holiday') holiday++; else worked++;
+            const v = parseFloat(r.amount);
+            if (!isNaN(v)) { total += v; if (v > hiV) { hiV = v; hiN = k; } }
+        });
+        return { n, worked, leave, holiday, unfilled: Math.max(n - worked - leave - holiday, 0),
+                 gross: parseFloat(d.gross) || 0, total, avg: worked ? total / worked : 0, hiN, hiV };
+    }
+
+    function exportCurrent() {
+        const staff = $('staffName').value;
+        if (!staff) { alert('សូមជ្រើសរើសឈ្មោះបុគ្គលិកជាមុនសិន!'); return; }
+        const { y, m } = ym();
+        const dd = {};
+        Object.entries(days).forEach(([k, r]) => { if (r.activity !== '' || r.amount !== '') dd[k] = r; });
+        if (!Object.keys(dd).length) { alert('សូមជ្រើសថ្ងៃយ៉ាងហោចណាស់មួយថ្ងៃជាមុនសិន!'); return; }
+        exportExcel({ staff, y, m, gross: $('grossSalary').value, days: dd });
+    }
+
+    function exportLast() {
+        const raw = localStorage.getItem('timesheetLastExport');
+        if (!raw) { alert('មិនមានទិន្នន័យដែលបានបញ្ជូនចុងក្រោយទេ'); return; }
+        try { exportExcel(JSON.parse(raw)); } catch (e) { alert('ទិន្នន័យខូច សូមបញ្ជូនម្តងទៀត'); }
+    }
+
+    async function exportExcel(d) {
+        if (typeof ExcelJS === 'undefined') {
+            alert('មិនអាចផ្ទុកឧបករណ៍ Excel បានទេ សូមភ្ជាប់អ៊ីនធឺណិត រួចព្យាយាមម្តងទៀត។');
+            return;
+        }
+        toast('កំពុងបង្កើតឯកសារ Excel...');
+        const st = computeStats(d), n = st.n;
+        const MON = MONTH_EN[d.m - 1], mon3 = MON.slice(0, 3);
+        const line = c => ({ style: 'thin', color: { argb: c || 'FF000000' } });
+        const box = c => ({ top: line(c), left: line(c), bottom: line(c), right: line(c) });
+        const solid = argb => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
+        const wb = new ExcelJS.Workbook();
+        wb.creator = 'Rising Phoenix Co., Ltd';
+
+        /* ---------- Sheet 1: Summary ---------- */
+        const s1 = wb.addWorksheet('Summary', { views: [{ showGridLines: false }] });
+        s1.columns = [{ width: 30 }, { width: 30 }, { width: 30 }];
+        s1.mergeCells('A1:C1');
+        const t = s1.getCell('A1');
+        t.value = 'សង្ខេបទិន្នន័យដែលបានបញ្ជូនចុងក្រោយ';
+        t.font = { size: 16, bold: true, color: { argb: 'FF2F5233' } };
+        t.alignment = { horizontal: 'center', vertical: 'middle' };
+        s1.getRow(1).height = 32;
+        s1.mergeCells('A2:C2');
+        const sub = s1.getCell('A2');
+        sub.value = `${d.staff} — ${MON} ${d.y}`;
+        sub.font = { size: 11, color: { argb: 'FF6B6350' } };
+        sub.alignment = { horizontal: 'center' };
+
+        [[st.worked, 'ថ្ងៃធ្វើការ (Worked)', 'FF2F5233', 'FFE9F2E7'],
+         [st.leave, 'ថ្ងៃឈប់សម្រាក (Leave)', 'FFA6402F', 'FFFBEAE6'],
+         [st.holiday, 'ថ្ងៃឈប់បុណ្យ (Public Holiday)', 'FFC68A1F', 'FFFBF1D9']].forEach((c, i) => {
+            const a = s1.getCell(4, i + 1), b = s1.getCell(5, i + 1);
+            a.value = c[0]; a.font = { size: 22, bold: true, color: { argb: c[2] } };
+            b.value = c[1]; b.font = { size: 10, color: { argb: 'FF6B6350' } };
+            [a, b].forEach(x => {
+                x.fill = solid(c[3]);
+                x.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                x.border = box('FFDCD2B4');
+            });
+        });
+        s1.getRow(4).height = 38; s1.getRow(5).height = 22;
+
+        const dash = v => v > 0 ? v : '-';
+        [['ចំនួនថ្ងៃសរុបក្នុងខែ (Total Days)', `${n} ថ្ងៃ`],
+         ['ថ្ងៃមិនទាន់បំពេញ (Not Yet Filled)', `${st.unfilled} ថ្ងៃ`],
+         ['ប្រាក់ខែគោល (Gross Salary)', dash(st.gross)],
+         ['ប្រាក់ឧបត្ថម្ភទីវាលសរុប (Total Field Allowance)', st.total],
+         ['ចំណូលសរុប (Salary + Allowance)', st.gross + st.total],
+         ['មធ្យមភាគប្រាក់/ថ្ងៃធ្វើការ (Avg / Worked Day)', st.worked ? st.avg : '-'],
+         ['ថ្ងៃដែលទទួលបានប្រាក់ខ្ពស់បំផុត (Highest Day)', st.hiN ? `ថ្ងៃទី ${st.hiN} ($${st.hiV.toFixed(2)})` : '-']
+        ].forEach((r, i) => {
+            const row = 7 + i;
+            s1.mergeCells(row, 1, row, 2);
+            const l = s1.getCell(row, 1), v = s1.getCell(row, 3);
+            l.value = r[0]; l.font = { color: { argb: 'FF6B6350' } };
+            v.value = r[1]; v.font = { bold: true }; v.alignment = { horizontal: 'right' };
+            if (typeof r[1] === 'number') v.numFmt = '$#,##0.00';
+            const dot = { bottom: { style: 'dotted', color: { argb: 'FFB8AE90' } } };
+            [1, 2, 3].forEach(c => { s1.getCell(row, c).border = dot; });
+            s1.getRow(row).height = 22;
+        });
+
+        /* ---------- Sheet 2: monthly timesheet (same layout as Google Sheet) ---------- */
+        const ws = wb.addWorksheet(`${mon3} ${d.y}`, { views: [{ state: 'frozen', xSplit: 4, ySplit: 5 }] });
+        const lastCol = 4 + n, valCol = lastCol + 1, lblCol = lastCol + 2;
+        ws.getColumn(1).width = 5; ws.getColumn(2).width = 22; ws.getColumn(3).width = 22; ws.getColumn(4).width = 11;
+        for (let c = 5; c <= lastCol; c++) ws.getColumn(c).width = 5.3;
+        ws.getColumn(valCol).width = 11; ws.getColumn(lblCol).width = 30;
+
+        ws.getCell('A1').value = 'RISING PHOENIX CO., LTD';
+        ws.getCell('A1').font = { bold: true, size: 12 };
+        ws.getCell('A2').value = `CDU STAFF Timesheet for ${MON} ${d.y}`;
+        ws.getCell('A2').font = { size: 11 };
+
+        ['A3:A5', 'B3:B5', 'C3:C5', 'D3:D5'].forEach(r => ws.mergeCells(r));
+        ws.mergeCells(3, 5, 3, lastCol);
+        ws.getCell('A3').value = 'No';
+        ws.getCell('B3').value = 'POSITION';
+        ws.getCell('C3').value = 'NAME';
+        ws.getCell('D3').value = 'Gross\nSalary';
+        ws.getCell(3, 5).value = `${mon3}-${String(d.y).slice(2)}`;
+        for (let day = 1; day <= n; day++) {
+            const w = new Date(d.y, d.m - 1, day).getDay(), col = 4 + day;
+            ws.getCell(4, col).value = DOW[w][1];
+            ws.getCell(5, col).value = day;
+            if (w === 0 || w === 6) {
+                ws.getCell(4, col).font = { color: { argb: 'FFFF0000' }, size: 9 };
+                ws.getCell(5, col).font = { color: { argb: 'FFFF0000' } };
+            } else {
+                ws.getCell(4, col).font = { size: 9 };
+            }
+        }
+        for (let r = 3; r <= 5; r++) for (let c = 1; c <= lastCol; c++) {
+            const cell = ws.getCell(r, c);
+            cell.fill = solid('FFF3F3F3');
+            cell.border = box();
+            cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+            if (r === 3 && (c <= 4 || c === 5)) cell.font = Object.assign({ bold: true }, cell.font || {});
+        }
+        ws.getRow(4).height = 18;
+
+        // staff block (5 rows): r = project/colour row, r+1 Salary, r+2 Field Allowance, r+3 Field Ration or Allowance, r+4 Total
+        const r = 6;
+        ws.getCell(r, 1).value = 1;
+        ws.getCell(r, 3).value = d.staff;
+        if (st.gross > 0) ws.getCell(r, 4).value = st.gross;
+        for (let rr = r; rr <= r + 4; rr++) for (let c = 1; c <= lastCol; c++) ws.getCell(rr, c).border = box();
+        ws.getCell(r, 1).alignment = { horizontal: 'center' };
+
+        const FILL = { worked: ['FF3D85C6', 'FF000000'], leave: ['FFFF0000', 'FFFFFFFF'], holiday: ['FFFFFF00', 'FF000000'] };
+        Object.entries(d.days).forEach(([k, rec]) => {
+            const day = +k;
+            if (!(day >= 1 && day <= n)) return;
+            if (rec.activity === '' && rec.amount === '') return;
+            const col = 4 + day;
+            const f = FILL[classifyDay(rec.activity)];
+            const pc = ws.getCell(r, col);
+            pc.value = rec.project || '';
+            pc.fill = solid(f[0]);
+            pc.font = { color: { argb: f[1] }, size: 9 };
+            pc.alignment = { horizontal: 'center', vertical: 'middle' };
+            const rc = ws.getCell(r + 3, col);
+            if (rec.amount !== '' && !isNaN(parseFloat(rec.amount))) rc.value = parseFloat(rec.amount);
+            rc.alignment = { horizontal: 'center' };
+            rc.font = { size: 9 };
+            if (rec.activity !== '' && classifyDay(rec.activity) === 'worked') rc.note = `${d.staff} - សកម្មភាព: ${rec.activity}`;   // no note on leave / holiday days
+        });
+
+        const first = ws.getColumn(5).letter, last = ws.getColumn(lastCol).letter, vL = ws.getColumn(valCol).letter;
+        const lines = [
+            ['Salary', st.gross],
+            ['Field Allowance', 0],
+            ['Field Ration or Allowance', { formula: `SUM(${first}${r + 3}:${last}${r + 3})`, result: st.total }],
+            ['Total payment', { formula: `SUM(${vL}${r + 1}:${vL}${r + 3})`, result: st.gross + st.total }]
+        ];
+        lines.forEach((ln, i) => {
+            const row = r + 1 + i;
+            const lc = ws.getCell(row, lblCol), vc = ws.getCell(row, valCol);
+            lc.value = ln[0]; vc.value = ln[1];
+            vc.numFmt = '#,##0.##';
+            lc.border = box(); vc.border = box();
+            if (i === 3) { lc.font = { bold: true }; vc.font = { bold: true }; lc.fill = solid('FFD9D9D9'); vc.fill = solid('FFD9D9D9'); }
+        });
+
+        /* ---------- Save / share ---------- */
+        const buf = await wb.xlsx.writeBuffer();
+        const mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        const blob = new Blob([buf], { type: mime });
+        const fname = `Timesheet_${String(d.staff).replace(/[^\w\-]+/g, '_')}_${d.y}-${String(d.m).padStart(2, '0')}.xlsx`;
+
+        // Installed app (standalone) on a phone: use the share sheet so the file can be saved / opened in Excel
+        const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
+        if (standalone && /Android|iPhone|iPad/i.test(navigator.userAgent) && navigator.canShare) {
+            const file = new File([blob], fname, { type: mime });
+            if (navigator.canShare({ files: [file] })) {
+                try { await navigator.share({ files: [file], title: fname }); return; }
+                catch (e) { if (e && e.name === 'AbortError') return; }
+            }
+        }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+        toast('បានទាញយកឯកសារ Excel');
+    }
+
+    /* ===== "×" button inside activity inputs: clears everything in one tap ===== */
+    function syncClear(inp) {
+        if (inp && inp.parentElement) inp.parentElement.classList.toggle('has', inp.value !== '');
+    }
+    document.addEventListener('input', e => {
+        if (e.target.matches && e.target.matches('.clearable input')) syncClear(e.target);
+    });
+    document.addEventListener('click', e => {
+        const b = e.target.closest && e.target.closest('.clr');
+        if (!b) return;
+        const inp = b.parentElement.querySelector('input');
+        inp.value = '';
+        inp.dispatchEvent(new Event('input', { bubbles: true }));   // lets the page update state (activity, project, colour hint)
+        syncClear(inp);
+        inp.focus();
+    });
+
+    let toastTimer;
+    function toast(msg) {
+        const t = $('toast');
+        t.textContent = msg; t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    /* ================= Form listeners ================= */
+    document.getElementById('staffName').addEventListener('change', saveDraft);
+    document.getElementById('grossSalary').addEventListener('input', saveDraft);
+
+    document.getElementById('monthYear').addEventListener('change', () => {
+        const v = $('monthYear').value;
+        if (!v) { $('monthYear').value = lastMonthVal; return; }
+        if (Object.keys(days).length && !confirm('ប្តូរខែនឹងលុបទិន្នន័យដែលបានបញ្ចូលក្នុងខែនេះ។ បន្តឬ?')) {
+            $('monthYear').value = lastMonthVal;
+            return;
+        }
+        days = {};
+        lastMonthVal = v;
+        render();
+        // New month selected: the previous month's summary no longer applies
+        document.getElementById('summaryModal').classList.remove('show');
+        localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport');
+        saveDraft();
+    });
+
+    window.onload = function() {
+        const t = new Date();
+        $('monthYear').value = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}`;
+        applyDraftMonthIfAny();
+        lastMonthVal = $('monthYear').value;
+        restoreDraftValues();      // fills `days` + salary from the saved draft
+        render();                  // calendar shows immediately, even before the sheet responds
+        fetchMasterData();
+        restoreSummary();
+    };
+
+    // --- Draft auto-save: keeps in-progress entries safe across refresh / closing the app ---
+    function saveDraft() {
+        const staff = document.getElementById('staffName').value;
+        const monthYear = document.getElementById('monthYear').value;
+        const grossSalary = document.getElementById('grossSalary').value;
+
+        const dailyActivities = {};
+        Object.entries(days).forEach(([d, r]) => {
+            if (r.activity !== '' || r.amount !== '') dailyActivities[`day_${d}`] = { activity: r.activity, amount: r.amount, project: r.project || '' };
+        });
+
+        // Nothing meaningful entered yet -> don't keep a stale/empty draft around
+        if (!staff && !grossSalary && Object.keys(dailyActivities).length === 0) {
+            localStorage.removeItem('timesheetDraft');
+            return;
+        }
+
+        localStorage.setItem('timesheetDraft', JSON.stringify({
+            staffName: staff,
+            monthYear: monthYear,
+            grossSalary: grossSalary,
+            dailyActivities: dailyActivities
+        }));
+    }
+
+    function applyDraftMonthIfAny() {
+        const raw = localStorage.getItem('timesheetDraft');
+        if (!raw) return;
+        try {
+            const draft = JSON.parse(raw);
+            if (draft.monthYear) {
+                document.getElementById('monthYear').value = draft.monthYear;
+            }
+        } catch (e) {
+            localStorage.removeItem('timesheetDraft');
+        }
+    }
+
+    function readDraft() {
+        const raw = localStorage.getItem('timesheetDraft');
+        if (!raw) return null;
+        try { return JSON.parse(raw); }
+        catch (e) { localStorage.removeItem('timesheetDraft'); return null; }
+    }
+
+    function restoreStaffFromDraft() {
+        const draft = readDraft();
+        if (!draft || !draft.staffName) return;
+        const sel = document.getElementById('staffName');
+        if (Array.from(sel.options).some(o => o.value === draft.staffName)) sel.value = draft.staffName;
+    }
+
+    function restoreDraftValues() {
+        const draft = readDraft();
+        if (!draft) return;
+        if (draft.grossSalary) document.getElementById('grossSalary').value = draft.grossSalary;
+        days = {};
+        if (draft.dailyActivities) {
+            Object.entries(draft.dailyActivities).forEach(([key, d]) => {
+                days[key.replace('day_', '')] = { activity: d.activity || '', amount: d.amount || '', project: d.project || '' };
+            });
+        }
+    }
+
+    function restoreSummary() {
+        const saved = localStorage.getItem('timesheetLastSummary');
+        if (!saved) return;
+        try {
+            const s = JSON.parse(saved);
+            showSummary(s, false); // false = don't re-save, it's already saved
+        } catch (e) {
+            localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport');
+        }
+    }
+
+    function clearSummaryHistory() {
+        localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport');
+        document.getElementById('summaryModal').classList.remove('show');
+    }
+
+    function saveData() {
+        const staff = document.getElementById('staffName').value;
+        if (!staff) {
+            alert('សូមជ្រើសរើសឈ្មោះបុគ្គលិកជាមុនសិន!');
+            return;
+        }
+
+        const dailyData = {};
+        const daysInMonthInput = document.getElementById('monthYear').value;
+        const [y, m] = daysInMonthInput.split('-');
+        const totalDays = new Date(y, m, 0).getDate();
+
+        for (let i = 1; i <= totalDays; i++) {
+            const r = days[i];
+            if (r && (r.activity !== "" || r.amount !== "")) {
+                dailyData[`day_${i}`] = {
+                    activity: r.activity,
+                    amount: r.amount,
+                    project: r.project || ''
+                };
+            }
+        }
+
+        if (Object.keys(dailyData).length === 0) {
+            alert('សូមជ្រើសថ្ងៃយ៉ាងហោចណាស់មួយថ្ងៃជាមុនសិន!');
+            return;
+        }
+
+        const formData = {
+            staffName: staff,
+            monthYear: document.getElementById('monthYear').value,
+            grossSalary: document.getElementById('grossSalary').value,
+            dailyActivities: dailyData
+        };
+
+        // --- Build the summary stats BEFORE the form gets reset ---
+        let workedDays = 0, leaveDays = 0, holidayDays = 0;
+        Object.values(dailyData).forEach(d => {
+            const cat = classifyDay(d.activity);
+            if (cat === 'leave') leaveDays++;
+            else if (cat === 'holiday') holidayDays++;
+            else workedDays++;
+        });
+        const recordedDays = workedDays + leaveDays + holidayDays;
+        const unfilledDays = Math.max(totalDays - recordedDays, 0);
+
+        const totalAllowance = Object.values(dailyData).reduce((sum, d) => {
+            const v = parseFloat(d.amount);
+            return sum + (isNaN(v) ? 0 : v);
+        }, 0);
+        const grossSalaryVal = parseFloat(formData.grossSalary) || 0;
+        const avgPerDay = workedDays > 0 ? (totalAllowance / workedDays) : 0;
+
+        let highestDayNum = null, highestDayAmt = -Infinity;
+        Object.entries(dailyData).forEach(([key, d]) => {
+            const v = parseFloat(d.amount);
+            if (!isNaN(v) && v > highestDayAmt) {
+                highestDayAmt = v;
+                highestDayNum = key.replace('day_', '');
+            }
+        });
+
+        const monthLabel = new Date(y, m - 1, 1).toLocaleString('en-US', { month: 'long' }) + ' ' + y;
+
+        document.getElementById('loading').style.display = 'block';
+
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            document.getElementById('loading').style.display = 'none';
+
+            showSummary({
+                staff,
+                monthLabel,
+                totalDays,
+                workedDays,
+                leaveDays,
+                holidayDays,
+                unfilledDays,
+                grossSalaryVal,
+                totalAllowance,
+                avgPerDay,
+                highestDayNum,
+                highestDayAmt
+            });
+
+            // Keep a copy of what was just submitted so the summary card can export it to Excel
+            const snapDays = {};
+            Object.entries(dailyData).forEach(([k, r]) => { snapDays[k.replace('day_', '')] = r; });
+            localStorage.setItem('timesheetLastExport', JSON.stringify({ staff, y: +y, m: +m, gross: formData.grossSalary, days: snapDays }));
+
+            // Submission succeeded — the in-progress draft for this month is no longer needed
+            localStorage.removeItem('timesheetDraft');
+
+            days = {};
+            document.getElementById('staffName').value = '';
+            document.getElementById('grossSalary').value = '';
+            document.getElementById('monthYear').value = `${y}-${m}`;
+            render();
+        })
+        .catch(error => {
+            document.getElementById('loading').style.display = 'none';
+            alert('មានបញ្ហាពេលបញ្ជូនទិន្នន័យ៖ ' + error);
+        });
+    }
+
+    function showSummary(s, persist = true) {
+        document.getElementById('summaryStaffLine').textContent = `${s.staff} — ${s.monthLabel}`;
+        document.getElementById('sumWorkedDays').textContent = s.workedDays;
+        document.getElementById('sumLeaveDays').textContent = s.leaveDays;
+        document.getElementById('sumHolidayDays').textContent = s.holidayDays;
+        document.getElementById('sumTotalDays').textContent = `${s.totalDays} ថ្ងៃ`;
+
+        const unfilledRow = document.getElementById('sumUnfilledRow');
+        if (s.unfilledDays > 0) {
+            document.getElementById('sumUnfilledDays').textContent = `${s.unfilledDays} ថ្ងៃ`;
+            unfilledRow.style.display = 'flex';
+        } else {
+            unfilledRow.style.display = 'none';
+        }
+
+        document.getElementById('sumGrossSalary').textContent = s.grossSalaryVal > 0 ? `$${s.grossSalaryVal.toFixed(2)}` : '-';
+        document.getElementById('sumFieldAllowance').textContent = `$${s.totalAllowance.toFixed(2)}`;
+        document.getElementById('sumGrandTotal').textContent = `$${(s.grossSalaryVal + s.totalAllowance).toFixed(2)}`;
+        document.getElementById('sumAvgPerDay').textContent = s.workedDays > 0 ? `$${s.avgPerDay.toFixed(2)}` : '-';
+        document.getElementById('sumHighestDay').textContent = s.highestDayNum
+            ? `ថ្ងៃទី ${s.highestDayNum} ($${s.highestDayAmt.toFixed(2)})`
+            : '-';
+
+        document.getElementById('summaryModal').classList.add('show');
+
+        if (persist) {
+            localStorage.setItem('timesheetLastSummary', JSON.stringify(s));
+        }
+    }
 </script>
+
 </body>
 </html>
