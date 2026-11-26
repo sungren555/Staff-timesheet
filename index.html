@@ -744,7 +744,7 @@
             <div class="cal" id="cal"></div>
             <div class="legend">
                 <span><span class="dot worked"></span>ធ្វើការ (D-HQ, D-F, D-FN)</span>
-                <span><span class="dot leave"></span>ច្បាប់ (AL, SL, PL, DL...)</span>
+                <span><span class="dot leave"></span>ច្បាប់ (AL, SL, PL, ML, EL, DL...)</span>
                 <span><span class="dot off"></span>W / X</span>
                 <span><span class="dot holiday"></span>ថ្ងៃបុណ្យ (PH)</span>
             </div>
@@ -895,6 +895,8 @@
         'AL':   { kind: 'leave',   km: 'ច្បាប់ប្រចាំឆ្នាំ (Annual leave)' },
         'SL':   { kind: 'leave',   km: 'ឈប់ឈឺ (Sick leave)' },
         'PL':   { kind: 'leave',   km: 'ច្បាប់ PL' },
+        'ML':   { kind: 'leave',   km: 'សម្រាកសម្រាលកូន (Maternity leave)' },
+        'EL':   { kind: 'leave',   km: 'សម្រាកបន្ទាន់ (Emergency leave)' },
         'DL':   { kind: 'leave',   km: 'ថ្ងៃសម្រាកជំនួស (Day in lieu)' },
         'LWOP': { kind: 'leave',   km: 'ច្បាប់គ្មានប្រាក់ខែ (Unpaid leave)' },
         'A':    { kind: 'leave',   km: 'អវត្តមាន (Absent)' },
@@ -909,6 +911,7 @@
         if (ATT_INFO[c]) return ATT_INFO[c].kind;
         return /^D-/i.test(c) ? 'work' : 'leave';
     }
+    const FIELD_RATE = '3';   // default Field ration ($ per day) for D-F / D-FN, filled automatically
     const isField = c => kindOf(c) === 'work' && String(c).trim().toUpperCase() !== 'D-HQ';   // field ration only for D-F / D-FN
     const workCodes = () => ATT_CODES.filter(c => kindOf(c) === 'work');
     const offCodes = () => ATT_CODES.filter(c => kindOf(c) !== 'work');
@@ -1192,7 +1195,7 @@
     function bindCodeButtons(k) {
         $('modeHint').querySelectorAll('.mode-btn.team').forEach(b => b.addEventListener('click', () => {
             const c = b.dataset.att;
-            if (k === 'worked') { workAtt = c; if (!isField(c)) workAmount = ''; } else { offAtt = c; }
+            if (k === 'worked') { workAtt = c; if (!isField(c)) workAmount = ''; else if (workAmount === '') workAmount = FIELD_RATE; } else { offAtt = c; }
             renderMode();
         }));
     }
@@ -1208,7 +1211,7 @@
         if (mode === 'worked') {
             if (!needWork()) return;
             const entry = { p: workProg, t: workTask };
-            const amt = isField(workAtt) ? String(workAmount) : '';
+            const amt = isField(workAtt) ? String(workAmount !== '' ? workAmount : FIELD_RATE) : '';
             const cur = days[d];
             if (cur && kindOf(cur.att) === 'work') {
                 const i = cur.progs.findIndex(x => sameProg(x, entry));
@@ -1245,7 +1248,7 @@
             if (hol[d]) continue;
             if (days[d] && days[d].att) continue;
             if (k === 'worked' && !weekend) {
-                days[d] = { att: workAtt, progs: [{ p: workProg, t: workTask }], amount: isField(workAtt) ? String(workAmount) : '' }; count++;
+                days[d] = { att: workAtt, progs: [{ p: workProg, t: workTask }], amount: isField(workAtt) ? String(workAmount !== '' ? workAmount : FIELD_RATE) : '' }; count++;
             }
             if (k === 'notwork' && weekend) { days[d] = { att: code, progs: [], amount: '' }; count++; }
         }
@@ -1335,6 +1338,7 @@
         $('shRows').innerHTML = '';
         if (r && r.progs) r.progs.forEach(x => shAddRow(x.p, x.t));
         $('shAmt').value = r && r.amount != null ? r.amount : '';
+        if (!r && isField($('shAtt').value)) $('shAmt').value = FIELD_RATE;
         syncSheet();
         $('scrim').classList.add('open');
     }
@@ -1344,6 +1348,7 @@
         if (!b) return;
         $('shAtt').value = b.dataset.k;
         renderShChips(b.dataset.k);
+        if (isField(b.dataset.k) && !$('shAmt').value) $('shAmt').value = FIELD_RATE;
         syncSheet();
     });
     $('shAddRow').addEventListener('click', () => shAddRow('', ''));
@@ -1409,7 +1414,7 @@
         t1.font = { size: 14, bold: true, color: { argb: 'FF2F5233' } };
         t1.alignment = { horizontal: 'center' };
         const dash = v => v > 0 ? v : '-';
-        [['ថ្ងៃធ្វើការ (D-HQ / D-F / D-FN)', st.worked], ['ថ្ងៃច្បាប់ (AL, SL, PL, DL ...)', st.leave], ['ថ្ងៃបុណ្យ (PH)', st.holiday],
+        [['ថ្ងៃធ្វើការ (D-HQ / D-F / D-FN)', st.worked], ['ថ្ងៃច្បាប់ (AL, SL, PL, ML, EL, DL ...)', st.leave], ['ថ្ងៃបុណ្យ (PH)', st.holiday],
          ['ថ្ងៃ W / X', st.off], ['ថ្ងៃមិនទាន់បំពេញ', st.unfilled], ['Base pay per month', dash(st.gross)], ['Field ration សរុប', st.total],
          ['ចំណូលសរុប (Base pay + Field ration)', st.gross + st.total]
         ].forEach((r, i) => {
