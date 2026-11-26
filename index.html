@@ -900,7 +900,7 @@
         'DL':   { kind: 'leave',   km: 'ថ្ងៃសម្រាកជំនួស (Day in lieu)' },
         'LWOP': { kind: 'leave',   km: 'ច្បាប់គ្មានប្រាក់ខែ (Unpaid leave)' },
         'A':    { kind: 'leave',   km: 'អវត្តមាន (Absent)' },
-        'NE':   { kind: 'leave',   km: 'មិនទាន់ជាបុគ្គលិក' }
+        'NE':   { kind: 'leave',   km: 'NE' }
     };
     let ATT_CODES = Object.keys(ATT_INFO);
     let ATT_MEANING = {};   // from Program tab (columns D:E "Code" / "Meaning") -> shown as notes next to every code
@@ -1086,6 +1086,7 @@
                 PROGRAMMES = data.programmes || [];
                 TASKS = data.tasks || [];
                 if (Array.isArray(data.attCodes) && data.attCodes.length >= 3) ATT_CODES = data.attCodes.map(String);
+                ['ML', 'EL'].forEach(c => { if (!ATT_CODES.includes(c)) { const i = ATT_CODES.indexOf('PL'); ATT_CODES.splice(i >= 0 ? i + 1 : ATT_CODES.length, 0, c); } });   // keep ML / EL even if the Sheet list lacks them
                 if (data.attMeanings && typeof data.attMeanings === 'object') ATT_MEANING = data.attMeanings;
                 renderShChips('');
                 restoreStaffFromDraft();
