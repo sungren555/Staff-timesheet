@@ -51,6 +51,8 @@
             --th-color: var(--ink);
             --td-border: var(--line);
             --weekend-bg: #EAD9AE;
+            --tint-off-bg: #EEEBE0;
+            --tint-off-border: #9A9378;
 
             --tint-worked-bg: #E9F2E7;
             --tint-worked-border: var(--paddy-light);
@@ -85,6 +87,8 @@
             --tint-leave-border: #D9695A;
             --tint-holiday-bg: #332C15;
             --tint-holiday-border: #E0B45A;
+            --tint-off-bg: #2A2C25;
+            --tint-off-border: #8B8A78;
         }
 
         * { box-sizing: border-box; }
@@ -288,7 +292,7 @@
         .mode-btn.work[aria-pressed="true"] { background: var(--paddy); border-color: var(--paddy); color: #FBEFD2; }
         .mode-btn.off[aria-pressed="true"] { background: var(--stamp-red); border-color: var(--stamp-red); color: #fff; }
         .mode-hint { margin: 8px 2px 0; font-size: 12.5px; color: var(--label-color); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 20px; }
-        .mode-hint .clearable input { width: 210px; padding: 6px 34px 6px 9px; font-size: 13px; }
+        .mode-hint .clearable input { width: 235px; padding: 6px 34px 6px 9px; font-size: 13px; }
         .clearable { position: relative; display: inline-block; }
         .sheet .clearable { display: block; }
         .clearable input { padding-right: 40px; }
@@ -344,6 +348,10 @@
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 700;
         }
         .day .dm { font-family: var(--font-mono); font-size: 10px; color: var(--label-color); }
+        .day .dmon { font-family: var(--font-mono); font-size: 9px; font-weight: 700; line-height: 1; color: var(--paddy-light); text-transform: uppercase; letter-spacing: .03em; }
+        #monthTitle { text-align: center; line-height: 1.35; }
+        .period-hint { margin-top: 5px; font-size: 11.5px; color: var(--paddy); font-family: var(--font-mono); font-weight: 700; }
+        [data-theme="dark"] .period-hint { color: var(--tint-worked-border); }
         .day .dp { font-family: var(--font-mono); font-weight: 700; font-size: 11px; background: var(--text-color); color: var(--container-bg); border-radius: 4px; padding: 0 6px; line-height: 1.5; }
         input[data-combo] { cursor: pointer; }
         .pick-scrim { position: fixed; inset: 0; z-index: 100000; display: none; align-items: flex-end; justify-content: center;
@@ -363,7 +371,7 @@
         .pick-list button.new { color: var(--stamp-red); font-weight: 700; }
         .pick-empty { padding: 18px 8px; color: var(--label-color); font-size: 14px; }
         .team-row { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
-        .team-row .mode-btn { flex: 1 1 0; min-width: 90px; min-height: 40px; padding: 8px 10px; font-size: 14px; }
+        .team-row .mode-btn { flex: 1 1 0; min-width: 62px; min-height: 40px; padding: 8px 10px; font-size: 14px; }
         .mode-btn.team { color: var(--paddy); }
         [data-theme="dark"] .mode-btn.team { color: var(--tint-worked-border); }
         .mode-btn.team[aria-pressed="true"] { background: var(--paddy); border-color: var(--paddy); color: #FBEFD2; }
@@ -379,6 +387,18 @@
         .day.cell-worked .da { color: var(--paddy); }
         .day.cell-leave .da { color: var(--tint-leave-border); }
         .day.cell-holiday .da { color: var(--stamp-ochre); }
+        .day.cell-off { background: var(--tint-off-bg); box-shadow: inset 0 0 0 2px var(--tint-off-border); }
+        .day.cell-off .da { color: var(--label-color); }
+        .chip[aria-pressed="true"] { background: var(--paddy); border-color: var(--paddy); border-style: solid; color: #FBEFD2; }
+        .prow { display: grid; grid-template-columns: 1fr 38px; gap: 6px; align-items: start; margin-bottom: 8px; padding: 8px; border: 1px solid var(--input-border); border-radius: 10px; }
+        .prow .px { border: 0; background: var(--input-bg); color: var(--stamp-red); width: 38px; height: 38px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+        .legend .dot.off { background: var(--tint-off-border); }
+        .mode-btn.team.coded { flex-direction: column; gap: 1px; min-width: 104px; min-height: 52px; padding: 6px 8px; }
+        .mode-btn.team.coded b { font-family: var(--font-mono); font-size: 14px; }
+        .mode-btn.team.coded small { font-size: 11px; font-weight: 400; line-height: 1.25; opacity: .85; }
+        .chip.cc { display: inline-flex; flex-direction: column; align-items: flex-start; text-align: left; border-radius: 12px; padding: 6px 12px; }
+        .chip.cc b { font-family: var(--font-mono); font-size: 13px; }
+        .chip.cc small { font-size: 11px; font-weight: 400; line-height: 1.25; opacity: .85; }
         [data-theme="dark"] .day.cell-worked .da { color: var(--tint-worked-border); }
         .day.today .dn::after { content: ""; display: block; height: 2px; margin-top: 1px; background: var(--text-color); border-radius: 1px; }
         @media (min-width: 640px) {
@@ -388,7 +408,7 @@
             .day .dm { font-size: 12px; }
         }
 
-        .live-sum { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+        .live-sum { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 12px; }
         .live-sum div { background: var(--th-bg); border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 11px; color: var(--label-color); line-height: 1.3; }
         .live-sum b { display: block; font-family: var(--font-mono); font-size: 18px; color: var(--text-color); }
 
@@ -669,9 +689,10 @@
                 <div class="form-group">
                     <label for="monthYear">
                         <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16"/><path d="M8 3.5v3.5M16 3.5v3.5"/></svg></span>
-                        ខែ និងឆ្នាំ (Month & Year):
+                        ខែបញ្ចប់ (Period ends in):
                     </label>
                     <input type="month" id="monthYear" required>
+                    <div class="period-hint" id="periodHint"></div>
                 </div>
             </div>
 
@@ -679,21 +700,21 @@
                 <div class="form-group">
                     <label for="grossSalary">
                         <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.3 9.3c0-1 1-1.8 2.7-1.8s2.7.9 2.7 2c0 2.6-5.4 1.4-5.4 4 0 1.1 1.2 2 2.7 2s2.7-.8 2.7-1.8"/></svg></span>
-                        ប្រាក់ខែគោល (Gross Salary):
+                        ប្រាក់ខែគោល (Base pay per month):
                     </label>
                     <input type="number" id="grossSalary" placeholder="ឧ. 500">
                 </div>
                 <div class="form-group">
                     <label for="fieldAllowance">
                         <span class="icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-7 2-12 6-16-6 1-9 6-9 12"/><path d="M12 21c0-6-2-10-5-13"/></svg></span>
-                        ប្រាក់ឧបត្ថម្ភទីវាល (Field Allowance):
+                        ប្រាក់ឧបត្ថម្ភទីវាល (Field ration):
                     </label>
                     <input type="number" id="fieldAllowance" placeholder="គណនាស្វ័យប្រវត្តិ" readonly style="background-color: var(--th-bg); font-weight: bold; color: var(--paddy);">
                 </div>
             </div>
 
             <h3>តារាងសកម្មភាពប្រចាំថ្ងៃ (Daily Activities)</h3>
-            <p class="table-hint">ជ្រើសប៊ូតុងខាងក្រោម រួចចុចលើថ្ងៃក្នុងប្រតិទិន ឬចុចថ្ងៃណាមួយដោយផ្ទាល់ ដើម្បីបញ្ចូលសកម្មភាព និងទឹកប្រាក់។</p>
+            <p class="table-hint">ជ្រើស «ថ្ងៃធ្វើការ» (D-HQ / D-F / D-FN + Programme + Task) ឬ «ថ្ងៃឈប់» (W, X, AL, SL, PH...) រួចចុចលើថ្ងៃក្នុងប្រតិទិន ឬចុចថ្ងៃណាមួយដោយផ្ទាល់ ដើម្បីកែ។ ជួរ Σ per day ក្នុង Sheet មានរូបមន្តស្រាប់ — Form មិនប៉ះពាល់ទេ។</p>
 
             <div class="modes">
                 <button type="button" class="mode-btn work" id="modeWork" aria-pressed="false" onclick="setMode('worked')">
@@ -702,7 +723,7 @@
                 </button>
                 <button type="button" class="mode-btn off" id="modeOff" aria-pressed="false" onclick="setMode('notwork')">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                    ជ្រើសថ្ងៃអត់ធ្វើការ
+                    ជ្រើសថ្ងៃឈប់ / ច្បាប់ / បុណ្យ
                 </button>
             </div>
             <div class="mode-hint" id="modeHint" aria-live="polite"></div>
@@ -722,21 +743,15 @@
             </div>
             <div class="cal" id="cal"></div>
             <div class="legend">
-                <span><span class="dot worked"></span>ធ្វើការ (Worked)</span>
-                <span><span class="dot leave"></span>ឈប់សម្រាក (Leave)</span>
-                <span><span class="dot holiday"></span>ថ្ងៃបុណ្យ (Holiday)</span>
+                <span><span class="dot worked"></span>ធ្វើការ (D-HQ, D-F, D-FN)</span>
+                <span><span class="dot leave"></span>ច្បាប់ (AL, SL, PL, DL...)</span>
+                <span><span class="dot off"></span>W / X</span>
+                <span><span class="dot holiday"></span>ថ្ងៃបុណ្យ (PH)</span>
             </div>
 
             <div class="live-sum" id="liveSum"></div>
             <ul class="hol-list" id="holList"></ul>
             <p class="hol-note" id="holNote"></p>
-
-            <datalist id="activityListOptions"></datalist>        <!-- សកម្មភាពធ្វើការ (Staff!B) -->
-            <datalist id="offActivityListOptions"></datalist>     <!-- ថ្ងៃសម្រាក (Staff!E) -->
-            <datalist id="allActivityListOptions"></datalist>     <!-- ទាំងពីរ (សម្រាប់ផ្ទាំងកែថ្ងៃ) -->
-            <datalist id="projectListOptions"></datalist>
-            <datalist id="offProjectListOptions"></datalist>
-            <datalist id="allProjectListOptions"></datalist>
 
             <button type="button" class="btn-submit" onclick="saveData()">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
@@ -781,20 +796,24 @@
                     <span>ចំនួនថ្ងៃសរុបក្នុងខែ (Total Days)</span>
                     <span id="sumTotalDays">-</span>
                 </div>
+                <div class="summary-row">
+                    <span>ថ្ងៃ W / X (Weekend / Off duty)</span>
+                    <span id="sumOffDays">-</span>
+                </div>
                 <div class="summary-row" id="sumUnfilledRow" style="display:none;">
                     <span>ថ្ងៃមិនទាន់បំពេញ (Not Yet Filled)</span>
                     <span id="sumUnfilledDays">-</span>
                 </div>
                 <div class="summary-row">
-                    <span>ប្រាក់ខែគោល (Gross Salary)</span>
+                    <span>ប្រាក់ខែគោល (Base pay)</span>
                     <span id="sumGrossSalary">-</span>
                 </div>
                 <div class="summary-row">
-                    <span>ប្រាក់ឧបត្ថម្ភទីវាលសរុប (Total Field Allowance)</span>
+                    <span>Field ration សរុប (Total Field Ration)</span>
                     <span id="sumFieldAllowance">-</span>
                 </div>
                 <div class="summary-row">
-                    <span>ចំណូលសរុប (Salary + Allowance)</span>
+                    <span>ចំណូលសរុប (Base pay + Field ration)</span>
                     <span id="sumGrandTotal">-</span>
                 </div>
                 <div class="summary-row">
@@ -825,18 +844,18 @@
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
         <h4 id="shTitle"></h4>
         <p class="sh-hol" id="shHol" hidden></p>
-        <label for="shAct">សកម្មភាព (Activity)</label>
-        <span class="clearable"><input type="text" id="shAct" placeholder="សកម្មភាព" autocomplete="off"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
-        <div class="chips" id="shChips">
-            <button type="button" class="chip" data-k="work">ធ្វើការ</button>
-            <button type="button" class="chip" data-k="notwork">អត់ធ្វើការ</button>
-            <button type="button" class="chip" data-k="sick">ឈប់ឈឺ</button>
-            <button type="button" class="chip" data-k="holiday">ថ្ងៃបុណ្យ</button>
+        <label>វត្តមាន (Attendance)</label>
+        <input type="hidden" id="shAtt">
+        <div class="chips" id="shChips"></div>
+        <div id="shProgBox" hidden>
+            <label>Programme / Task <span style="font-weight:400">(ថ្ងៃចែក = បន្ថែមច្រើនជួរ ១ ទាំងអស់)</span></label>
+            <div id="shRows"></div>
+            <button type="button" class="chip" id="shAddRow">＋ បន្ថែម Programme</button>
         </div>
-        <label for="shProj">គម្រោង (Project)</label>
-        <input type="text" id="shProj" autocomplete="off" placeholder="គម្រោង">
-        <label for="shAmt" style="margin-top:10px">ទឹកប្រាក់ (Amount)</label>
-        <input type="number" id="shAmt" placeholder="ទឹកប្រាក់" inputmode="decimal" step="any">
+        <div id="shAmtWrap" hidden>
+            <label for="shAmt" style="margin-top:10px">Field ration ($)</label>
+            <input type="number" id="shAmt" placeholder="ទឹកប្រាក់" inputmode="decimal" step="any">
+        </div>
         <p class="sh-kind" id="shKind"></p>
         <div class="acts">
             <button type="button" class="btn-ghost" id="shClear">សម្អាតថ្ងៃនេះ</button>
@@ -848,168 +867,7 @@
 <div class="toast" id="toast" role="status"></div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyNefEeNFtacVPHDg7gy3-tE8RomIOAZnkak0YybkmVlWY5TXQVsKUbtprEg4omHjUJEQ/exec'; // <-- ជំនួស URL របស់អ្នកនៅទីនេះ
-
-    let globalActivities = [];        // work activities only
-    let globalOffActivities = [];     // rest / leave / holiday activities only
-
-    function toggleTheme() {
-        const body = document.body;
-        const themeText = document.getElementById('themeText');
-
-        if (body.getAttribute('data-theme') === 'light') {
-            body.setAttribute('data-theme', 'dark');
-            themeText.textContent = 'Light';
-        } else {
-            body.setAttribute('data-theme', 'light');
-            themeText.textContent = 'Dark';
-        }
-    }
-
-    // Classify a day exactly like the Apps Script colors it in the master sheet:
-    //   Leave (red)   -> activity contains LEAVE / NOT WORKING / ច្បាប់, or the WHOLE WORD AL / PL / ML / CL / SL
-    //   Holiday (gold)-> activity contains PUBLIC HOLIDAY / HOLIDAY
-    //   Worked (green)-> anything else (including a day with only an amount, or blank activity)
-    // Note: short codes (AL, PL, ML, CL, SL) must match a whole word, not just appear inside
-    // a longer word — otherwise "EXTERNAL AUDITING" would wrongly match "AL" inside "EXTERNAL".
-    function classifyDay(activity) {
-        const raw = (activity || '').trim();
-        if (!raw) return 'worked'; // blank activity -> matches Apps Script's else-branch
-        const upper = raw.toUpperCase();
-
-        const holidayPhrases = ['PUBLIC HOLIDAY', 'HOLIDAY'];
-        if (holidayPhrases.some(k => upper.includes(k))) return 'holiday';
-
-        const leavePhrases = ['LEAVE', 'NOT WORKING', 'ច្បាប់'];
-        if (leavePhrases.some(k => upper.includes(k))) return 'leave';
-
-        const leaveCodes = ['AL', 'PL', 'ML', 'CL', 'SL'];
-        const tokens = upper.split(/[^A-Z]+/).filter(Boolean); // split into whole words only
-        if (tokens.some(t => leaveCodes.includes(t))) return 'leave';
-
-        return 'worked';
-    }
-
-    /* ================= Calendar state ================= */
-    let days = {};            // { 5: {activity:'External', amount:'12'} } for the month on screen
-    let mode = null;          // null | 'worked' | 'notwork'
-    let editing = null;
-    let lastMonthVal = '';
-    // Activity / project start EMPTY: the user must pick an activity before tapping any day.
-    let workActText = '';
-    let workProject = '';
-    let offActText = '';
-    let offProject = '';
-    const LEAVE_CODES = ['AL', 'PL', 'ML', 'CL', 'SL'];
-    // Amount ($) applied to each worked day, typed by staff (empty = no amount). "Office Work" never gets an amount.
-    let workAmount = '';          // empty by default: staff types the amount themselves (not every field day is paid)
-    const isOfficeWork = a => String(a || '').toUpperCase().includes('OFFICE WORK');
-    // Activities written in RED in the Staff sheet (Office Work, CDU Meeting...) -> no amount and no comment
-    let RED_ACTS = new Set();
-    const isNoAmount = a => RED_ACTS.has(String(a || '').trim()) || isOfficeWork(a);
-    const amtFor = a => isNoAmount(a) ? '' : String(workAmount);
-    // Project codes shown in the dropdowns. If your Apps Script getData also returns "projects": ["IR","CE","RE"],
-    // that list replaces this one automatically.
-    let PROJECTS = ['IR', 'CE', 'RE'];          // work projects only
-    let OFF_PROJECTS = ['AL', 'CL', 'ML', 'PL', 'SL'];   // leave codes only
-    // Default project for each activity (Staff sheet: Column B -> Column C). Empty string = no fixed project.
-    let ACT_PROJ = {};
-    // Teams (Staff sheet: IBIS Rice / CE / Admin ...). Each team has its own activities and default projects.
-    let TEAMS = [];                      // work teams: [{name, items:[{a,p,red}]}]
-    let TEAM_MAP = {};                   // { team: { activity: project } }
-    let team = '';                       // starts empty: staff must pick a team first
-    const teamRequired = () => TEAMS.some(t => t.name);
-    function projFor(act) {
-        const k = String(act || '').trim();
-        const has = (o) => Object.prototype.hasOwnProperty.call(o, k);
-        if (mode !== 'notwork' && team && TEAM_MAP[team] && has(TEAM_MAP[team])) return TEAM_MAP[team][k];
-        return has(ACT_PROJ) ? ACT_PROJ[k] : null;   // null = unknown activity (user may type activity + project freely)
-    }
-    /* ---------- Picker (bottom sheet) for activity / project ----------
-       Works the same on iPhone, Android and desktop: big tap targets, own search box,
-       no native <datalist> (Android shows it as a horizontal strip, iOS makes it hard to use). */
-    let pickEl = null, pickState = null;
-    function pickClose() { if (pickEl) pickEl.classList.remove('open'); pickState = null; }
-    function pickRender() {
-        const st = pickState; if (!st) return;
-        const q = pickEl.querySelector('.pick-search').value.trim();
-        const ql = q.toLowerCase();
-        const opts = [...new Set(st.getOpts())];
-        const list = ql ? opts.filter(o => o.toLowerCase().includes(ql)) : opts;
-        const box = pickEl.querySelector('.pick-list');
-        box.innerHTML = '';
-        const add = (label, value, cls) => {
-            const b = document.createElement('button');
-            b.type = 'button';
-            if (cls) b.className = cls;
-            b.textContent = label;
-            b.addEventListener('click', () => pickChoose(value));
-            box.appendChild(b);
-        };
-        if (!q && st.allowEmpty) add('— គ្មាន —', '', '');
-        if (q && !opts.some(o => o.toLowerCase() === ql)) add('＋ ប្រើ «' + q + '» (បញ្ចូលថ្មី)', q, 'new');
-        list.forEach(o => add(o, o, o === st.current ? 'cur' : ''));
-        if (!list.length && !q) box.innerHTML = '<div class="pick-empty">មិនមានបញ្ជី — សូមវាយបញ្ចូល</div>';
-    }
-    function pickChoose(v) {
-        const st = pickState; if (!st) return;
-        pickClose();
-        st.input.value = v;
-        st.input.dispatchEvent(new Event('input', { bubbles: true }));   // lets the page update project / amount / state
-    }
-    function pickOpen(input, getOpts, title, allowEmpty) {
-        if (!pickEl) {
-            pickEl = document.createElement('div');
-            pickEl.className = 'pick-scrim';
-            pickEl.innerHTML = '<div class="pick-sheet" role="dialog" aria-modal="true"><div class="pick-head"><span class="pick-title"></span><button type="button" class="pick-x" aria-label="បិទ">×</button></div>' +
-                '<input type="text" class="pick-search" autocomplete="off" autocapitalize="off" placeholder="ស្វែងរក ឬវាយថ្មី...">' +
-                '<div class="pick-list"></div></div>';
-            document.body.appendChild(pickEl);
-            pickEl.addEventListener('click', e => { if (e.target === pickEl) pickClose(); });
-            pickEl.querySelector('.pick-x').addEventListener('click', pickClose);
-            const sr = pickEl.querySelector('.pick-search');
-            sr.addEventListener('input', pickRender);
-            sr.addEventListener('keydown', e => {
-                if (e.key === 'Enter') { e.preventDefault(); const v = sr.value.trim(); if (v) pickChoose(v); }
-                if (e.key === 'Escape') pickClose();
-            });
-        }
-        pickState = { input, getOpts, allowEmpty: !!allowEmpty, current: input.value.trim() };
-        pickEl.querySelector('.pick-title').textContent = title || 'ជ្រើសរើស';
-        pickEl.querySelector('.pick-search').value = '';
-        pickRender();
-        pickEl.classList.add('open');
-        pickEl.querySelector('.pick-list').scrollTop = 0;
-        // no auto-focus on the search box: the keyboard would cover the list; staff can tap it when they want to type
-    }
-    function attachCombo(input, getOpts, title, allowEmpty) {
-        if (!input || input.dataset.combo) return;
-        input.dataset.combo = '1';
-        input.readOnly = true;                       // tap opens the picker; no keyboard pops up
-        input.setAttribute('inputmode', 'none');
-        if (!input.placeholder) input.placeholder = 'ចុចដើម្បីជ្រើសរើស';
-        input.addEventListener('click', () => pickOpen(input, getOpts, title, allowEmpty));
-    }
-    const comboHide = pickClose;
-    const allActivityNames = () => [...TEAMS.flatMap(x => x.items.map(i => i.a)), ...globalOffActivities];
-    const allProjectNames = () => [...TEAMS.flatMap(x => x.items.map(i => i.p).filter(Boolean)), ...OFF_PROJECTS];
-
-    function fillList(id, arr) {
-        const dl = $(id);
-        dl.innerHTML = '';
-        [...new Set(arr)].forEach(v => { const o = document.createElement('option'); o.value = v; dl.appendChild(o); });
-    }
-    // work activities / projects offered = only those of the chosen team (all teams if none chosen)
-    function refreshWorkLists() {
-        const t = TEAMS.find(x => x.name === team);
-        const items = t ? t.items : (teamRequired() ? [] : TEAMS.flatMap(x => x.items));   // no team chosen -> nothing offered
-        globalActivities = [...new Set(items.map(i => i.a))];
-        PROJECTS = [...new Set(items.map(i => i.p).filter(Boolean))];
-        fillList('activityListOptions', globalActivities);
-        fillList('projectListOptions', PROJECTS);
-        fillList('allActivityListOptions', [...TEAMS.flatMap(x => x.items.map(i => i.a)), ...globalOffActivities]);
-        fillList('allProjectListOptions', [...TEAMS.flatMap(x => x.items.map(i => i.p).filter(Boolean)), ...OFF_PROJECTS]);
-    }
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwMZYPq_XcIL1KFJMUkp3cZ7nvines_n2Is-2dUFmSJu406nXf5EAOUMRLpWL9Vs2Kw/exec';
 
     const $ = id => document.getElementById(id);
     const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1018,11 +876,80 @@
     const DOW = [["អា","Sun"],["ច","Mon"],["អ","Tue"],["ពុ","Wed"],["ព្រ","Thu"],["សុ","Fri"],["សៅ","Sat"]];
     const kmNum = n => String(n).replace(/\d/g, d => "០១២៣៤៥៦៧៨៩"[d]);
 
+    function toggleTheme() {
+        const body = document.body, themeText = $('themeText');
+        if (body.getAttribute('data-theme') === 'light') { body.setAttribute('data-theme', 'dark'); themeText.textContent = 'Light'; }
+        else { body.setAttribute('data-theme', 'light'); themeText.textContent = 'Dark'; }
+    }
+
+    /* ================= Attendance codes (row "Attendance" in the sheet) =================
+       If the sheet's Attendance cells have a dropdown list, Apps Script sends that list as data.attCodes
+       and it replaces this default list. kind: work | leave | holiday | off */
+    const ATT_INFO = {
+        'D-HQ': { kind: 'work',    km: 'ធ្វើការ ការិយាល័យ / HQ (Duty – office/HQ)' },
+        'D-F':  { kind: 'work',    km: 'ធ្វើការ ទីវាល (Duty – field)' },
+        'D-FN': { kind: 'work',    km: 'ទីវាល ដេកក្នុងព្រៃ (Duty – field, night in forest)' },
+        'X':    { kind: 'off',     km: 'ឈប់សម្រាក (Off duty)' },
+        'W':    { kind: 'off',     km: 'ចុងសប្តាហ៍ (Weekend)' },
+        'PH':   { kind: 'holiday', km: 'ថ្ងៃបុណ្យជាតិ (Public holiday)' },
+        'AL':   { kind: 'leave',   km: 'ច្បាប់ប្រចាំឆ្នាំ (Annual leave)' },
+        'SL':   { kind: 'leave',   km: 'ឈប់ឈឺ (Sick leave)' },
+        'PL':   { kind: 'leave',   km: 'ច្បាប់ PL' },
+        'DL':   { kind: 'leave',   km: 'ថ្ងៃសម្រាកជំនួស (Day in lieu)' },
+        'LWOP': { kind: 'leave',   km: 'ច្បាប់គ្មានប្រាក់ខែ (Unpaid leave)' },
+        'A':    { kind: 'leave',   km: 'អវត្តមាន (Absent)' },
+        'NE':   { kind: 'leave',   km: 'NE' }
+    };
+    let ATT_CODES = Object.keys(ATT_INFO);
+    let ATT_MEANING = {};   // from Program tab (columns D:E "Code" / "Meaning") -> shown as notes next to every code
+    const attKm = c => ATT_MEANING[c] || (ATT_INFO[c] && ATT_INFO[c].km) || '';
+    function kindOf(c) {
+        c = String(c || '').trim();
+        if (!c) return '';
+        if (ATT_INFO[c]) return ATT_INFO[c].kind;
+        return /^D-/i.test(c) ? 'work' : 'leave';
+    }
+    const isField = c => kindOf(c) === 'work' && String(c).trim().toUpperCase() !== 'D-HQ';   // field ration only for D-F / D-FN
+    const workCodes = () => ATT_CODES.filter(c => kindOf(c) === 'work');
+    const offCodes = () => ATT_CODES.filter(c => kindOf(c) !== 'work');
+    const CELL_CLS = { work: 'cell-worked', leave: 'cell-leave', holiday: 'cell-holiday', off: 'cell-off' };
+    const progShort = p => String(p || '').split(/\s[·–-]\s/)[0].trim();
+    const taskShort = t => String(t || '').split(/\s[–-]\s/)[0].trim();
+
+    /* ================= State ================= */
+    let days = {};            // { 5: { att:'D-F', progs:[{p:'P-20002 · IBIS Rice', t:'AD – Admin'}], amount:'12' } }
+    let mode = null;          // null | 'worked' | 'notwork'
+    let editing = null;
+    let lastMonthVal = '';
+    let workAtt = '', workProg = '', workTask = '', workAmount = '', splitAdd = false;
+    let offAtt = '';
+    let PROGRAMMES = [], TASKS = [];
+
     function ym() {
         const v = $('monthYear').value || '';
         let [y, m] = v.split('-').map(Number);
         if (!y || !m) { const t = new Date(); y = t.getFullYear(); m = t.getMonth() + 1; }
         return { y, m };
+    }
+
+    /* ================= Reporting period: 26th of previous month -> 25th of selected month =================
+       The month picker means "the month in which the period ENDS" (e.g. Nov 2026 = 26 Oct -> 25 Nov).
+       Day numbers never collide (26-31 = previous month, 1-25 = selected month), so `days{}` stays keyed by day number. */
+    const PERIOD_START_DAY = 26, PERIOD_END_DAY = 25;
+    function periodDays(y, m) {
+        const out = [];
+        const start = new Date(y, m - 2, PERIOD_START_DAY);   // JS rolls Jan back to Dec of the previous year
+        const end = new Date(y, m - 1, PERIOD_END_DAY);
+        for (let dt = new Date(start); dt <= end; dt.setDate(dt.getDate() + 1)) {
+            out.push({ d: dt.getDate(), mon: dt.getMonth() + 1, yr: dt.getFullYear(), w: dt.getDay() });
+        }
+        return out;
+    }
+    const isoOf = p => `${p.yr}-${String(p.mon).padStart(2, '0')}-${String(p.d).padStart(2, '0')}`;
+    const shortDate = p => `${p.d} ${MONTH_EN[p.mon - 1].slice(0, 3)} ${p.yr}`;
+    function periodText(y, m) {
+        const per = periodDays(y, m);
+        return `${shortDate(per[0])} → ${shortDate(per[per.length - 1])}`;
     }
 
     /* ======= Cambodia public holidays 2026 =======
@@ -1045,152 +972,183 @@
     addHol(2026, 11, [9], "ពិធីបុណ្យឯករាជ្យជាតិ", "Independence Day");
     addHol(2026, 11, [23, 24, 25], "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែ អកអំបុក", "Water Festival");
     addHol(2026, 12, [29], "ទិវាសន្តិភាពនៅកម្ពុជា", "Peace Day in Cambodia");
+    // 2027: only the fixed-date holidays so far (the rest of the 2027 list is not yet published) -> add more here
+    addHol(2027, 1, [1], "ទិវាចូលឆ្នាំសកល", "International New Year’s Day");
+    addHol(2027, 1, [7], "ទិវាជ័យជម្នះលើរបបប្រល័យពូជសាសន៍", "Victory over Genocide Day");
 
+    // Holidays that fall inside the period of (y, m), keyed by day number
     function holMap(y, m) {
         const o = {};
-        (HOL[y] || []).filter(h => h.m === m).forEach(h => o[h.d] = h);
+        periodDays(y, m).forEach(p => {
+            const h = (HOL[p.yr] || []).find(x => x.m === p.mon && x.d === p.d);
+            if (h) o[p.d] = h;
+        });
         return o;
     }
 
-    /* Activity text used by each button. Prefers the wording that already exists in your master list,
-       so the Apps Script colouring keeps working. */
-    function findActivity(keyword, fallback) {
-        return [...globalOffActivities, ...globalActivities].find(a => String(a).toUpperCase().includes(keyword)) || fallback;
+    // Tab name in the Google Sheet: "Oct-Nov 2026", "Nov-Dec 2026", "Dec-Jan 2027" (year = year the period ends)
+    function tabName(y, m) {
+        const per = periodDays(y, m), a = per[0], b = per[per.length - 1];
+        return `${MONTH_EN[a.mon - 1].slice(0, 3)}-${MONTH_EN[b.mon - 1].slice(0, 3)} ${b.yr}`;
     }
-    const actNotWork = () => findActivity('NOT WORKING', 'Not Working');
-    const actSick = () => findActivity('SICK LEAVE', 'Sick Leave');
-    const actHoliday = () => findActivity('PUBLIC HOLIDAY', 'Public Holiday');
-    const actWork = () => (workActText || '').trim() || 'Working';
-    const actOff = () => (offActText || '').trim() || actNotWork();
 
-    /* ================= Master data from Google Sheets ================= */
+    function statsOf(obj) {
+        const s = { worked: 0, leave: 0, holiday: 0, off: 0, total: 0, hiN: null, hiV: -Infinity };
+        Object.entries(obj).forEach(([k, r]) => {
+            if (!r || !r.att) return;
+            const kd = kindOf(r.att);
+            if (kd === 'work') s.worked++; else if (kd === 'leave') s.leave++; else if (kd === 'holiday') s.holiday++; else s.off++;
+            const v = parseFloat(r.amount);
+            if (!isNaN(v)) { s.total += v; if (v > s.hiV) { s.hiV = v; s.hiN = k; } }
+        });
+        s.filled = s.worked + s.leave + s.holiday + s.off;
+        return s;
+    }
+
+    /* ---------- Picker (bottom sheet) ---------- */
+    let pickEl = null, pickState = null;
+    function pickClose() { if (pickEl) pickEl.classList.remove('open'); pickState = null; }
+    function pickRender() {
+        const st = pickState; if (!st) return;
+        const q = pickEl.querySelector('.pick-search').value.trim();
+        const ql = q.toLowerCase();
+        const opts = [...new Set(st.getOpts())];
+        const lab = o => st.labelOf ? `${o} — ${st.labelOf(o)}` : o;
+        const list = ql ? opts.filter(o => lab(o).toLowerCase().includes(ql)) : opts;
+        const box = pickEl.querySelector('.pick-list');
+        box.innerHTML = '';
+        const add = (label, value, cls) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            if (cls) b.className = cls;
+            b.textContent = label;
+            b.addEventListener('click', () => pickChoose(value));
+            box.appendChild(b);
+        };
+        if (!q && st.allowEmpty) add('— គ្មាន —', '', '');
+        if (q && !st.noNew && !opts.some(o => o.toLowerCase() === ql)) add('＋ ប្រើ «' + q + '» (បញ្ចូលថ្មី)', q, 'new');
+        list.forEach(o => add(lab(o), o, o === st.current ? 'cur' : ''));
+        if (!list.length && !q) box.innerHTML = '<div class="pick-empty">មិនមានបញ្ជី — សូមពិនិត្យ Tab "Program" ក្នុង Google Sheet</div>';
+    }
+    function pickChoose(v) {
+        const st = pickState; if (!st) return;
+        pickClose();
+        st.input.value = v;
+        st.input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    function pickOpen(input, getOpts, title, allowEmpty, noNew, labelOf) {
+        if (!pickEl) {
+            pickEl = document.createElement('div');
+            pickEl.className = 'pick-scrim';
+            pickEl.innerHTML = '<div class="pick-sheet" role="dialog" aria-modal="true"><div class="pick-head"><span class="pick-title"></span><button type="button" class="pick-x" aria-label="បិទ">×</button></div>' +
+                '<input type="text" class="pick-search" autocomplete="off" autocapitalize="off" placeholder="ស្វែងរក...">' +
+                '<div class="pick-list"></div></div>';
+            document.body.appendChild(pickEl);
+            pickEl.addEventListener('click', e => { if (e.target === pickEl) pickClose(); });
+            pickEl.querySelector('.pick-x').addEventListener('click', pickClose);
+            const sr = pickEl.querySelector('.pick-search');
+            sr.addEventListener('input', pickRender);
+            sr.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.preventDefault(); const v = sr.value.trim(); if (v && !(pickState && pickState.noNew)) pickChoose(v); }
+                if (e.key === 'Escape') pickClose();
+            });
+        }
+        pickState = { input, getOpts, allowEmpty: !!allowEmpty, noNew: !!noNew, labelOf, current: input.value.trim() };
+        pickEl.querySelector('.pick-title').textContent = title || 'ជ្រើសរើស';
+        pickEl.querySelector('.pick-search').value = '';
+        pickRender();
+        pickEl.classList.add('open');
+        pickEl.querySelector('.pick-list').scrollTop = 0;
+    }
+    function attachCombo(input, getOpts, title, allowEmpty, noNew, labelOf) {
+        if (!input || input.dataset.combo) return;
+        input.dataset.combo = '1';
+        input.readOnly = true;
+        input.setAttribute('inputmode', 'none');
+        if (!input.placeholder) input.placeholder = 'ចុចដើម្បីជ្រើសរើស';
+        input.addEventListener('click', () => pickOpen(input, getOpts, title, allowEmpty, noNew, labelOf));
+    }
+
+    /* ================= Master data from Google Sheets (tab "Program") ================= */
     function fetchMasterData() {
         fetch(scriptURL + '?action=getData')
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
-                if (data.status === "error") {
-                    alert(data.message);
-                    return;
-                }
-
-                const staffSelect = $('staffName');
-                staffSelect.innerHTML = '<option value="">-- ជ្រើសរើសឈ្មោះ --</option>';
-                data.staffs.forEach(staff => {
-                    const opt = document.createElement('option');
-                    opt.value = staff;
-                    opt.textContent = staff;
-                    staffSelect.appendChild(opt);
+                if (data.status === 'error') { alert(data.message); return; }
+                const sel = $('staffName');
+                sel.innerHTML = '<option value="">-- ជ្រើសរើសឈ្មោះ --</option>';
+                (data.staffs || []).forEach(s => {
+                    const o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o);
                 });
-
-                // Teams come from the Staff sheet. Old Apps Script (no "teams") is converted to one nameless team.
-                let tdata = data.teams;
-                if (!Array.isArray(tdata)) {
-                    const ap = data.activityProjects || {}, op0 = data.offActivityProjects || {};
-                    const allActs = data.activities || [];
-                    const workA = allActs.filter(a => classifyDay(a) === 'worked');
-                    const offA = Array.isArray(data.offActivities) ? data.offActivities : allActs.filter(a => classifyDay(a) !== 'worked');
-                    tdata = [
-                        { name: '', off: false, items: workA.map(a => ({ a, p: ap[a] || '', red: false })) },
-                        { name: '', off: true, items: offA.map(a => ({ a, p: ap[a] || op0[a] || '', red: false })) }
-                    ];
-                }
-                TEAMS = tdata.filter(t => !t.off);
-                const offItems = tdata.filter(t => t.off).flatMap(t => t.items);
-
-                ACT_PROJ = {}; TEAM_MAP = {}; RED_ACTS = new Set();
-                TEAMS.forEach(t => {
-                    TEAM_MAP[t.name] = {};
-                    t.items.forEach(it => {
-                        if (!(it.a in TEAM_MAP[t.name])) TEAM_MAP[t.name][it.a] = it.p || '';
-                        if (!(it.a in ACT_PROJ)) ACT_PROJ[it.a] = it.p || '';
-                        if (it.red) RED_ACTS.add(it.a);
-                    });
-                });
-                globalOffActivities = [...new Set(offItems.map(i => i.a))];
-                offItems.forEach(it => { if (!(it.a in ACT_PROJ)) ACT_PROJ[it.a] = it.p || ''; });
-                const op = [...new Set(offItems.map(i => i.p).filter(Boolean))];
-                if (op.length) OFF_PROJECTS = op;
-
-                if (team && !TEAMS.some(t => t.name === team)) team = '';
-                fillList('offActivityListOptions', globalOffActivities);
-                fillList('offProjectListOptions', OFF_PROJECTS);
-                refreshWorkLists();
-
+                PROGRAMMES = data.programmes || [];
+                TASKS = data.tasks || [];
+                if (Array.isArray(data.attCodes) && data.attCodes.length >= 3) ATT_CODES = data.attCodes.map(String);
+                if (data.attMeanings && typeof data.attMeanings === 'object') ATT_MEANING = data.attMeanings;
+                renderShChips('');
                 restoreStaffFromDraft();
                 if (mode) renderMode();
             })
-            .catch(error => {
-                console.error('Error fetching master data:', error);
-            });
+            .catch(err => console.error('Error fetching master data:', err));
     }
 
-    /* ================= Render ================= */
+    /* ================= Render calendar (26th -> 25th) ================= */
     function render() {
         const { y, m } = ym();
         const hol = holMap(y, m);
-        const first = new Date(y, m - 1, 1).getDay();
-        const n = new Date(y, m, 0).getDate();
+        const per = periodDays(y, m);
+        const n = per.length;
         const t = new Date();
 
         let h = DOW.map((d, i) => `<div class="dow${i === 0 || i === 6 ? ' weekend' : ''}"><b>${d[0]}</b><small>${d[1]}</small></div>`).join('');
-        for (let i = 0; i < first; i++) h += '<div class="pad"></div>';
+        for (let i = 0; i < per[0].w; i++) h += '<div class="pad"></div>';
 
-        for (let d = 1; d <= n; d++) {
-            const r = days[d];
-            const has = r && (r.activity !== '' || r.amount !== '');
-            const w = new Date(y, m - 1, d).getDay();
-            const kind = has ? classifyDay(r.activity) : '';
-            const isToday = t.getFullYear() === y && t.getMonth() + 1 === m && t.getDate() === d;
-            const cls = ['day', (w === 0 || w === 6) ? 'weekend' : '', kind ? 'cell-' + kind : '', isToday ? 'today' : ''].join(' ');
+        per.forEach((p, idx) => {
+            const d = p.d, r = days[d];
+            const has = !!(r && r.att);
+            const kind = has ? kindOf(r.att) : '';
+            const isToday = t.getFullYear() === p.yr && t.getMonth() + 1 === p.mon && t.getDate() === d;
+            const cls = ['day', (p.w === 0 || p.w === 6) ? 'weekend' : '', kind ? CELL_CLS[kind] : '', isToday ? 'today' : ''].join(' ');
             const hd = hol[d];
-            h += `<button type="button" class="${cls}" data-d="${d}" aria-label="${d} ${MONTH_EN[m-1]}${hd ? ', ' + esc(hd.en) : ''}">
+            const progTxt = has && r.progs && r.progs.length
+                ? r.progs.map(x => progShort(x.p) + (x.t ? '/' + taskShort(x.t) : '')).join(', ') : '';
+            h += `<button type="button" class="${cls}" data-d="${d}" aria-label="${d} ${MONTH_EN[p.mon-1]}${hd ? ', ' + esc(hd.en) : ''}">
                 ${hd && kind !== 'holiday' ? '<span class="hdot"></span>' : ''}
                 <span class="dn">${d}</span>
-                ${has && r.project ? `<span class="dp">${esc(r.project)}</span>` : ''}
-                <span class="da">${has ? esc(r.activity) : ''}</span>
-                <span class="dm">${has && r.amount !== '' ? esc(r.amount) : ''}</span>
+                ${(idx === 0 || d === 1) ? `<span class="dmon">${MONTH_EN[p.mon-1].slice(0,3)}</span>` : ''}
+                ${has ? `<span class="dp">${esc(r.att)}</span>` : ''}
+                <span class="da">${esc(progTxt)}</span>
+                <span class="dm">${has && r.amount !== '' && r.amount != null ? esc(r.amount) : ''}</span>
             </button>`;
-        }
-        $('cal').innerHTML = h;
-        $('monthTitle').textContent = `${MONTH_KM[m-1]} ${kmNum(y)} (${MONTH_EN[m-1]} ${y})`;
-
-        // live counters
-        const c = { worked: 0, leave: 0, holiday: 0 };
-        let filled = 0;
-        Object.values(days).forEach(r => {
-            if (r.activity === '' && r.amount === '') return;
-            filled++; c[classifyDay(r.activity)]++;
         });
-        $('liveSum').innerHTML =
-            `<div><b>${c.worked}</b>ធ្វើការ</div><div><b>${c.leave}</b>ឈប់សម្រាក</div><div><b>${c.holiday}</b>ថ្ងៃបុណ្យ</div><div><b>${Math.max(n - filled, 0)}</b>មិនទាន់បំពេញ</div>`;
+        $('cal').innerHTML = h;
+        $('monthTitle').innerHTML = `ប្រចាំខែ ${MONTH_KM[m-1]} ${kmNum(y)}<br><small style="font-weight:400;color:var(--label-color)">${periodText(y, m)} · ${n} ថ្ងៃ</small>`;
+        $('periodHint').textContent = periodText(y, m) + '  →  Tab: ' + tabName(y, m);
 
-        // official holidays of this month
-        const keys = Object.keys(hol).map(Number).sort((a, b) => a - b);
+        const c = statsOf(days);
+        $('liveSum').innerHTML =
+            `<div><b>${c.worked}</b>ធ្វើការ</div><div><b>${c.leave}</b>ច្បាប់</div><div><b>${c.holiday}</b>ថ្ងៃបុណ្យ</div><div><b>${c.off}</b>W / X</div><div><b>${Math.max(n - c.filled, 0)}</b>មិនទាន់បំពេញ</div>`;
+
+        const keys = per.map(p => p.d).filter(d => hol[d]);
         $('holList').innerHTML = keys.map(d =>
-            `<li><span class="hd">${d} ${MONTH_EN[m-1].slice(0,3)}</span><span class="ht">${esc(hol[d].km)}<small>${esc(hol[d].en)}</small></span></li>`).join('');
-        $('holNote').textContent = !HOL[y]
-            ? `មិនទាន់មានបញ្ជីថ្ងៃបុណ្យឆ្នាំ ${y} ក្នុងប្រព័ន្ធ។`
-            : (keys.length ? 'តាមប្រកាសលេខ ២១៦/២៥ ក្រសួងការងារ និងបណ្តុះបណ្តាលវិជ្ជាជីវៈ។' : 'ខែនេះគ្មានថ្ងៃបុណ្យជាតិទេ។');
+            `<li><span class="hd">${d} ${MONTH_EN[hol[d].m-1].slice(0,3)}</span><span class="ht">${esc(hol[d].km)}<small>${esc(hol[d].en)}</small></span></li>`).join('');
+        $('holNote').textContent = (!HOL[per[0].yr] && !HOL[per[n - 1].yr])
+            ? `មិនទាន់មានបញ្ជីថ្ងៃបុណ្យឆ្នាំ ${per[n - 1].yr} ក្នុងប្រព័ន្ធ។`
+            : (keys.length ? 'តាមប្រកាសលេខ ២១៦/២៥ ក្រសួងការងារ និងបណ្តុះបណ្តាលវិជ្ជាជីវៈ។' : 'រយៈពេលនេះគ្មានថ្ងៃបុណ្យជាតិទេ។');
 
         calculateTotalAllowance();
     }
 
-    function generateDays() { render(); }   // kept for compatibility
-
     function calculateTotalAllowance() {
-        let total = 0;
-        Object.values(days).forEach(r => {
-            const v = parseFloat(r.amount);
-            if (!isNaN(v)) total += v;
-        });
-        $('fieldAllowance').value = total > 0 ? total : '';
+        const s = statsOf(days);
+        $('fieldAllowance').value = s.total > 0 ? s.total : '';
     }
 
-    /* ================= Modes (worked / not working) ================= */
-    function setMode(k) {
-        comboHide();
-        mode = (mode === k) ? null : k;
-        renderMode();
+    /* ================= Modes ================= */
+    function setMode(k) { pickClose(); mode = (mode === k) ? null : k; renderMode(); }
+
+    function codeButtons(codes, sel) {
+        return `<div class="team-row" role="group" aria-label="Attendance">${codes.map(c =>
+            `<button type="button" class="mode-btn team coded" data-att="${esc(c)}" aria-pressed="${c === sel}" title="${esc(attKm(c))}"><b>${esc(c)}</b><small>${esc(attKm(c))}</small></button>`).join('')}</div>`;
     }
 
     function renderMode() {
@@ -1199,120 +1157,100 @@
         const hint = $('modeHint');
         hint.innerHTML = '';
         if (mode === 'worked') {
-            const teamBtns = teamRequired()
-                ? `<div class="team-row" role="group" aria-label="ក្រុម (Team)">${TEAMS.map(t => `<button type="button" class="mode-btn team" data-team="${esc(t.name)}" aria-pressed="${t.name === team}">${esc(t.name)}</button>`).join('')}</div>`
-                : '';
-            const needTeam = teamRequired() && !team;
-            hint.innerHTML = teamBtns + (needTeam
-                ? `<span>សូមជ្រើសរើសក្រុមជាមុនសិន</span>`
-                : `<span>ចុចលើថ្ងៃ ដើម្បីដាក់សកម្មភាព៖</span>
-                <span class="clearable"><input type="text" id="workActivity" autocomplete="off" value="${esc(workActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
-                <input type="text" id="workProject" class="proj" autocomplete="off" placeholder="គម្រោង" aria-label="គម្រោង" value="${esc(workProject)}">
-                <input type="number" id="workAmount" inputmode="decimal" step="any" min="0" placeholder="ទឹកប្រាក់ $" aria-label="ទឹកប្រាក់ ($)" value="${esc(amtFor(workActText))}"${isNoAmount(workActText) ? ' disabled' : ''}>
-                <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`);
-            hint.querySelectorAll('.mode-btn.team').forEach(b => b.addEventListener('click', () => {
-                if (team === b.dataset.team) return;
-                team = b.dataset.team;
-                workActText = ''; workProject = ''; workAmount = '';   // activities differ per team -> start empty again
-                refreshWorkLists();
-                renderMode();
-            }));
-            if (needTeam) return;
-            attachCombo($('workActivity'), () => globalActivities, 'សកម្មភាព (ក្រុម ' + team + ')');
-            attachCombo($('workProject'), () => PROJECTS, 'គម្រោង', true);
-            syncClear($('workActivity'));
-            $('workProject').addEventListener('input', e => {
-                workProject = e.target.value.trim();         // free typing allowed (new project)
-            });
-            $('workAmount').addEventListener('input', e => {
-                workAmount = e.target.value;
-            });
-            $('workActivity').addEventListener('input', e => {
-                const changed = e.target.value !== workActText;
-                workActText = e.target.value;
-                if (changed) workAmount = '';            // new activity -> amount box starts empty again (no carry-over)
-                const p = workActText.trim() === '' ? '' : projFor(workActText);   // cleared -> no project; else auto-pick (still editable)
-                if (p !== null) {
-                    workProject = p;
-                    $('workProject').value = workProject;
-                }
-                const ao = $('workAmount');              // red activity (Office Work...) -> no amount; others -> default/edited amount
-                ao.disabled = isNoAmount(workActText);
-                ao.value = amtFor(workActText);   // '' unless the staff types an amount
+            let h = codeButtons(workCodes(), workAtt);
+            if (!workAtt) {
+                hint.innerHTML = h + '<span>សូមជ្រើសប្រភេទវត្តមានជាមុនសិន៖ D-HQ ការិយាល័យ · D-F ទីវាល · D-FN ទីវាលដេកក្នុងព្រៃ</span>';
+                bindCodeButtons('worked');
+                return;
+            }
+            h += `<span>${esc(attKm(workAtt))} — ចុចលើថ្ងៃ ដើម្បីដាក់៖</span>
+                <span class="clearable"><input type="text" id="workProg" autocomplete="off" placeholder="Programme" value="${esc(workProg)}"><button type="button" class="clr" aria-label="លុប">×</button></span>
+                <span class="clearable"><input type="text" id="workTask" autocomplete="off" placeholder="Task (ស្រេចចិត្ត)" value="${esc(workTask)}"><button type="button" class="clr" aria-label="លុប">×</button></span>
+                <input type="number" id="workAmount" inputmode="decimal" step="any" min="0" placeholder="Field ration $" aria-label="Field ration ($)" value="${esc(isField(workAtt) ? workAmount : '')}"${isField(workAtt) ? '' : ' disabled'}>
+                <button type="button" class="chip" id="splitChip" aria-pressed="${splitAdd}">＋ ចែកថ្ងៃ (បន្ថែម Programme លើថ្ងៃដែលមានរួច)</button>
+                <button type="button" class="chip" onclick="fillWeek('worked')">ជ្រើស ច័ន្ទ–សុក្រ ទាំងអស់</button>`;
+            hint.innerHTML = h;
+            bindCodeButtons('worked');
+            attachCombo($('workProg'), () => PROGRAMMES, 'Programme', false, true);
+            attachCombo($('workTask'), () => TASKS, 'Task', true, true);
+            syncClear($('workProg')); syncClear($('workTask'));
+            $('workProg').addEventListener('input', e => { workProg = e.target.value.trim(); });
+            $('workTask').addEventListener('input', e => { workTask = e.target.value.trim(); });
+            $('workAmount').addEventListener('input', e => { workAmount = e.target.value; });
+            $('splitChip').addEventListener('click', e => {
+                splitAdd = !splitAdd;
+                e.currentTarget.setAttribute('aria-pressed', splitAdd);
+                toast(splitAdd ? 'ចុចថ្ងៃដដែលម្តងទៀតជាមួយ Programme ផ្សេង = ចែកថ្ងៃ (១ ទាំងពីរជួរ)' : 'ចុចថ្ងៃ = ជំនួស Programme ចាស់');
             });
         } else if (mode === 'notwork') {
-            hint.innerHTML = `<span>ចុចលើថ្ងៃ ដើម្បីកំណត់ថ្ងៃសម្រាក៖</span>
-                <span class="clearable"><input type="text" id="offActivity" autocomplete="off" value="${esc(offActText)}"><button type="button" class="clr" aria-label="លុបអក្សរទាំងអស់">×</button></span>
-                <input type="text" id="offProject" class="proj" autocomplete="off" placeholder="កូដ" aria-label="កូដ" value="${esc(offProject)}">
-                <button type="button" class="chip" onclick="fillWeek('notwork')">ជ្រើស សៅរ៍–អាទិត្យ ទាំងអស់</button>`;
-            attachCombo($('offActivity'), () => globalOffActivities, 'ប្រភេទថ្ងៃសម្រាក');
-            attachCombo($('offProject'), () => OFF_PROJECTS, 'កូដ', true);
-            syncClear($('offActivity'));
-            $('offProject').addEventListener('input', e => {
-                offProject = e.target.value.trim();
-            });
-            $('offActivity').addEventListener('input', e => {
-                offActText = e.target.value;
-                const p = offActText.trim() === '' ? '' : projFor(offActText);     // cleared -> no code; else auto-pick (still editable)
-                if (p !== null) {
-                    offProject = p;
-                    $('offProject').value = offProject;
-                }
-            });
+            hint.innerHTML = codeButtons(offCodes(), offAtt) +
+                (offAtt ? `<span>${esc(attKm(offAtt))} — ចុចលើថ្ងៃ ដើម្បីកំណត់៖</span>` : '<span>សូមជ្រើសកូដជាមុនសិន</span>') +
+                `<button type="button" class="chip" onclick="fillWeek('notwork')">ជ្រើស សៅរ៍–អាទិត្យ ទាំងអស់ = W</button>`;
+            bindCodeButtons('notwork');
         }
     }
+    function bindCodeButtons(k) {
+        $('modeHint').querySelectorAll('.mode-btn.team').forEach(b => b.addEventListener('click', () => {
+            const c = b.dataset.att;
+            if (k === 'worked') { workAtt = c; if (!isField(c)) workAmount = ''; } else { offAtt = c; }
+            renderMode();
+        }));
+    }
 
-    // A team (work mode) and an activity must be chosen/typed before any day can be set.
-    // The activity may be a new one that is not in the list; the project can be typed freely too.
-    function modeActivityOk(k) {
-        if (k === 'worked' && teamRequired() && !team) {
-            toast('សូមជ្រើសរើសក្រុម (Team) ជាមុនសិន');
-            const hint0 = document.querySelector('.mode-btn.team'); if (hint0) hint0.focus();
-            return false;
-        }
-        const txt = (k === 'worked' ? workActText : offActText).trim();
-        if (!txt) {
-            toast(k === 'worked' ? 'សូមជ្រើសរើស ឬវាយសកម្មភាពជាមុនសិន' : 'សូមជ្រើសរើសប្រភេទថ្ងៃសម្រាកជាមុនសិន');
-            const el = $(k === 'worked' ? 'workActivity' : 'offActivity');
-            if (el) el.focus();
-            return false;
-        }
+    function needWork() {
+        if (!workAtt) { toast('សូមជ្រើសប្រភេទវត្តមាន (D-HQ / D-F / D-FN) ជាមុនសិន'); return false; }
+        if (!workProg) { toast('សូមជ្រើស Programme ជាមុនសិន'); const el = $('workProg'); if (el) el.focus(); return false; }
         return true;
     }
+    const sameProg = (a, b) => a.p === b.p && (a.t || '') === (b.t || '');
 
-    // Fill every EMPTY weekday (worked) or weekend day (not working); public holidays and filled days are skipped
+    function paint(d) {
+        if (mode === 'worked') {
+            if (!needWork()) return;
+            const entry = { p: workProg, t: workTask };
+            const amt = isField(workAtt) ? String(workAmount) : '';
+            const cur = days[d];
+            if (cur && kindOf(cur.att) === 'work') {
+                const i = cur.progs.findIndex(x => sameProg(x, entry));
+                if (splitAdd) {
+                    if (i >= 0) { cur.progs.splice(i, 1); if (!cur.progs.length) delete days[d]; }
+                    else { cur.progs.push(entry); cur.att = workAtt; if (amt !== '') cur.amount = amt; }
+                } else if (i >= 0 && cur.progs.length === 1 && cur.att === workAtt) {
+                    delete days[d];                                   // tap again = un-select
+                } else {
+                    days[d] = { att: workAtt, progs: [entry], amount: amt };
+                }
+            } else {
+                days[d] = { att: workAtt, progs: [entry], amount: amt };
+            }
+        } else {
+            if (!offAtt) { toast('សូមជ្រើសកូដ (W, X, AL, SL, PH ...) ជាមុនសិន'); return; }
+            const cur = days[d];
+            if (cur && cur.att === offAtt) delete days[d];
+            else days[d] = { att: offAtt, progs: [], amount: '' };
+        }
+        render(); saveDraft();
+    }
+
+    // worked: fill every EMPTY Mon–Fri (not holiday); notwork: fill every EMPTY Sat/Sun with W
     function fillWeek(k) {
-        if (!modeActivityOk(k)) return;
         const { y, m } = ym();
         const hol = holMap(y, m);
-        const n = new Date(y, m, 0).getDate();
+        let code = 'W';
+        if (k === 'worked') { if (!needWork()) return; }
+        else if (!ATT_CODES.includes('W')) code = offAtt || 'W';
         let count = 0;
-        for (let d = 1; d <= n; d++) {
-            const w = new Date(y, m - 1, d).getDay();
-            const weekend = (w === 0 || w === 6);
+        for (const p of periodDays(y, m)) {
+            const d = p.d, weekend = (p.w === 0 || p.w === 6);
             if (hol[d]) continue;
-            if (days[d] && days[d].activity !== '') continue;
-            if (k === 'worked' && !weekend) { days[d] = { activity: actWork(), amount: (days[d] && days[d].amount) || amtFor(actWork()), project: workProject }; count++; }
-            if (k === 'notwork' && weekend) { days[d] = { activity: actOff(), amount: '', project: offProject }; count++; }
+            if (days[d] && days[d].att) continue;
+            if (k === 'worked' && !weekend) {
+                days[d] = { att: workAtt, progs: [{ p: workProg, t: workTask }], amount: isField(workAtt) ? String(workAmount) : '' }; count++;
+            }
+            if (k === 'notwork' && weekend) { days[d] = { att: code, progs: [], amount: '' }; count++; }
         }
         render(); saveDraft();
         toast(`បានកំណត់ ${count} ថ្ងៃ (មិនរាប់ថ្ងៃបុណ្យ និងថ្ងៃដែលមានទិន្នន័យរួច)`);
-    }
-
-    function paint(d) {
-        if (!modeActivityOk(mode)) return;
-        const act = mode === 'worked' ? actWork() : actOff();
-        const proj = mode === 'worked' ? workProject : offProject;
-        const amt = mode === 'worked' ? amtFor(act) : '';   // worked: default/edited $ (blank for Office Work); not working: none
-        const cur = days[d];
-        if (cur && cur.activity === act && (cur.project || '') === proj) {
-            // tap again = un-select; keep the amount only if it was typed by hand
-            if (cur.amount !== '' && cur.amount !== amt) days[d] = { activity: '', amount: cur.amount, project: '' };
-            else delete days[d];
-        } else {
-            days[d] = { activity: act, amount: amt, project: proj };
-        }
-        render(); saveDraft();
     }
 
     $('cal').addEventListener('click', e => {
@@ -1322,31 +1260,29 @@
         if (mode) paint(d); else openSheet(d);
     });
 
-    /* ================= Public holidays ================= */
     function loadHolidays() {
         const { y, m } = ym();
-        if (!HOL[y]) { toast(`មិនទាន់មានបញ្ជីថ្ងៃបុណ្យឆ្នាំ ${y}`); return; }
+        const per0 = periodDays(y, m);
+        if (!HOL[per0[0].yr] && !HOL[per0[per0.length - 1].yr]) { toast(`មិនទាន់មានបញ្ជីថ្ងៃបុណ្យឆ្នាំ ${per0[per0.length - 1].yr}`); return; }
         const hol = holMap(y, m);
         const ds = Object.keys(hol).map(Number);
-        if (!ds.length) { toast('ខែនេះគ្មានថ្ងៃបុណ្យជាតិទេ'); return; }
-        const act = actHoliday();
+        if (!ds.length) { toast('រយៈពេលនេះគ្មានថ្ងៃបុណ្យជាតិទេ'); return; }
         let set = 0, skipped = 0;
         ds.forEach(d => {
             const cur = days[d];
-            if (cur && cur.activity !== '' && classifyDay(cur.activity) !== 'holiday') { skipped++; return; }
-            days[d] = { activity: act, amount: cur ? cur.amount : '', project: '' };
+            if (cur && cur.att && kindOf(cur.att) !== 'holiday' && kindOf(cur.att) !== 'off') { skipped++; return; }
+            days[d] = { att: 'PH', progs: [], amount: '' };
             set++;
         });
         render(); saveDraft();
-        toast(`បានទាញថ្ងៃបុណ្យ ${set} ថ្ងៃ` + (skipped ? ` (រំលង ${skipped} ថ្ងៃដែលមានសកម្មភាពរួច)` : ''));
+        toast(`បានដាក់ PH ${set} ថ្ងៃ` + (skipped ? ` (រំលង ${skipped} ថ្ងៃដែលមានទិន្នន័យរួច)` : ''));
     }
 
     function clearMonth() {
         if (!Object.keys(days).length) return;
-        if (confirm('សម្អាតទិន្នន័យទាំងអស់នៃខែនេះ?')) { days = {}; render(); saveDraft(); }
+        if (confirm('សម្អាតទិន្នន័យទាំងអស់នៃរយៈពេលនេះ?')) { days = {}; render(); saveDraft(); }
     }
 
-    /* ================= Month navigation ================= */
     function stepMonth(k) {
         let { y, m } = ym();
         m += k;
@@ -1356,81 +1292,87 @@
         $('monthYear').dispatchEvent(new Event('change'));
     }
 
-    /* ================= Day sheet ================= */
+    /* ================= Day sheet (tap a day with no mode selected) ================= */
+    function renderShChips(sel) {
+        $('shChips').innerHTML = ATT_CODES.map(c =>
+            `<button type="button" class="chip cc" data-k="${esc(c)}" aria-pressed="${c === sel}" title="${esc(attKm(c))}"><b>${esc(c)}</b><small>${esc(attKm(c))}</small></button>`).join('');
+    }
+    function shAddRow(p, t) {
+        const row = document.createElement('div');
+        row.className = 'prow';
+        row.innerHTML = '<div><input type="text" class="sp" placeholder="Programme" autocomplete="off"><input type="text" class="st" placeholder="Task (ស្រេចចិត្ត)" autocomplete="off" style="margin-top:6px"></div><button type="button" class="px" aria-label="លុបជួរ">×</button>';
+        const sp = row.querySelector('.sp'), st = row.querySelector('.st');
+        sp.value = p || ''; st.value = t || '';
+        attachCombo(sp, () => PROGRAMMES, 'Programme', false, true);
+        attachCombo(st, () => TASKS, 'Task', true, true);
+        row.querySelector('.px').addEventListener('click', () => row.remove());
+        $('shRows').appendChild(row);
+    }
+    function syncSheet() {
+        const a = $('shAtt').value.trim();
+        const k = a ? kindOf(a) : '';
+        $('shProgBox').hidden = k !== 'work';
+        if (k === 'work' && !$('shRows').children.length) shAddRow(workProg, workTask);
+        const field = isField(a);
+        $('shAmt').disabled = !field;
+        $('shAmtWrap').hidden = !field;
+        if (!field) $('shAmt').value = '';
+        const el = $('shKind');
+        el.textContent = a ? `● ${a} — ${attKm(a)}` : '';
+        el.style.color = k === 'work' ? 'var(--paddy-light)' : k === 'leave' ? 'var(--stamp-red)' : k === 'holiday' ? 'var(--stamp-ochre)' : 'var(--label-color)';
+    }
     function openSheet(d) {
         editing = d;
         const { y, m } = ym();
-        const r = days[d] || { activity: '', amount: '' };
+        const r = days[d];
         const hd = holMap(y, m)[d];
-        $('shTitle').textContent = `${DOW[new Date(y, m - 1, d).getDay()][1]} ${d} ${MONTH_EN[m-1]} ${y}`;
+        const pd = periodDays(y, m).find(x => x.d === d);
+        $('shTitle').textContent = `${DOW[pd.w][1]} ${d} ${MONTH_EN[pd.mon-1]} ${pd.yr}`;
         $('shHol').hidden = !hd;
         if (hd) $('shHol').textContent = 'ថ្ងៃបុណ្យ៖ ' + hd.km;
-        $('shAct').value = r.activity;
-        syncClear($('shAct'));
-        $('shProj').value = r.project || '';
-        $('shAmt').value = r.amount;
-        $('shAmt').disabled = isNoAmount(r.activity);
-        updateKind();
+        $('shAtt').value = r ? r.att : '';
+        renderShChips(r ? r.att : '');
+        $('shRows').innerHTML = '';
+        if (r && r.progs) r.progs.forEach(x => shAddRow(x.p, x.t));
+        $('shAmt').value = r && r.amount != null ? r.amount : '';
+        syncSheet();
         $('scrim').classList.add('open');
     }
-    function closeSheet() { $('scrim').classList.remove('open'); editing = null; }
-    function updateKind() {
-        const el = $('shKind');
-        if ($('shAct').value === '' && $('shAmt').value === '') { el.textContent = ''; return; }
-        const k = classifyDay($('shAct').value);
-        el.textContent = k === 'worked' ? '● ធ្វើការ (Worked)' : k === 'leave' ? '● ឈប់សម្រាក (Leave)' : '● ថ្ងៃបុណ្យ (Holiday)';
-        el.style.color = k === 'worked' ? 'var(--paddy-light)' : k === 'leave' ? 'var(--stamp-red)' : 'var(--stamp-ochre)';
-    }
-    $('shAct').addEventListener('input', () => {
-        updateKind();
-        const noAmt = isNoAmount($('shAct').value);      // red activity: no amount
-        $('shAmt').disabled = noAmt;
-        if (noAmt) $('shAmt').value = '';
-        const p = projFor($('shAct').value);             // auto-pick the activity's project; you can still change it
-        if (p !== null) $('shProj').value = p;
-    });
-    $('shAmt').addEventListener('input', updateKind);
-    attachCombo($('shAct'), allActivityNames, 'សកម្មភាព');
-    attachCombo($('shProj'), allProjectNames, 'គម្រោង', true);
+    function closeSheet() { $('scrim').classList.remove('open'); editing = null; pickClose(); }
     $('shChips').addEventListener('click', e => {
         const b = e.target.closest('.chip');
         if (!b) return;
-        const k = b.dataset.k;
-        $('shAct').value = k === 'work' ? actWork() : k === 'notwork' ? actNotWork() : k === 'sick' ? actSick() : actHoliday();
-        syncClear($('shAct'));
-        const p = projFor($('shAct').value);
-        $('shProj').value = p !== null ? p : (k === 'work' ? workProject : '');
-        $('shAmt').disabled = isNoAmount($('shAct').value);
-        if ($('shAmt').disabled) $('shAmt').value = '';
-        updateKind();
+        $('shAtt').value = b.dataset.k;
+        renderShChips(b.dataset.k);
+        syncSheet();
     });
+    $('shAddRow').addEventListener('click', () => shAddRow('', ''));
     $('shClose').onclick = closeSheet;
     $('scrim').addEventListener('click', e => { if (e.target.id === 'scrim') closeSheet(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
     $('shClear').onclick = () => { delete days[editing]; closeSheet(); render(); saveDraft(); };
     $('shSave').onclick = () => {
-        const act = $('shAct').value.trim(), amt = $('shAmt').value;
-        if (act === '' && amt !== '') { toast('សូមជ្រើសរើសសកម្មភាពជាមុនសិន'); $('shAct').focus(); return; }
-        if (act === '' && amt === '') delete days[editing];
-        else days[editing] = { activity: act, amount: amt, project: $('shProj').value.trim() };
+        const att = $('shAtt').value.trim();
+        if (!att) { delete days[editing]; closeSheet(); render(); saveDraft(); return; }
+        let progs = [], amt = '';
+        if (kindOf(att) === 'work') {
+            $('shRows').querySelectorAll('.prow').forEach(r => {
+                const p = r.querySelector('.sp').value.trim(), t = r.querySelector('.st').value.trim();
+                if (p && !progs.some(x => x.p === p && x.t === t)) progs.push({ p, t });
+            });
+            if (!progs.length) { toast('សូមជ្រើស Programme យ៉ាងហោចណាស់មួយ'); return; }
+            amt = isField(att) ? $('shAmt').value : '';
+        }
+        days[editing] = { att, progs, amount: amt };
         closeSheet(); render(); saveDraft();
     };
 
-    /* ================= Export to Excel (ExcelJS) =================
-       Sheet 1 "Summary"  -> same figures as the summary card
-       Sheet 2 "Oct 2026" -> same layout as the Google Sheet monthly tab                       */
+    /* ================= Export to Excel (same layout as the Google Sheet tab) ================= */
     function computeStats(d) {
-        const n = new Date(d.y, d.m, 0).getDate();
-        let worked = 0, leave = 0, holiday = 0, total = 0, hiN = null, hiV = -Infinity;
-        Object.entries(d.days).forEach(([k, r]) => {
-            if (r.activity === '' && r.amount === '') return;
-            const c = classifyDay(r.activity);
-            if (c === 'leave') leave++; else if (c === 'holiday') holiday++; else worked++;
-            const v = parseFloat(r.amount);
-            if (!isNaN(v)) { total += v; if (v > hiV) { hiV = v; hiN = k; } }
-        });
-        return { n, worked, leave, holiday, unfilled: Math.max(n - worked - leave - holiday, 0),
-                 gross: parseFloat(d.gross) || 0, total, avg: worked ? total / worked : 0, hiN, hiV };
+        const n = periodDays(d.y, d.m).length;
+        const s = statsOf(d.days);
+        return { n, worked: s.worked, leave: s.leave, holiday: s.holiday, off: s.off, unfilled: Math.max(n - s.filled, 0),
+                 gross: parseFloat(d.gross) || 0, total: s.total, avg: s.worked ? s.total / s.worked : 0, hiN: s.hiN, hiV: s.hiV };
     }
 
     function exportCurrent() {
@@ -1438,11 +1380,10 @@
         if (!staff) { alert('សូមជ្រើសរើសឈ្មោះបុគ្គលិកជាមុនសិន!'); return; }
         const { y, m } = ym();
         const dd = {};
-        Object.entries(days).forEach(([k, r]) => { if (r.activity !== '' || r.amount !== '') dd[k] = r; });
+        Object.entries(days).forEach(([k, r]) => { if (r && r.att) dd[k] = r; });
         if (!Object.keys(dd).length) { alert('សូមជ្រើសថ្ងៃយ៉ាងហោចណាស់មួយថ្ងៃជាមុនសិន!'); return; }
         exportExcel({ staff, y, m, gross: $('grossSalary').value, days: dd });
     }
-
     function exportLast() {
         const raw = localStorage.getItem('timesheetLastExport');
         if (!raw) { alert('មិនមានទិន្នន័យដែលបានបញ្ជូនចុងក្រោយទេ'); return; }
@@ -1450,13 +1391,9 @@
     }
 
     async function exportExcel(d) {
-        if (typeof ExcelJS === 'undefined') {
-            alert('មិនអាចផ្ទុកឧបករណ៍ Excel បានទេ សូមភ្ជាប់អ៊ីនធឺណិត រួចព្យាយាមម្តងទៀត។');
-            return;
-        }
+        if (typeof ExcelJS === 'undefined') { alert('មិនអាចផ្ទុកឧបករណ៍ Excel បានទេ សូមភ្ជាប់អ៊ីនធឺណិត រួចព្យាយាមម្តងទៀត។'); return; }
         toast('កំពុងបង្កើតឯកសារ Excel...');
-        const st = computeStats(d), n = st.n;
-        const MON = MONTH_EN[d.m - 1], mon3 = MON.slice(0, 3);
+        const per = periodDays(d.y, d.m), n = per.length, st = computeStats(d), perTxt = periodText(d.y, d.m), tab = tabName(d.y, d.m);
         const line = c => ({ style: 'thin', color: { argb: c || 'FF000000' } });
         const box = c => ({ top: line(c), left: line(c), bottom: line(c), right: line(c) });
         const solid = argb => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
@@ -1465,142 +1402,89 @@
 
         /* ---------- Sheet 1: Summary ---------- */
         const s1 = wb.addWorksheet('Summary', { views: [{ showGridLines: false }] });
-        s1.columns = [{ width: 30 }, { width: 30 }, { width: 30 }];
-        s1.mergeCells('A1:C1');
-        const t = s1.getCell('A1');
-        t.value = 'សង្ខេបទិន្នន័យដែលបានបញ្ជូនចុងក្រោយ';
-        t.font = { size: 16, bold: true, color: { argb: 'FF2F5233' } };
-        t.alignment = { horizontal: 'center', vertical: 'middle' };
-        s1.getRow(1).height = 32;
-        s1.mergeCells('A2:C2');
-        const sub = s1.getCell('A2');
-        sub.value = `${d.staff} — ${MON} ${d.y}`;
-        sub.font = { size: 11, color: { argb: 'FF6B6350' } };
-        sub.alignment = { horizontal: 'center' };
-
-        [[st.worked, 'ថ្ងៃធ្វើការ (Worked)', 'FF2F5233', 'FFE9F2E7'],
-         [st.leave, 'ថ្ងៃឈប់សម្រាក (Leave)', 'FFA6402F', 'FFFBEAE6'],
-         [st.holiday, 'ថ្ងៃឈប់បុណ្យ (Public Holiday)', 'FFC68A1F', 'FFFBF1D9']].forEach((c, i) => {
-            const a = s1.getCell(4, i + 1), b = s1.getCell(5, i + 1);
-            a.value = c[0]; a.font = { size: 22, bold: true, color: { argb: c[2] } };
-            b.value = c[1]; b.font = { size: 10, color: { argb: 'FF6B6350' } };
-            [a, b].forEach(x => {
-                x.fill = solid(c[3]);
-                x.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-                x.border = box('FFDCD2B4');
-            });
-        });
-        s1.getRow(4).height = 38; s1.getRow(5).height = 22;
-
+        s1.columns = [{ width: 46 }, { width: 24 }];
+        s1.mergeCells('A1:B1');
+        const t1 = s1.getCell('A1');
+        t1.value = `${d.staff} — ${perTxt}`;
+        t1.font = { size: 14, bold: true, color: { argb: 'FF2F5233' } };
+        t1.alignment = { horizontal: 'center' };
         const dash = v => v > 0 ? v : '-';
-        [['ចំនួនថ្ងៃសរុបក្នុងខែ (Total Days)', `${n} ថ្ងៃ`],
-         ['ថ្ងៃមិនទាន់បំពេញ (Not Yet Filled)', `${st.unfilled} ថ្ងៃ`],
-         ['ប្រាក់ខែគោល (Gross Salary)', dash(st.gross)],
-         ['ប្រាក់ឧបត្ថម្ភទីវាលសរុប (Total Field Allowance)', st.total],
-         ['ចំណូលសរុប (Salary + Allowance)', st.gross + st.total],
-         ['មធ្យមភាគប្រាក់/ថ្ងៃធ្វើការ (Avg / Worked Day)', st.worked ? st.avg : '-'],
-         ['ថ្ងៃដែលទទួលបានប្រាក់ខ្ពស់បំផុត (Highest Day)', st.hiN ? `ថ្ងៃទី ${st.hiN} ($${st.hiV.toFixed(2)})` : '-']
+        [['ថ្ងៃធ្វើការ (D-HQ / D-F / D-FN)', st.worked], ['ថ្ងៃច្បាប់ (AL, SL, PL, DL ...)', st.leave], ['ថ្ងៃបុណ្យ (PH)', st.holiday],
+         ['ថ្ងៃ W / X', st.off], ['ថ្ងៃមិនទាន់បំពេញ', st.unfilled], ['Base pay per month', dash(st.gross)], ['Field ration សរុប', st.total],
+         ['ចំណូលសរុប (Base pay + Field ration)', st.gross + st.total]
         ].forEach((r, i) => {
-            const row = 7 + i;
-            s1.mergeCells(row, 1, row, 2);
-            const l = s1.getCell(row, 1), v = s1.getCell(row, 3);
-            l.value = r[0]; l.font = { color: { argb: 'FF6B6350' } };
-            v.value = r[1]; v.font = { bold: true }; v.alignment = { horizontal: 'right' };
-            if (typeof r[1] === 'number') v.numFmt = '$#,##0.00';
-            const dot = { bottom: { style: 'dotted', color: { argb: 'FFB8AE90' } } };
-            [1, 2, 3].forEach(c => { s1.getCell(row, c).border = dot; });
-            s1.getRow(row).height = 22;
+            const a = s1.getCell(3 + i, 1), b = s1.getCell(3 + i, 2);
+            a.value = r[0]; b.value = r[1]; b.alignment = { horizontal: 'right' }; b.font = { bold: true };
+            if (i >= 5 && typeof r[1] === 'number') b.numFmt = '$#,##0.00';
+            a.border = b.border = { bottom: { style: 'dotted', color: { argb: 'FFB8AE90' } } };
         });
 
-        /* ---------- Sheet 2: monthly timesheet (same layout as Google Sheet) ---------- */
-        const ws = wb.addWorksheet(`${mon3} ${d.y}`, { views: [{ state: 'frozen', xSplit: 4, ySplit: 5 }] });
-        const lastCol = 4 + n, valCol = lastCol + 1, lblCol = lastCol + 2;
-        ws.getColumn(1).width = 5; ws.getColumn(2).width = 22; ws.getColumn(3).width = 22; ws.getColumn(4).width = 11;
-        for (let c = 5; c <= lastCol; c++) ws.getColumn(c).width = 5.3;
-        ws.getColumn(valCol).width = 11; ws.getColumn(lblCol).width = 30;
+        /* ---------- Sheet 2: period tab (same layout as the Google Sheet) ---------- */
+        const FIRST = 6, PAY = FIRST + 31, RAT = PAY + 1;
+        const ws = wb.addWorksheet(tab, { views: [{ state: 'frozen', xSplit: 5, ySplit: 6 }] });
+        [22, 12, 12, 36, 26].forEach((w, i) => ws.getColumn(i + 1).width = w);
+        for (let c = FIRST; c < PAY; c++) ws.getColumn(c).width = 5.8;
+        ws.getColumn(PAY).width = 12; ws.getColumn(RAT).width = 12;
 
-        ws.getCell('A1').value = 'RISING PHOENIX CO., LTD';
-        ws.getCell('A1').font = { bold: true, size: 12 };
-        ws.getCell('A2').value = `CDU STAFF Timesheet for ${MON} ${d.y}`;
-        ws.getCell('A2').font = { size: 11 };
+        ws.getCell('A1').value = 'Unit'; ws.getCell('B1').value = 'CDU';
+        ws.getCell('A2').value = 'Period from';
+        ws.getCell('B2').value = new Date(Date.UTC(per[0].yr, per[0].mon - 1, per[0].d)); ws.getCell('B2').numFmt = 'dd-mmm-yy';
+        ws.getCell('C2').value = 'to';
+        ws.getCell('D2').value = new Date(Date.UTC(per[n - 1].yr, per[n - 1].mon - 1, per[n - 1].d)); ws.getCell('D2').numFmt = 'dd-mmm-yy';
+        ws.getCell('A1').font = ws.getCell('A2').font = { bold: true };
 
-        ['A3:A5', 'B3:B5', 'C3:C5', 'D3:D5'].forEach(r => ws.mergeCells(r));
-        ws.mergeCells(3, 5, 3, lastCol);
-        ws.getCell('A3').value = 'No';
-        ws.getCell('B3').value = 'POSITION';
-        ws.getCell('C3').value = 'NAME';
-        ws.getCell('D3').value = 'Gross\nSalary';
-        ws.getCell(3, 5).value = `${mon3}-${String(d.y).slice(2)}`;
-        for (let day = 1; day <= n; day++) {
-            const w = new Date(d.y, d.m - 1, day).getDay(), col = 4 + day;
-            ws.getCell(4, col).value = DOW[w][1];
-            ws.getCell(5, col).value = day;
-            if (w === 0 || w === 6) {
-                ws.getCell(4, col).font = { color: { argb: 'FFFF0000' }, size: 9 };
-                ws.getCell(5, col).font = { color: { argb: 'FFFF0000' } };
-            } else {
-                ws.getCell(4, col).font = { size: 9 };
-            }
-        }
-        for (let r = 3; r <= 5; r++) for (let c = 1; c <= lastCol; c++) {
+        ['Staff name', 'Staff type', 'Row', 'Programme', 'Task'].forEach((t, i) => ws.getCell(6, i + 1).value = t);
+        per.forEach((p, i) => {
+            ws.getCell(5, FIRST + i).value = DOW[p.w][1].slice(0, 2);
+            ws.getCell(6, FIRST + i).value = `${p.d}/${p.mon}`;
+        });
+        ws.getCell(6, PAY).value = 'Base pay per month'; ws.getCell(6, RAT).value = 'Field ration';
+        for (let r = 5; r <= 6; r++) for (let c = 1; c <= RAT; c++) {
             const cell = ws.getCell(r, c);
-            cell.fill = solid('FFF3F3F3');
-            cell.border = box();
-            cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-            if (r === 3 && (c <= 4 || c === 5)) cell.font = Object.assign({ bold: true }, cell.font || {});
+            cell.fill = solid('FF1F3A4D'); cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 9 };
+            cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; cell.border = box();
         }
-        ws.getRow(4).height = 18;
+        ws.getRow(6).height = 32;
 
-        // staff block (5 rows): r = project/colour row, r+1 Salary, r+2 Field Allowance, r+3 Field Ration or Allowance, r+4 Total
-        const r = 6;
-        ws.getCell(r, 1).value = 1;
-        ws.getCell(r, 3).value = d.staff;
-        if (st.gross > 0) ws.getCell(r, 4).value = st.gross;
-        for (let rr = r; rr <= r + 4; rr++) for (let c = 1; c <= lastCol; c++) ws.getCell(rr, c).border = box();
-        ws.getCell(r, 1).alignment = { horizontal: 'center' };
+        // programme rows = unique (programme, task) pairs, in order of first use
+        const pairs = [];
+        per.forEach(p => { const r = d.days[p.d]; if (r && r.progs) r.progs.forEach(x => { if (!pairs.some(q => q.p === x.p && (q.t || '') === (x.t || ''))) pairs.push({ p: x.p, t: x.t || '' }); }); });
+        if (!pairs.length) pairs.push({ p: '', t: '' });
 
-        const FILL = { worked: ['FF3D85C6', 'FF000000'], leave: ['FFFF0000', 'FFFFFFFF'], holiday: ['FFFFFF00', 'FF000000'] };
-        Object.entries(d.days).forEach(([k, rec]) => {
-            const day = +k;
-            if (!(day >= 1 && day <= n)) return;
-            if (rec.activity === '' && rec.amount === '') return;
-            const col = 4 + day;
-            const f = FILL[classifyDay(rec.activity)];
-            const pc = ws.getCell(r, col);
-            pc.value = rec.project || '';
-            pc.fill = solid(f[0]);
-            pc.font = { color: { argb: f[1] }, size: 9 };
-            pc.alignment = { horizontal: 'center', vertical: 'middle' };
-            const rc = ws.getCell(r + 3, col);
-            if (rec.amount !== '' && !isNaN(parseFloat(rec.amount))) rc.value = parseFloat(rec.amount);
-            rc.alignment = { horizontal: 'center' };
-            rc.font = { size: 9 };
-            if (rec.activity !== '' && classifyDay(rec.activity) === 'worked' && !isNoAmount(rec.activity)) rc.note = `${d.staff} - សកម្មភាព: ${rec.activity}`;   // no note on leave / holiday days
+        const FILL = { work: 'FFE9F2E7', leave: 'FFFBEAE6', holiday: 'FFFBF1D9', off: 'FFEFEFEF' };
+        const ar = 7, sr = 8, pr0 = 9, prN = pr0 + pairs.length - 1;
+        ws.getCell(ar, 1).value = d.staff; ws.getCell(ar, 2).value = '';
+        ws.getCell(ar, 3).value = 'Attendance'; ws.getCell(sr, 3).value = 'Σ per day';
+        pairs.forEach((q, i) => { ws.getCell(pr0 + i, 3).value = 'Programme'; ws.getCell(pr0 + i, 4).value = q.p; ws.getCell(pr0 + i, 5).value = q.t; });
+        for (let r = ar; r <= prN; r++) for (let c = 1; c <= RAT; c++) { ws.getCell(r, c).border = box('FFDCD2B4'); ws.getCell(r, c).font = { size: 9 }; }
+        ws.getCell(ar, 1).font = { bold: true, size: 9 };
+        ws.getCell(sr, 3).font = { italic: true, size: 9 };
+
+        per.forEach((p, i) => {
+            const col = FIRST + i, rec = d.days[p.d];
+            const L = ws.getColumn(col).letter;
+            let cnt = 0;
+            if (rec && rec.att) {
+                const ac = ws.getCell(ar, col);
+                ac.value = rec.att; ac.fill = solid(FILL[kindOf(rec.att)] || FILL.off);
+                ac.alignment = { horizontal: 'center' }; ac.font = { bold: true, size: 9 };
+                (rec.progs || []).forEach(x => {
+                    const idx = pairs.findIndex(q => q.p === x.p && (q.t || '') === (x.t || ''));
+                    const c = ws.getCell(pr0 + idx, col); c.value = 1; c.alignment = { horizontal: 'center' }; cnt++;
+                });
+            }
+            ws.getCell(sr, col).value = { formula: `SUM(${L}${pr0}:${L}${prN})`, result: cnt };
+            ws.getCell(sr, col).alignment = { horizontal: 'center' };
+            ws.getCell(sr, col).fill = solid('FFF3F3F3');
         });
-
-        const first = ws.getColumn(5).letter, last = ws.getColumn(lastCol).letter, vL = ws.getColumn(valCol).letter;
-        const lines = [
-            ['Salary', st.gross],
-            ['Field Allowance', 0],
-            ['Field Ration or Allowance', { formula: `SUM(${first}${r + 3}:${last}${r + 3})`, result: st.total }],
-            ['Total payment', { formula: `SUM(${vL}${r + 1}:${vL}${r + 3})`, result: st.gross + st.total }]
-        ];
-        lines.forEach((ln, i) => {
-            const row = r + 1 + i;
-            const lc = ws.getCell(row, lblCol), vc = ws.getCell(row, valCol);
-            lc.value = ln[0]; vc.value = ln[1];
-            vc.numFmt = '#,##0.##';
-            lc.border = box(); vc.border = box();
-            if (i === 3) { lc.font = { bold: true }; vc.font = { bold: true }; lc.fill = solid('FFD9D9D9'); vc.fill = solid('FFD9D9D9'); }
-        });
+        if (st.gross > 0) ws.getCell(ar, PAY).value = st.gross;
+        if (st.total > 0) ws.getCell(ar, RAT).value = st.total;
 
         /* ---------- Save / share ---------- */
         const buf = await wb.xlsx.writeBuffer();
         const mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
         const blob = new Blob([buf], { type: mime });
-        const fname = `Timesheet_${String(d.staff).replace(/[^\w\-]+/g, '_')}_${d.y}-${String(d.m).padStart(2, '0')}.xlsx`;
-
-        // Installed app (standalone) on a phone: use the share sheet so the file can be saved / opened in Excel
+        const fname = `Timesheet_${String(d.staff).replace(/[^\w\-]+/g, '_')}_${tab.replace(/\s+/g, '_')}.xlsx`;
         const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
         if (standalone && /Android|iPhone|iPad/i.test(navigator.userAgent) && navigator.canShare) {
             const file = new File([blob], fname, { type: mime });
@@ -1610,30 +1494,22 @@
             }
         }
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = fname;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        a.href = URL.createObjectURL(blob); a.download = fname;
+        document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 5000);
         toast('បានទាញយកឯកសារ Excel');
     }
 
-    /* ===== "×" button inside activity inputs: clears everything in one tap ===== */
-    function syncClear(inp) {
-        if (inp && inp.parentElement) inp.parentElement.classList.toggle('has', inp.value !== '');
-    }
-    document.addEventListener('input', e => {
-        if (e.target.matches && e.target.matches('.clearable input')) syncClear(e.target);
-    });
+    /* ===== "×" button inside inputs ===== */
+    function syncClear(inp) { if (inp && inp.parentElement) inp.parentElement.classList.toggle('has', inp.value !== ''); }
+    document.addEventListener('input', e => { if (e.target.matches && e.target.matches('.clearable input')) syncClear(e.target); });
     document.addEventListener('click', e => {
         const b = e.target.closest && e.target.closest('.clr');
         if (!b) return;
         const inp = b.parentElement.querySelector('input');
         inp.value = '';
-        inp.dispatchEvent(new Event('input', { bubbles: true }));   // lets the page update state (activity, project, colour hint)
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
         syncClear(inp);
-        inp.focus();
     });
 
     let toastTimer;
@@ -1645,262 +1521,165 @@
     }
 
     /* ================= Form listeners ================= */
-    document.getElementById('staffName').addEventListener('change', saveDraft);
-    document.getElementById('grossSalary').addEventListener('input', saveDraft);
+    $('staffName').addEventListener('change', saveDraft);
+    $('grossSalary').addEventListener('input', saveDraft);
 
-    document.getElementById('monthYear').addEventListener('change', () => {
+    $('monthYear').addEventListener('change', () => {
         const v = $('monthYear').value;
         if (!v) { $('monthYear').value = lastMonthVal; return; }
-        if (Object.keys(days).length && !confirm('ប្តូរខែនឹងលុបទិន្នន័យដែលបានបញ្ចូលក្នុងខែនេះ។ បន្តឬ?')) {
+        if (Object.keys(days).length && !confirm('ប្តូររយៈពេលនឹងលុបទិន្នន័យដែលបានបញ្ចូលក្នុងរយៈពេលនេះ។ បន្តឬ?')) {
             $('monthYear').value = lastMonthVal;
             return;
         }
         days = {};
         lastMonthVal = v;
         render();
-        // New month selected: the previous month's summary no longer applies
-        document.getElementById('summaryModal').classList.remove('show');
+        $('summaryModal').classList.remove('show');
         localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport');
         saveDraft();
     });
 
-    window.onload = function() {
+    window.onload = function () {
+        // From the 26th onward we are already in the NEXT period (e.g. 26 Nov -> period ending 25 Dec)
         const t = new Date();
-        $('monthYear').value = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}`;
+        const base = new Date(t.getFullYear(), t.getMonth() + (t.getDate() >= PERIOD_START_DAY ? 1 : 0), 1);
+        $('monthYear').value = `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, '0')}`;
         applyDraftMonthIfAny();
         lastMonthVal = $('monthYear').value;
-        restoreDraftValues();      // fills `days` + salary from the saved draft
-        render();                  // calendar shows immediately, even before the sheet responds
+        restoreDraftValues();
+        render();
         fetchMasterData();
         restoreSummary();
     };
 
-    // --- Draft auto-save: keeps in-progress entries safe across refresh / closing the app ---
+    // --- Draft auto-save ---
     function saveDraft() {
-        const staff = document.getElementById('staffName').value;
-        const monthYear = document.getElementById('monthYear').value;
-        const grossSalary = document.getElementById('grossSalary').value;
-
-        const dailyActivities = {};
-        Object.entries(days).forEach(([d, r]) => {
-            if (r.activity !== '' || r.amount !== '') dailyActivities[`day_${d}`] = { activity: r.activity, amount: r.amount, project: r.project || '' };
-        });
-
-        // Nothing meaningful entered yet -> don't keep a stale/empty draft around
-        if (!staff && !grossSalary && Object.keys(dailyActivities).length === 0) {
-            localStorage.removeItem('timesheetDraft');
-            return;
-        }
-
-        localStorage.setItem('timesheetDraft', JSON.stringify({
-            staffName: staff,
-            monthYear: monthYear,
-            grossSalary: grossSalary,
-            dailyActivities: dailyActivities
-        }));
+        const staff = $('staffName').value, monthYear = $('monthYear').value, grossSalary = $('grossSalary').value;
+        const dd = {};
+        Object.entries(days).forEach(([d, r]) => { if (r && r.att) dd[d] = r; });
+        if (!staff && !grossSalary && !Object.keys(dd).length) { localStorage.removeItem('timesheetDraft'); return; }
+        localStorage.setItem('timesheetDraft', JSON.stringify({ v: 2, staffName: staff, monthYear, grossSalary, days: dd }));
     }
-
-    function applyDraftMonthIfAny() {
-        const raw = localStorage.getItem('timesheetDraft');
-        if (!raw) return;
-        try {
-            const draft = JSON.parse(raw);
-            if (draft.monthYear) {
-                document.getElementById('monthYear').value = draft.monthYear;
-            }
-        } catch (e) {
-            localStorage.removeItem('timesheetDraft');
-        }
-    }
-
     function readDraft() {
         const raw = localStorage.getItem('timesheetDraft');
         if (!raw) return null;
-        try { return JSON.parse(raw); }
-        catch (e) { localStorage.removeItem('timesheetDraft'); return null; }
+        try { return JSON.parse(raw); } catch (e) { localStorage.removeItem('timesheetDraft'); return null; }
     }
-
+    function applyDraftMonthIfAny() { const d = readDraft(); if (d && d.monthYear) $('monthYear').value = d.monthYear; }
     function restoreStaffFromDraft() {
-        const draft = readDraft();
-        if (!draft || !draft.staffName) return;
-        const sel = document.getElementById('staffName');
-        if (Array.from(sel.options).some(o => o.value === draft.staffName)) sel.value = draft.staffName;
+        const d = readDraft();
+        if (!d || !d.staffName) return;
+        const sel = $('staffName');
+        if (Array.from(sel.options).some(o => o.value === d.staffName)) sel.value = d.staffName;
     }
-
     function restoreDraftValues() {
-        const draft = readDraft();
-        if (!draft) return;
-        if (draft.grossSalary) document.getElementById('grossSalary').value = draft.grossSalary;
+        const d = readDraft();
         days = {};
-        if (draft.dailyActivities) {
-            Object.entries(draft.dailyActivities).forEach(([key, d]) => {
-                days[key.replace('day_', '')] = { activity: d.activity || '', amount: d.amount || '', project: d.project || '' };
-            });
-        }
+        if (!d) return;
+        if (d.grossSalary) $('grossSalary').value = d.grossSalary;
+        if (d.v === 2 && d.days) Object.entries(d.days).forEach(([k, r]) => { if (r && r.att) days[k] = { att: r.att, progs: r.progs || [], amount: r.amount || '' }; });
+        // drafts made with the old calendar-month form (no "v") are ignored: the data model changed
     }
-
     function restoreSummary() {
         const saved = localStorage.getItem('timesheetLastSummary');
         if (!saved) return;
-        try {
-            const s = JSON.parse(saved);
-            showSummary(s, false); // false = don't re-save, it's already saved
-        } catch (e) {
-            localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport');
-        }
+        try { showSummary(JSON.parse(saved), false); }
+        catch (e) { localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport'); }
     }
-
     function clearSummaryHistory() {
         localStorage.removeItem('timesheetLastSummary'); localStorage.removeItem('timesheetLastExport');
-        document.getElementById('summaryModal').classList.remove('show');
+        $('summaryModal').classList.remove('show');
+    }
+
+    /* ================= Submit ================= */
+    async function postData(payload) {
+        const body = JSON.stringify(payload);
+        try {
+            // text/plain = "simple" request (no preflight) so we can READ Apps Script's answer
+            const r = await fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body });
+            return await r.json();
+        } catch (e) {
+            // browser blocked reading the answer -> send again blind (the sheet write is idempotent)
+            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body });
+            return { status: 'success', unconfirmed: true };
+        }
     }
 
     function saveData() {
-        const staff = document.getElementById('staffName').value;
-        if (!staff) {
-            alert('សូមជ្រើសរើសឈ្មោះបុគ្គលិកជាមុនសិន!');
-            return;
-        }
+        const staff = $('staffName').value;
+        if (!staff) { alert('សូមជ្រើសរើសឈ្មោះបុគ្គលិកជាមុនសិន!'); return; }
+        const { y, m } = ym();
+        const per = periodDays(y, m), totalDays = per.length;
+        const list = [], bad = [];
+        const snap = {};
+        per.forEach(p => {
+            const r = days[p.d];
+            if (!r || !r.att) return;
+            if (kindOf(r.att) === 'work' && !(r.progs && r.progs.length)) bad.push(p.d);
+            const amount = isField(r.att) ? String(r.amount || '') : '';
+            list.push({ date: isoOf(p), att: r.att, progs: (r.progs || []).map(x => ({ p: x.p, t: x.t || '' })), amount });
+            snap[p.d] = { att: r.att, progs: r.progs || [], amount };
+        });
+        if (bad.length) { alert('មានថ្ងៃធ្វើការដែលមិនទាន់មាន Programme (ថ្ងៃទី ' + bad.join(', ') + ') សូមជ្រើស Programme ជាមុនសិន!'); return; }
+        if (!list.length) { alert('សូមជ្រើសថ្ងៃយ៉ាងហោចណាស់មួយថ្ងៃជាមុនសិន!'); return; }
 
-        const dailyData = {};
-        const daysInMonthInput = document.getElementById('monthYear').value;
-        const [y, m] = daysInMonthInput.split('-');
-        const totalDays = new Date(y, m, 0).getDate();
-
-        for (let i = 1; i <= totalDays; i++) {
-            const r = days[i];
-            if (r && (r.activity !== "" || r.amount !== "")) {
-                dailyData[`day_${i}`] = {
-                    activity: r.activity,
-                    amount: isNoAmount(r.activity) ? '' : r.amount,
-                    project: r.project || '',
-                    noNote: isNoAmount(r.activity)
-                };
-            }
-        }
-
-        const noAct = Object.keys(dailyData).filter(k => (dailyData[k].activity || '').trim() === '');
-        if (noAct.length) {
-            alert('មានថ្ងៃដែលមិនទាន់មានសកម្មភាព (ថ្ងៃទី ' + noAct.map(k => k.replace('day_', '')).join(', ') + ') សូមជ្រើសរើសសកម្មភាពជាមុនសិន!');
-            return;
-        }
-
-        if (Object.keys(dailyData).length === 0) {
-            alert('សូមជ្រើសថ្ងៃយ៉ាងហោចណាស់មួយថ្ងៃជាមុនសិន!');
-            return;
-        }
-
-        const formData = {
+        const st = statsOf(snap);
+        const grossSalaryVal = parseFloat($('grossSalary').value) || 0;
+        const payload = {
             staffName: staff,
-            monthYear: document.getElementById('monthYear').value,
-            grossSalary: document.getElementById('grossSalary').value,
-            dailyActivities: dailyData
+            sheetName: tabName(y, m),
+            periodStart: isoOf(per[0]),
+            periodEnd: isoOf(per[totalDays - 1]),
+            grossSalary: $('grossSalary').value,
+            fieldRation: st.total > 0 ? st.total : '',
+            days: list
+        };
+        const summary = {
+            staff, monthLabel: periodText(y, m), totalDays,
+            workedDays: st.worked, leaveDays: st.leave, holidayDays: st.holiday, offDays: st.off,
+            unfilledDays: Math.max(totalDays - st.filled, 0),
+            grossSalaryVal, totalAllowance: st.total,
+            avgPerDay: st.worked ? st.total / st.worked : 0,
+            highestDayNum: st.hiN, highestDayAmt: st.hiV
         };
 
-        // --- Build the summary stats BEFORE the form gets reset ---
-        let workedDays = 0, leaveDays = 0, holidayDays = 0;
-        Object.values(dailyData).forEach(d => {
-            const cat = classifyDay(d.activity);
-            if (cat === 'leave') leaveDays++;
-            else if (cat === 'holiday') holidayDays++;
-            else workedDays++;
-        });
-        const recordedDays = workedDays + leaveDays + holidayDays;
-        const unfilledDays = Math.max(totalDays - recordedDays, 0);
-
-        const totalAllowance = Object.values(dailyData).reduce((sum, d) => {
-            const v = parseFloat(d.amount);
-            return sum + (isNaN(v) ? 0 : v);
-        }, 0);
-        const grossSalaryVal = parseFloat(formData.grossSalary) || 0;
-        const avgPerDay = workedDays > 0 ? (totalAllowance / workedDays) : 0;
-
-        let highestDayNum = null, highestDayAmt = -Infinity;
-        Object.entries(dailyData).forEach(([key, d]) => {
-            const v = parseFloat(d.amount);
-            if (!isNaN(v) && v > highestDayAmt) {
-                highestDayAmt = v;
-                highestDayNum = key.replace('day_', '');
-            }
-        });
-
-        const monthLabel = new Date(y, m - 1, 1).toLocaleString('en-US', { month: 'long' }) + ' ' + y;
-
-        document.getElementById('loading').style.display = 'block';
-
-        fetch(scriptURL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        })
-        .then(response => {
-            document.getElementById('loading').style.display = 'none';
-
-            showSummary({
-                staff,
-                monthLabel,
-                totalDays,
-                workedDays,
-                leaveDays,
-                holidayDays,
-                unfilledDays,
-                grossSalaryVal,
-                totalAllowance,
-                avgPerDay,
-                highestDayNum,
-                highestDayAmt
-            });
-
-            // Keep a copy of what was just submitted so the summary card can export it to Excel
-            const snapDays = {};
-            Object.entries(dailyData).forEach(([k, r]) => { snapDays[k.replace('day_', '')] = r; });
-            localStorage.setItem('timesheetLastExport', JSON.stringify({ staff, y: +y, m: +m, gross: formData.grossSalary, days: snapDays }));
-
-            // Submission succeeded — the in-progress draft for this month is no longer needed
+        $('loading').style.display = 'block';
+        postData(payload).then(res => {
+            $('loading').style.display = 'none';
+            if (res && res.status === 'error') { alert('Google Sheet ឆ្លើយតប៖ ' + res.message); return; }
+            showSummary(summary);
+            localStorage.setItem('timesheetLastExport', JSON.stringify({ staff, y, m, gross: $('grossSalary').value, days: snap }));
             localStorage.removeItem('timesheetDraft');
-
             days = {};
-            document.getElementById('staffName').value = '';
-            document.getElementById('grossSalary').value = '';
-            document.getElementById('monthYear').value = `${y}-${m}`;
+            $('staffName').value = '';
+            $('grossSalary').value = '';
             render();
-        })
-        .catch(error => {
-            document.getElementById('loading').style.display = 'none';
-            alert('មានបញ្ហាពេលបញ្ជូនទិន្នន័យ៖ ' + error);
+            if (res && res.warnings && res.warnings.length) alert('សូមពិនិត្យ៖\n' + res.warnings.join('\n'));
+            else if (res && res.unconfirmed) toast('បានបញ្ជូន (មិនអាចបញ្ជាក់លទ្ធផលពី Google Sheet បានទេ — សូមពិនិត្យ Sheet)');
+        }).catch(err => {
+            $('loading').style.display = 'none';
+            alert('មានបញ្ហាពេលបញ្ជូនទិន្នន័យ៖ ' + err);
         });
     }
 
     function showSummary(s, persist = true) {
-        document.getElementById('summaryStaffLine').textContent = `${s.staff} — ${s.monthLabel}`;
-        document.getElementById('sumWorkedDays').textContent = s.workedDays;
-        document.getElementById('sumLeaveDays').textContent = s.leaveDays;
-        document.getElementById('sumHolidayDays').textContent = s.holidayDays;
-        document.getElementById('sumTotalDays').textContent = `${s.totalDays} ថ្ងៃ`;
-
-        const unfilledRow = document.getElementById('sumUnfilledRow');
-        if (s.unfilledDays > 0) {
-            document.getElementById('sumUnfilledDays').textContent = `${s.unfilledDays} ថ្ងៃ`;
-            unfilledRow.style.display = 'flex';
-        } else {
-            unfilledRow.style.display = 'none';
-        }
-
-        document.getElementById('sumGrossSalary').textContent = s.grossSalaryVal > 0 ? `$${s.grossSalaryVal.toFixed(2)}` : '-';
-        document.getElementById('sumFieldAllowance').textContent = `$${s.totalAllowance.toFixed(2)}`;
-        document.getElementById('sumGrandTotal').textContent = `$${(s.grossSalaryVal + s.totalAllowance).toFixed(2)}`;
-        document.getElementById('sumAvgPerDay').textContent = s.workedDays > 0 ? `$${s.avgPerDay.toFixed(2)}` : '-';
-        document.getElementById('sumHighestDay').textContent = s.highestDayNum
-            ? `ថ្ងៃទី ${s.highestDayNum} ($${s.highestDayAmt.toFixed(2)})`
-            : '-';
-
-        document.getElementById('summaryModal').classList.add('show');
-
-        if (persist) {
-            localStorage.setItem('timesheetLastSummary', JSON.stringify(s));
-        }
+        $('summaryStaffLine').textContent = `${s.staff} — ${s.monthLabel}`;
+        $('sumWorkedDays').textContent = s.workedDays;
+        $('sumLeaveDays').textContent = s.leaveDays;
+        $('sumHolidayDays').textContent = s.holidayDays;
+        $('sumOffDays').textContent = `${s.offDays || 0} ថ្ងៃ`;
+        $('sumTotalDays').textContent = `${s.totalDays} ថ្ងៃ`;
+        const ur = $('sumUnfilledRow');
+        if (s.unfilledDays > 0) { $('sumUnfilledDays').textContent = `${s.unfilledDays} ថ្ងៃ`; ur.style.display = 'flex'; } else ur.style.display = 'none';
+        $('sumGrossSalary').textContent = s.grossSalaryVal > 0 ? `$${s.grossSalaryVal.toFixed(2)}` : '-';
+        $('sumFieldAllowance').textContent = `$${s.totalAllowance.toFixed(2)}`;
+        $('sumGrandTotal').textContent = `$${(s.grossSalaryVal + s.totalAllowance).toFixed(2)}`;
+        $('sumAvgPerDay').textContent = s.workedDays > 0 ? `$${s.avgPerDay.toFixed(2)}` : '-';
+        $('sumHighestDay').textContent = s.highestDayNum ? `ថ្ងៃទី ${s.highestDayNum} ($${s.highestDayAmt.toFixed(2)})` : '-';
+        $('summaryModal').classList.add('show');
+        if (persist) localStorage.setItem('timesheetLastSummary', JSON.stringify(s));
     }
+
 </script>
 
 </body>
